@@ -1,7 +1,10 @@
 package com.example.playcation.user.controller;
 
 import com.example.playcation.user.dto.UserLoginRequestDto;
+import com.example.playcation.user.dto.UserLoginResponseDto;
+import com.example.playcation.user.dto.UserLogoutRequestDto;
 import com.example.playcation.user.dto.UserResponseDto;
+import com.example.playcation.user.dto.UserSignInRequestDto;
 import com.example.playcation.user.service.UserService;
 import com.example.playcation.util.JwtTokenProvider;
 import jakarta.validation.Valid;
@@ -25,10 +28,10 @@ public class UserController {
 
   // 로그인
   @PostMapping("/login")
-  public ResponseEntity<UserResponseDto> login(
+  public ResponseEntity<UserLoginResponseDto> login(
       @Valid @RequestBody UserLoginRequestDto userLoginRequestDto
   ) {
-    UserResponseDto responseDto = userService.login(
+    UserLoginResponseDto responseDto = userService.login(
         userLoginRequestDto.getEmail(),
         userLoginRequestDto.getPassword()
     );
@@ -39,13 +42,24 @@ public class UserController {
   @DeleteMapping("/delete")
   public String deleteAccount(
       @RequestHeader("Authorization") String authorizationHeader,
-      @RequestParam String password
+      @RequestBody UserLogoutRequestDto userLogoutRequestDto
   ) {
     // Authorization 헤더에서 JWT 토큰 추출
     String token = authorizationHeader.replace("Bearer ", "").trim();
     String email = jwtTokenProvider.getUsername(token);
     // 탈퇴 처리 메서드 호출
-    userService.delete(token, password);
+    userService.delete(email, userLogoutRequestDto.getPassword());
     return "회원 탈퇴가 완료되었습니다.";
+  }
+
+  @PostMapping("/sign-in")
+  public ResponseEntity<UserResponseDto> signUp(
+      @Valid @RequestBody UserSignInRequestDto userSignInRequestDto
+  ) {
+    return ResponseEntity.ok().body(userService.signUp(
+        userSignInRequestDto.getEmail(),
+        userSignInRequestDto.getPassword(),
+        userSignInRequestDto.getName()
+    ));
   }
 }

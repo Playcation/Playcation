@@ -12,13 +12,13 @@ public class ExceptionResponseDto {
 
     private static final ObjectMapper objectmapper = new ObjectMapper();
 
-    private HttpStatus httpStatus;
+    private String errorCode;
 
     private String message;
 
-    public ExceptionResponseDto(ErrorCode errorCode) {
-        this.message = errorCode.getMessage();
-        this.httpStatus = errorCode.getHttpStatus();
+    public ExceptionResponseDto(ExceptionType exceptionType) {
+        this.errorCode = exceptionType.getErrorName();
+        this.message = exceptionType.getMessage();
     }
 
     public String convertToJson() throws JsonProcessingException {

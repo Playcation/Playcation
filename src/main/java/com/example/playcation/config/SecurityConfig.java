@@ -42,13 +42,11 @@ public class SecurityConfig {
         .httpBasic((auth) -> auth.disable());
 
     // JWT 인증 필터 추가
-//        http.addFilterAt(jwtAuthenticationFilter(jwtTokenProvider), BasicAuthenticationFilter.class);
     http.addFilterAt(jwtAuthenticationFilter(jwtTokenProvider), ExceptionTranslationFilter.class);
 
     //인가 설정
     http.authorizeHttpRequests((auth) -> auth
-        .requestMatchers("/users","/users/login","/users/delete","/workspaces/boards","boards/**", "swagger-ui/**", "/swagger-resources/*",
-            "/v3/api-docs/**", "/home", "/health").permitAll() //인증 없이 허용
+        .requestMatchers("/users/sign-in","/users/login").permitAll() //인증 없이 허용
         .requestMatchers("/admin").hasRole("ADMIN")             // ADMIN 권한 필요
         .requestMatchers("/admin/**").hasRole("ADMIN")             // ADMIN 권한 필요
         .anyRequest().authenticated());                          // 나머지 인증 필요

@@ -13,6 +13,7 @@ public enum UserErrorCode implements ExceptionType {
 
 
   NOT_FOUND_USER(HttpStatus.NOT_FOUND, "유저를 찾을 수 없습니다."),
+  DELETED_USER(HttpStatus.BAD_REQUEST, "이미 삭제된 회원입니다."),
 
   // DuplicatedException
   //중복된 이메일로 가일 할 때 출력하는 오류 메시지
