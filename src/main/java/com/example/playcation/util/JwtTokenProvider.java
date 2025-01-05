@@ -18,18 +18,18 @@ import org.springframework.util.StringUtils;
 public class JwtTokenProvider {
   private final SecretKey secretKey;
 
-  public JwtTokenProvider(@Value("${spring.jwt.service:mySuperSecretKey12345LongEnoughkkkkkKKKKK}") String secret) {
+  public JwtTokenProvider(@Value("${spring.jwt.service}") String secret) {
     this.secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), SignatureAlgorithm.HS256.getJcaName());
   }
 
-  // 토큰에서 사용자 이름을 추출
-  public String getUsername(String token) {
+  // 토큰에서 사용자 아이디를 추출
+  public String getUserId(String token) {
     return getClaims(token).getSubject();
   }
 
   // 토큰에서 역할을 추출
   public String getRole(String token) {
-    return getClaims(token).get("role", String.class);
+    return getClaims(token).get("auth", String.class);
   }
 
   // 토큰이 만료되었는지 확인
@@ -44,9 +44,9 @@ public class JwtTokenProvider {
   }
 
   // JWT 토큰 생성
-  public String createToken(String email, Auth auth, long expirationMs) {
+  public String createToken(Long userId, Auth auth, long expirationMs) {
     return Jwts.builder()
-        .setSubject(email)
+        .setSubject(userId.toString())
         .claim("auth", auth)
         .setIssuedAt(new Date())
         .setExpiration(new Date(System.currentTimeMillis() + expirationMs))
