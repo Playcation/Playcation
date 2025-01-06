@@ -4,9 +4,10 @@ import com.example.playcation.enums.GameStatus;
 import com.example.playcation.game.dto.CreatedGameRequestDto;
 import com.example.playcation.game.dto.CreatedGameResponseDto;
 import com.example.playcation.game.dto.PageGameResponseDto;
-import com.example.playcation.game.dto.UpdateGameRequestDto;
+import com.example.playcation.game.dto.UpdatedGameRequestDto;
 import com.example.playcation.game.service.GameService;
 import com.example.playcation.util.JwtTokenProvider;
+import com.example.playcation.util.TokenUtil;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
@@ -29,12 +30,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class GameController {
 
   private final GameService gameService;
-  private final JwtTokenProvider jwtTokenProvider;
+  private final TokenUtil tokenUtil;
 
   // 게임 생성 컨트롤러
   @PostMapping
-  public ResponseEntity<CreatedGameResponseDto> createdCard(@RequestHeader("Authorization") String authorizationHeader, CreatedGameRequestDto requestDto) {
-    Long id = findUserByToken(authorizationHeader);
+  public ResponseEntity<CreatedGameResponseDto> createdCard(
+      @RequestHeader("Authorization") String authorizationHeader,
+      CreatedGameRequestDto requestDto) {
+    Long id = tokenUtil.findUserByToken(authorizationHeader);
     CreatedGameResponseDto responseDto = gameService.createdGame(id, requestDto);
     return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
   }
@@ -43,7 +46,7 @@ public class GameController {
   @GetMapping("/{gameId}")
   public ResponseEntity<CreatedGameResponseDto> findGame(@PathVariable Long gameId) {
     CreatedGameResponseDto responseDto = gameService.findGameById(gameId);
-    return new ResponseEntity<>(responseDto,HttpStatus.OK);
+    return new ResponseEntity<>(responseDto, HttpStatus.OK);
   }
 
   //게임 다건 조회 컨트롤러
@@ -56,7 +59,7 @@ public class GameController {
       @RequestParam(required = false) String category,
       @RequestParam(required = false) BigDecimal price,
       @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDateTime createdAt
-      ) {
+  ) {
     PageGameResponseDto games = gameService.searchGames(page, title, category, price, createdAt);
     return new ResponseEntity<>(games, HttpStatus.OK);
   }
@@ -66,23 +69,20 @@ public class GameController {
   public ResponseEntity<CreatedGameResponseDto> updateGame(
       @PathVariable Long gameId,
       @RequestHeader("Authorization") String authorizationHeader,
-      @RequestParam UpdateGameRequestDto requestDto) {
-    Long userId = findUserByToken(authorizationHeader);
+      @RequestParam UpdatedGameRequestDto requestDto) {
+    Long userId = tokenUtil.findUserByToken(authorizationHeader);
     CreatedGameResponseDto responseDto = gameService.updateGame(gameId, userId, requestDto);
     return new ResponseEntity<>(responseDto, HttpStatus.OK);
   }
 
   @DeleteMapping("/{gameId}")
-  public ResponseEntity<String> deleteGame(@PathVariable Long gameId, @RequestHeader("Authorization") String authorizationHeader, @RequestParam GameStatus status) {
-    Long userId = findUserByToken(authorizationHeader);
+  public ResponseEntity<String> deleteGame(@PathVariable Long gameId,
+      @RequestHeader("Authorization") String authorizationHeader, @RequestParam GameStatus status) {
+    Long userId = tokenUtil.findUserByToken(authorizationHeader);
 
     gameService.deleteGame(gameId, status, userId);
     return new ResponseEntity<>("삭제되었습니다", HttpStatus.OK);
   }
 
-  // 토큰에서 유저id를 찾아주는 메서드
-  public Long findUserByToken(String authorizationHeader) {
-    String token = authorizationHeader.replace("Bearer ", "").trim();
-    return Long.parseLong(jwtTokenProvider.getUserId(token));
-  }
+
 }

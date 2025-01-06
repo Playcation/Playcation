@@ -32,7 +32,9 @@ public class CreatedGameResponseDto {
   private LocalDateTime updateAt;
 
 
-  public CreatedGameResponseDto(Long gameId, Long userId, String title, String category, BigDecimal price, String description, String image, GameStatus status, LocalDateTime createdAt, LocalDateTime updateAt) {
+  public CreatedGameResponseDto(Long gameId, Long userId, String title, String category,
+      BigDecimal price, String description, String image, GameStatus status,
+      LocalDateTime createdAt, LocalDateTime updateAt) {
     this.gameId = gameId;
     this.userId = userId;
     this.title = title;

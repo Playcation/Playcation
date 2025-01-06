@@ -2,7 +2,7 @@ package com.example.playcation.game.entity;
 
 import com.example.playcation.common.BaseEntity;
 import com.example.playcation.enums.GameStatus;
-import com.example.playcation.game.dto.UpdateGameRequestDto;
+import com.example.playcation.game.dto.UpdatedGameRequestDto;
 import com.example.playcation.user.entity.User;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -50,7 +50,8 @@ public class Game extends BaseEntity {
   private String imageUrl;
 
 
-  public Game(User user, String title, String category, BigDecimal price, String description, GameStatus status, String imageUrl) {
+  public Game(User user, String title, String category, BigDecimal price, String description,
+      GameStatus status, String imageUrl) {
     this.user = user;
     this.title = title;
     this.category = category;
@@ -60,7 +61,7 @@ public class Game extends BaseEntity {
     this.imageUrl = imageUrl;
   }
 
-  public void updateGame(UpdateGameRequestDto requestDto) {
+  public void updateGame(UpdatedGameRequestDto requestDto) {
     this.title = requestDto.getTitle();
     this.category = requestDto.getCategory();
     this.price = requestDto.getPrice();

@@ -14,12 +14,13 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 @RequiredArgsConstructor
-public class GameRepositoryCustomImpl implements GameRepositoryCustom{
+public class GameRepositoryCustomImpl implements GameRepositoryCustom {
 
   private final JPAQueryFactory queryFactory;
 
   @Override
-  public PageGameResponseDto searchGames(PageRequest pageRequest, String title, String category, BigDecimal price, LocalDateTime createdAt) {
+  public PageGameResponseDto searchGames(PageRequest pageRequest, String title, String category,
+      BigDecimal price, LocalDateTime createdAt) {
     QGame game = QGame.game;
 
     List<Game> gameList = queryFactory
@@ -52,7 +53,7 @@ public class GameRepositoryCustomImpl implements GameRepositoryCustom{
   }
 
   private BooleanExpression eqCategory(String category) {
-    return category != null ? QGame.game.category.eq(category) :null;
+    return category != null ? QGame.game.category.eq(category) : null;
   }
 
   private BooleanExpression eqPrice(BigDecimal price) {
