@@ -3,6 +3,7 @@ package com.example.playcation.game.controller;
 import com.example.playcation.game.Dto.CreatedGameRequestDto;
 import com.example.playcation.game.Dto.CreatedGameResponseDto;
 import com.example.playcation.game.Dto.PageGameResponseDto;
+import com.example.playcation.game.Dto.UpdateGameRequestDto;
 import com.example.playcation.game.service.GameService;
 import com.example.playcation.util.JwtTokenProvider;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -14,6 +15,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -32,8 +34,7 @@ public class GameController {
   // 게임 생성 컨트롤러
   @PostMapping
   public ResponseEntity<CreatedGameResponseDto> createdCard(@RequestHeader("Authorization") String authorizationHeader, CreatedGameRequestDto requestDto) {
-    String token = authorizationHeader.replace("Bearer ", "").trim();
-    Long id = Long.parseLong(jwtTokenProvider.getUserId(token));
+    Long id = findUserByToken(authorizationHeader);
     CreatedGameResponseDto responseDto = gameService.createdGame(id, requestDto);
     return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
   }
@@ -56,5 +57,22 @@ public class GameController {
       ) {
     PageGameResponseDto games = gameService.searchGames(page, title, category, price, createdAt);
     return new ResponseEntity<>(games, HttpStatus.OK);
+  }
+
+  @PatchMapping("/{gameId}")
+  public ResponseEntity<CreatedGameResponseDto> updateGame(
+      @PathVariable Long gameId,
+      @RequestHeader("Authorization") String authorizationHeader,
+      @RequestParam UpdateGameRequestDto requestDto) {
+
+    Long userId = findUserByToken(authorizationHeader);
+    CreatedGameResponseDto responseDto = gameService.updateGame(gameId, userId, requestDto);
+    return new ResponseEntity<>(responseDto, HttpStatus.OK);
+  }
+
+  // 토큰에서 유저id를 찾아주는 메서드
+  public Long findUserByToken(String authorizationHeader) {
+    String token = authorizationHeader.replace("Bearer ", "").trim();
+    return Long.parseLong(jwtTokenProvider.getUserId(token));
   }
 }
