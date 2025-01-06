@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -36,7 +37,7 @@ public class GameController {
   @PostMapping
   public ResponseEntity<CreatedGameResponseDto> createdCard(
       @RequestHeader("Authorization") String authorizationHeader,
-      CreatedGameRequestDto requestDto) {
+      @RequestBody CreatedGameRequestDto requestDto) {
     Long id = tokenUtil.findUserByToken(authorizationHeader);
     CreatedGameResponseDto responseDto = gameService.createdGame(id, requestDto);
     return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
