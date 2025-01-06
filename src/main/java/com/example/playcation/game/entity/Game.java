@@ -13,9 +13,18 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.DynamicInsert;
 
 @Entity
 @Table(name = "`game`")
+@Getter
+@DynamicInsert
+@AllArgsConstructor
+@NoArgsConstructor
 public class Game extends BaseEntity {
 
   @Id
@@ -31,8 +40,31 @@ public class Game extends BaseEntity {
 
   private BigDecimal price;
 
+  private String description;
+
   @Enumerated(value = EnumType.STRING)
   private GameStatus status;
 
-  private String ImageUrl;
+  private String imageUrl;
+
+  @Builder
+  public Game(User user, String title, String category, BigDecimal price, String description, GameStatus status, String imageUrl) {
+    this.user = user;
+    this.title = title;
+    this.category = category;
+    this.price = price;
+    this.description = description;
+    this.status = status;
+    this.imageUrl = imageUrl;
+  }
+
+  @Builder
+  public void updateGame(String title, String category, BigDecimal price, String description, GameStatus status, String imageUrl) {
+    this.title = title;
+    this.category = category;
+    this.price = price;
+    this.description = description;
+    this.status = status;
+    this.imageUrl = imageUrl;
+  }
 }
