@@ -9,6 +9,7 @@ import com.example.playcation.user.dto.UpdatedUserPasswordRequestDto;
 import com.example.playcation.user.dto.UpdatedUserRequestDto;
 import com.example.playcation.user.service.UserService;
 import com.example.playcation.util.JwtTokenProvider;
+import com.example.playcation.util.TokenUtil;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -28,17 +29,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
 
   private final UserService userService;
-  private final JwtTokenProvider jwtTokenProvider;
+  private final TokenUtil tokenUtil;
 
   // 로그인
   @PostMapping("/login")
   public ResponseEntity<LoginUserResponseDto> login(
       @Valid @RequestBody LoginUserRequestDto userLoginRequestDto
   ) {
-    LoginUserResponseDto responseDto = userService.login(
-        userLoginRequestDto.getEmail(),
-        userLoginRequestDto.getPassword()
-    );
+    LoginUserResponseDto responseDto = userService.login(userLoginRequestDto);
     return ResponseEntity.ok(responseDto);
   }
 
@@ -54,19 +52,14 @@ public class UserController {
   public ResponseEntity<UserResponseDto> signUp(
       @Valid @RequestBody SignInUserRequestDto userSignInRequestDto
   ) {
-    return ResponseEntity.ok().body(userService.signUp(
-        userSignInRequestDto.getEmail(),
-        userSignInRequestDto.getPassword(),
-        userSignInRequestDto.getName()
-    ));
+    return ResponseEntity.ok().body(userService.signUp(userSignInRequestDto));
   }
 
   @GetMapping
   public ResponseEntity<UserResponseDto> findUser(
       @RequestHeader("Authorization") String authorizationHeader
   ){
-    String token = authorizationHeader.replace("Bearer ", "").trim();
-    Long id = Long.parseLong(jwtTokenProvider.getUserId(token));
+    Long id = tokenUtil.findUserByToken(authorizationHeader);
 
     return ResponseEntity.ok().body(userService.findUser(id));
   }
@@ -76,10 +69,9 @@ public class UserController {
       @RequestHeader("Authorization") String authorizationHeader,
       @RequestBody UpdatedUserRequestDto userUpdateRequestDto
   ){
-    String token = authorizationHeader.replace("Bearer ", "").trim();
-    Long id = Long.parseLong(jwtTokenProvider.getUserId(token));
+    Long id = tokenUtil.findUserByToken(authorizationHeader);
 
-    return ResponseEntity.ok().body(userService.updateUser(id, userUpdateRequestDto.getPassword(), userUpdateRequestDto.getName(), userUpdateRequestDto.getDescription()));
+    return ResponseEntity.ok().body(userService.updateUser(id, userUpdateRequestDto));
   }
 
   @PatchMapping("/password")
@@ -87,9 +79,8 @@ public class UserController {
       @RequestHeader("Authorization") String authorizationHeader,
       @RequestBody UpdatedUserPasswordRequestDto userUpdatePasswordRequestDto
   ){
-    String token = authorizationHeader.replace("Bearer ", "").trim();
-    Long id = Long.parseLong(jwtTokenProvider.getUserId(token));
-    return ResponseEntity.ok().body(userService.updateUserPassword(id, userUpdatePasswordRequestDto.getOldPassword(), userUpdatePasswordRequestDto.getNewPassword()));
+    Long id = tokenUtil.findUserByToken(authorizationHeader);
+    return ResponseEntity.ok().body(userService.updateUserPassword(id, userUpdatePasswordRequestDto));
   }
 
   //회원 탈퇴
@@ -98,11 +89,9 @@ public class UserController {
       @RequestHeader("Authorization") String authorizationHeader,
       @RequestBody DeletedUserRequestDto userLogoutRequestDto
   ) {
-    // Authorization 헤더에서 JWT 토큰 추출
-    String token = authorizationHeader.replace("Bearer ", "").trim();
-    Long id = Long.parseLong(jwtTokenProvider.getUserId(token));
+    Long id = tokenUtil.findUserByToken(authorizationHeader);
     // 탈퇴 처리 메서드 호출
-    userService.delete(id, userLogoutRequestDto.getPassword());
+    userService.delete(id, userLogoutRequestDto);
     return "회원 탈퇴가 완료되었습니다.";
   }
 }

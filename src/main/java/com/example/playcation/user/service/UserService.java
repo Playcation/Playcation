@@ -5,7 +5,12 @@ import com.example.playcation.exception.DuplicatedException;
 import com.example.playcation.exception.InvalidInputException;
 import com.example.playcation.exception.NoAuthorizedException;
 import com.example.playcation.exception.UserErrorCode;
+import com.example.playcation.user.dto.DeletedUserRequestDto;
+import com.example.playcation.user.dto.LoginUserRequestDto;
 import com.example.playcation.user.dto.LoginUserResponseDto;
+import com.example.playcation.user.dto.SignInUserRequestDto;
+import com.example.playcation.user.dto.UpdatedUserPasswordRequestDto;
+import com.example.playcation.user.dto.UpdatedUserRequestDto;
 import com.example.playcation.user.dto.UserResponseDto;
 import com.example.playcation.user.entity.User;
 import com.example.playcation.user.repository.UserRepository;
@@ -22,17 +27,17 @@ public class UserService {
   private final PasswordEncoder passwordEncoder;
   private final JwtTokenProvider jwtTokenProvider;
 
-  public LoginUserResponseDto login(String email, String password) {
-    User user = userRepository.findByEmailOrElseThrow(email);
-    checkPassword(user, password);
+  public LoginUserResponseDto login(LoginUserRequestDto loginUserRequestDto) {
+    User user = userRepository.findByEmailOrElseThrow(loginUserRequestDto.getEmail());
+    checkPassword(user, loginUserRequestDto.getPassword());
 
     String token = jwtTokenProvider.createToken(user.getId(), user.getAuth(), 60*60*600L);
     return LoginUserResponseDto.toDto(user, token);
   }
 
-  public void delete(Long id, String password) {
+  public void delete(Long id, DeletedUserRequestDto deletedUserRequestDto) {
     User user = userRepository.findByIdOrElseThrow(id);
-    checkPassword(user, password);
+    checkPassword(user, deletedUserRequestDto.getPassword());
     user.delete();
     userRepository.save(user);
   }
@@ -43,14 +48,14 @@ public class UserService {
     }
   }
 
-  public UserResponseDto signUp(String email, String password, String name) {
-    if(userRepository.existsByEmail(email)){
+  public UserResponseDto signUp(SignInUserRequestDto signInUserRequestDto) {
+    if(userRepository.existsByEmail(signInUserRequestDto.getEmail())){
       throw new DuplicatedException(UserErrorCode.EMAIL_EXIST);
     }
     User user = userRepository.save( User.builder()
-        .email(email)
-        .password(password)
-        .name(name)
+        .email(signInUserRequestDto.getEmail())
+        .password(signInUserRequestDto.getPassword())
+        .name(signInUserRequestDto.getName())
         .auth(Auth.USER)
         .build()
     );
@@ -61,18 +66,18 @@ public class UserService {
     return UserResponseDto.toDto(userRepository.findByIdOrElseThrow(id));
   }
 
-  public UserResponseDto updateUser(Long id, String password, String name, String description) {
+  public UserResponseDto updateUser(Long id, UpdatedUserRequestDto updatedUserRequestDto) {
     User user = userRepository.findByIdOrElseThrow(id);
-    checkPassword(user, password);
-    user.update(name, description);
+    checkPassword(user, updatedUserRequestDto.getPassword());
+    user.update(updatedUserRequestDto.getName(), updatedUserRequestDto.getDescription());
     userRepository.save(user);
     return UserResponseDto.toDto(user);
   }
 
-  public UserResponseDto updateUserPassword(Long id, String oldPassword, String newPassword) {
+  public UserResponseDto updateUserPassword(Long id, UpdatedUserPasswordRequestDto updatedUserPasswordRequestDto) {
     User user = userRepository.findByIdOrElseThrow(id);
-    checkPassword(user, oldPassword);
-    user.updatePassword(newPassword);
+    checkPassword(user, updatedUserPasswordRequestDto.getOldPassword());
+    user.updatePassword(updatedUserPasswordRequestDto.getNewPassword());
     userRepository.save(user);
     return UserResponseDto.toDto(user);
   }
