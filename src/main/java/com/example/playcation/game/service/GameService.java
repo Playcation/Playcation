@@ -42,4 +42,9 @@ public class GameService {
 
     return CreatedGameResponseDto.toDto(game);
   }
+
+  public CreatedGameResponseDto findGameById(Long gameId) {
+    Game game = gameRepository.findByIdOrElseThrow(gameId);
+    return CreatedGameResponseDto.toDto(game);
+  }
 }
