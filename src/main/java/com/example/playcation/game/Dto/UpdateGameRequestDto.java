@@ -1,0 +1,30 @@
+package com.example.playcation.game.Dto;
+
+import com.example.playcation.enums.GameStatus;
+import java.math.BigDecimal;
+import lombok.Getter;
+
+@Getter
+public class UpdateGameRequestDto {
+
+  private String title;
+
+  private String category;
+
+  private BigDecimal price;
+
+  private String description;
+
+  private GameStatus status;
+
+  private String imageUrl;
+
+  public UpdateGameRequestDto(String title, String category, BigDecimal price, String description, GameStatus status, String imageUrl) {
+    this.title = title;
+    this.category = category;
+    this.price = price;
+    this.description = description;
+    this.status = status;
+    this.imageUrl = imageUrl;
+  }
+}
