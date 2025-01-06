@@ -3,6 +3,12 @@ package com.example.playcation.user.dto;
 import lombok.Getter;
 
 @Getter
-public class UserLogoutRequestDto {
+public class UserUpdateRequestDto {
+
   private String password;
+
+  private String name;
+
+  private String description;
+
 }

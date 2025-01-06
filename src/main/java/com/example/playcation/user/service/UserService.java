@@ -1,6 +1,6 @@
 package com.example.playcation.user.service;
 
-import com.example.playcation.common.Auth;
+import com.example.playcation.enums.Auth;
 import com.example.playcation.exception.DuplicatedException;
 import com.example.playcation.exception.InvalidInputException;
 import com.example.playcation.exception.UserErrorCode;
@@ -10,9 +10,6 @@ import com.example.playcation.user.entity.User;
 import com.example.playcation.user.repository.UserRepository;
 import com.example.playcation.util.JwtTokenProvider;
 import com.example.playcation.util.PasswordEncoder;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -28,24 +25,18 @@ public class UserService {
     User user = userRepository.findByEmailOrElseThrow(email);
     checkPassword(user, password);
 
-    String token = jwtTokenProvider.createToken(user.getEmail(), user.getAuth(), 60*60*600L);
-
+    String token = jwtTokenProvider.createToken(user.getId(), user.getAuth(), 60*60*600L);
     return UserLoginResponseDto.toDto(user, token);
-
   }
 
-  public void delete(String email, String password) {
-    User user = userRepository.findByEmailOrElseThrow(email);
-
-    if (user.getDeletedAt() != null) {
-      throw new InvalidInputException(UserErrorCode.DELETED_USER);
-    }
+  public void delete(Long id, String password) {
+    User user = userRepository.findByIdOrElseThrow(id);
     checkPassword(user, password);
     user.delete();
     userRepository.save(user);
   }
 
-  private void checkPassword(User user, String password) {
+  public void checkPassword(User user, String password) {
     if (!passwordEncoder.matches(password, user.getPassword())) {
       throw new InvalidInputException(UserErrorCode.WRONG_PASSWORD);
     }
@@ -61,6 +52,26 @@ public class UserService {
         name,
         Auth.USER
     ));
+    return UserResponseDto.toDto(user);
+  }
+
+  public UserResponseDto findUser(Long id) {
+    return UserResponseDto.toDto(userRepository.findByIdOrElseThrow(id));
+  }
+
+  public UserResponseDto updateUser(Long id, String password, String name, String description) {
+    User user = userRepository.findByIdOrElseThrow(id);
+    checkPassword(user, password);
+    user.update(name, description);
+    userRepository.save(user);
+    return UserResponseDto.toDto(user);
+  }
+
+  public UserResponseDto updateUserPassword(Long id, String oldPassword, String newPassword) {
+    User user = userRepository.findByIdOrElseThrow(id);
+    checkPassword(user, oldPassword);
+    user.updatePassword(newPassword);
+    userRepository.save(user);
     return UserResponseDto.toDto(user);
   }
 }

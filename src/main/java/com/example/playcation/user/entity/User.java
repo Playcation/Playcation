@@ -1,6 +1,6 @@
 package com.example.playcation.user.entity;
 
-import com.example.playcation.common.Auth;
+import com.example.playcation.enums.Auth;
 import com.example.playcation.common.BaseEntity;
 import com.example.playcation.util.PasswordEncoder;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -39,6 +39,8 @@ public class User extends BaseEntity {
   @Column(length = 10)
   private String name;
 
+  private String description;
+
   @Enumerated(value = EnumType.STRING)
   private Auth auth;
 
@@ -50,6 +52,16 @@ public class User extends BaseEntity {
     this.password = password;
     this.name = name;
     this.auth = auth;
+  }
+
+  public void update(String name, String description){
+    this.name = name == null ? this.name : name;
+    this.description = description == null ? this.description : description;
+//    return this;
+  }
+
+  public void updatePassword(String password){
+    this.password = password;
   }
 
   public void delete(){

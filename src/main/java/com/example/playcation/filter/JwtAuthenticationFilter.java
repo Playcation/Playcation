@@ -30,7 +30,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     if (token != null && !jwtTokenProvider.isExpired(token)) {
       // 토큰이 유효하면 인증 객체를 생성하여 SecurityContext에 설정
-      String username = jwtTokenProvider.getUsername(token);
+      String username = jwtTokenProvider.getUserId(token);
       String role = jwtTokenProvider.getRole(token);
 
       // UsernamePasswordAuthenticationToken 생성
