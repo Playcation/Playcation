@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 @Getter
+@Builder
 public class CreatedGameResponseDto {
 
   private Long gameId;
@@ -30,7 +31,7 @@ public class CreatedGameResponseDto {
 
   private LocalDateTime updateAt;
 
-  @Builder
+
   public CreatedGameResponseDto(Long gameId, Long userId, String title, String category, BigDecimal price, String description, String image, GameStatus status, LocalDateTime createdAt, LocalDateTime updateAt) {
     this.gameId = gameId;
     this.userId = userId;
@@ -44,8 +45,8 @@ public class CreatedGameResponseDto {
     this.updateAt = updateAt;
   }
 
-  @Builder
-  public CreatedGameResponseDto toDto(Game game) {
+
+  public static CreatedGameResponseDto toDto(Game game) {
     return new CreatedGameResponseDto(
         game.getId(),
         game.getUser().getId(),

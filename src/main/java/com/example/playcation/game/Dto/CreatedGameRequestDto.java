@@ -1,7 +1,9 @@
 package com.example.playcation.game.Dto;
 
 import java.math.BigDecimal;
+import lombok.Getter;
 
+@Getter
 public class CreatedGameRequestDto {
 
   private String title;
