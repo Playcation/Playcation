@@ -3,7 +3,7 @@ package com.example.playcation.user.dto;
 import lombok.Getter;
 
 @Getter
-public class UserUpdateRequestDto {
+public class UpdatedUserRequestDto {
 
   private String password;
 

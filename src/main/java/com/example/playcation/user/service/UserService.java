@@ -5,7 +5,7 @@ import com.example.playcation.exception.DuplicatedException;
 import com.example.playcation.exception.InvalidInputException;
 import com.example.playcation.exception.NoAuthorizedException;
 import com.example.playcation.exception.UserErrorCode;
-import com.example.playcation.user.dto.UserLoginResponseDto;
+import com.example.playcation.user.dto.LoginUserResponseDto;
 import com.example.playcation.user.dto.UserResponseDto;
 import com.example.playcation.user.entity.User;
 import com.example.playcation.user.repository.UserRepository;
@@ -22,12 +22,12 @@ public class UserService {
   private final PasswordEncoder passwordEncoder;
   private final JwtTokenProvider jwtTokenProvider;
 
-  public UserLoginResponseDto login(String email, String password) {
+  public LoginUserResponseDto login(String email, String password) {
     User user = userRepository.findByEmailOrElseThrow(email);
     checkPassword(user, password);
 
     String token = jwtTokenProvider.createToken(user.getId(), user.getAuth(), 60*60*600L);
-    return UserLoginResponseDto.toDto(user, token);
+    return LoginUserResponseDto.toDto(user, token);
   }
 
   public void delete(Long id, String password) {
@@ -47,12 +47,13 @@ public class UserService {
     if(userRepository.existsByEmail(email)){
       throw new DuplicatedException(UserErrorCode.EMAIL_EXIST);
     }
-    User user = userRepository.save( new User(
-        email,
-        password,
-        name,
-        Auth.USER
-    ));
+    User user = userRepository.save( User.builder()
+        .email(email)
+        .password(password)
+        .name(name)
+        .auth(Auth.USER)
+        .build()
+    );
     return UserResponseDto.toDto(user);
   }
 

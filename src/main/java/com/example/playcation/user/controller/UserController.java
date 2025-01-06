@@ -1,12 +1,12 @@
 package com.example.playcation.user.controller;
 
-import com.example.playcation.user.dto.UserLoginRequestDto;
-import com.example.playcation.user.dto.UserLoginResponseDto;
-import com.example.playcation.user.dto.UserDeleteRequestDto;
+import com.example.playcation.user.dto.LoginUserRequestDto;
+import com.example.playcation.user.dto.LoginUserResponseDto;
+import com.example.playcation.user.dto.DeletedUserRequestDto;
 import com.example.playcation.user.dto.UserResponseDto;
-import com.example.playcation.user.dto.UserSignInRequestDto;
-import com.example.playcation.user.dto.UserUpdatePasswordRequestDto;
-import com.example.playcation.user.dto.UserUpdateRequestDto;
+import com.example.playcation.user.dto.SignInUserRequestDto;
+import com.example.playcation.user.dto.UpdatedUserPasswordRequestDto;
+import com.example.playcation.user.dto.UpdatedUserRequestDto;
 import com.example.playcation.user.service.UserService;
 import com.example.playcation.util.JwtTokenProvider;
 import jakarta.validation.Valid;
@@ -32,10 +32,10 @@ public class UserController {
 
   // 로그인
   @PostMapping("/login")
-  public ResponseEntity<UserLoginResponseDto> login(
-      @Valid @RequestBody UserLoginRequestDto userLoginRequestDto
+  public ResponseEntity<LoginUserResponseDto> login(
+      @Valid @RequestBody LoginUserRequestDto userLoginRequestDto
   ) {
-    UserLoginResponseDto responseDto = userService.login(
+    LoginUserResponseDto responseDto = userService.login(
         userLoginRequestDto.getEmail(),
         userLoginRequestDto.getPassword()
     );
@@ -52,7 +52,7 @@ public class UserController {
 
   @PostMapping("/sign-in")
   public ResponseEntity<UserResponseDto> signUp(
-      @Valid @RequestBody UserSignInRequestDto userSignInRequestDto
+      @Valid @RequestBody SignInUserRequestDto userSignInRequestDto
   ) {
     return ResponseEntity.ok().body(userService.signUp(
         userSignInRequestDto.getEmail(),
@@ -74,7 +74,7 @@ public class UserController {
   @PutMapping
   public ResponseEntity<UserResponseDto> updateUser(
       @RequestHeader("Authorization") String authorizationHeader,
-      @RequestBody UserUpdateRequestDto userUpdateRequestDto
+      @RequestBody UpdatedUserRequestDto userUpdateRequestDto
   ){
     String token = authorizationHeader.replace("Bearer ", "").trim();
     Long id = Long.parseLong(jwtTokenProvider.getUserId(token));
@@ -85,7 +85,7 @@ public class UserController {
   @PatchMapping("/password")
   public ResponseEntity<UserResponseDto> changePassword(
       @RequestHeader("Authorization") String authorizationHeader,
-      @RequestBody UserUpdatePasswordRequestDto userUpdatePasswordRequestDto
+      @RequestBody UpdatedUserPasswordRequestDto userUpdatePasswordRequestDto
   ){
     String token = authorizationHeader.replace("Bearer ", "").trim();
     Long id = Long.parseLong(jwtTokenProvider.getUserId(token));
@@ -96,7 +96,7 @@ public class UserController {
   @DeleteMapping("/delete")
   public String deleteAccount(
       @RequestHeader("Authorization") String authorizationHeader,
-      @RequestBody UserDeleteRequestDto userLogoutRequestDto
+      @RequestBody DeletedUserRequestDto userLogoutRequestDto
   ) {
     // Authorization 헤더에서 JWT 토큰 추출
     String token = authorizationHeader.replace("Bearer ", "").trim();
