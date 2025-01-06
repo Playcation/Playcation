@@ -6,5 +6,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface GameRepository extends JpaRepository<Game, Long> {
-
+  default Game findByIdOrElseThrow(Long id) {
+    return findById(id).orElseThrow(() -> new RuntimeException());
+  }
 }
