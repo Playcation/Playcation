@@ -31,7 +31,7 @@ public class GameService {
 
   // 게임 생성
   public CreatedGameResponseDto createdGame(Long id,
-      @RequestBody CreatedGameRequestDto requestDto) {
+      CreatedGameRequestDto requestDto) {
 
     User user = userRepository.findByIdOrElseThrow(id);
 
