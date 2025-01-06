@@ -2,7 +2,7 @@ package com.example.playcation.game.Dto;
 
 import java.math.BigDecimal;
 
-public class CreatedGameRequestEntity {
+public class CreatedGameRequestDto {
 
   private String title;
 
@@ -14,7 +14,7 @@ public class CreatedGameRequestEntity {
 
   private String image;
 
-  public CreatedGameRequestEntity (String title, String category, BigDecimal price, String description, String image) {
+  public CreatedGameRequestDto(String title, String category, BigDecimal price, String description, String image) {
     this.title = title;
     this.category = category;
     this.price = price;

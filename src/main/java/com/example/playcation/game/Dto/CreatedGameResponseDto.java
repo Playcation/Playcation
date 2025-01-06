@@ -2,14 +2,13 @@ package com.example.playcation.game.Dto;
 
 import com.example.playcation.enums.GameStatus;
 import com.example.playcation.game.entity.Game;
-import com.example.playcation.gametag.entity.GameTag;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Getter;
 
 @Getter
-public class CreatedGameResponseEntity {
+public class CreatedGameResponseDto {
 
   private Long gameId;
 
@@ -32,7 +31,7 @@ public class CreatedGameResponseEntity {
   private LocalDateTime updateAt;
 
   @Builder
-  public CreatedGameResponseEntity (Long gameId, Long userId, String title, String category, BigDecimal price, String description, String image, GameStatus status, LocalDateTime createdAt, LocalDateTime updateAt) {
+  public CreatedGameResponseDto(Long gameId, Long userId, String title, String category, BigDecimal price, String description, String image, GameStatus status, LocalDateTime createdAt, LocalDateTime updateAt) {
     this.gameId = gameId;
     this.userId = userId;
     this.title = title;
@@ -46,8 +45,8 @@ public class CreatedGameResponseEntity {
   }
 
   @Builder
-  public CreatedGameResponseEntity toDto(Game game) {
-    return new CreatedGameResponseEntity(
+  public CreatedGameResponseDto toDto(Game game) {
+    return new CreatedGameResponseDto(
         game.getId(),
         game.getUser().getId(),
         game.getTitle(),
