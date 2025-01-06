@@ -15,16 +15,13 @@ public class UpdateGameRequestDto {
 
   private String description;
 
-  private GameStatus status;
-
   private String imageUrl;
 
-  public UpdateGameRequestDto(String title, String category, BigDecimal price, String description, GameStatus status, String imageUrl) {
+  public UpdateGameRequestDto(String title, String category, BigDecimal price, String description, String imageUrl) {
     this.title = title;
     this.category = category;
     this.price = price;
     this.description = description;
-    this.status = status;
     this.imageUrl = imageUrl;
   }
 }

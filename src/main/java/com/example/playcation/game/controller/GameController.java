@@ -1,10 +1,12 @@
 package com.example.playcation.game.controller;
 
+import com.example.playcation.enums.GameStatus;
 import com.example.playcation.game.Dto.CreatedGameRequestDto;
 import com.example.playcation.game.Dto.CreatedGameResponseDto;
 import com.example.playcation.game.Dto.PageGameResponseDto;
 import com.example.playcation.game.Dto.UpdateGameRequestDto;
 import com.example.playcation.game.service.GameService;
+import com.example.playcation.user.entity.User;
 import com.example.playcation.util.JwtTokenProvider;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.math.BigDecimal;
@@ -14,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -49,7 +52,9 @@ public class GameController {
   //게임 다건 조회 컨트롤러
   @GetMapping
   public ResponseEntity<PageGameResponseDto> findGamesAndPaging(
+      // 조회하고 싶은 페이지(미입력시 자동으로 첫 페이지가 출력)
       @RequestParam(defaultValue = "0") int page,
+      // 검색 조건(tag는 게임에서 찾을 수 없음으로 따로 제작)
       @RequestParam(required = false) String title,
       @RequestParam(required = false) String category,
       @RequestParam(required = false) BigDecimal price,
@@ -59,15 +64,23 @@ public class GameController {
     return new ResponseEntity<>(games, HttpStatus.OK);
   }
 
+  // 게임 수정 컨트롤러
   @PatchMapping("/{gameId}")
   public ResponseEntity<CreatedGameResponseDto> updateGame(
       @PathVariable Long gameId,
       @RequestHeader("Authorization") String authorizationHeader,
       @RequestParam UpdateGameRequestDto requestDto) {
-
     Long userId = findUserByToken(authorizationHeader);
     CreatedGameResponseDto responseDto = gameService.updateGame(gameId, userId, requestDto);
     return new ResponseEntity<>(responseDto, HttpStatus.OK);
+  }
+
+  @DeleteMapping("/{gameId}")
+  public ResponseEntity<String> deleteGame(@PathVariable Long gameId, @RequestHeader("Authorization") String authorizationHeader, @RequestParam GameStatus status) {
+    Long userId = findUserByToken(authorizationHeader);
+
+    gameService.deleteGame(gameId, status, userId);
+    return new ResponseEntity<>("삭제되었습니다", HttpStatus.OK);
   }
 
   // 토큰에서 유저id를 찾아주는 메서드

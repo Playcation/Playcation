@@ -60,13 +60,15 @@ public class Game extends BaseEntity {
     this.imageUrl = imageUrl;
   }
 
-
   public void updateGame(UpdateGameRequestDto requestDto) {
     this.title = requestDto.getTitle();
     this.category = requestDto.getCategory();
     this.price = requestDto.getPrice();
     this.description = requestDto.getDescription();
-    this.status = requestDto.getStatus();
     this.imageUrl = requestDto.getImageUrl();
+  }
+
+  public void deleteGame(GameStatus status) {
+    this.status = status;
   }
 }

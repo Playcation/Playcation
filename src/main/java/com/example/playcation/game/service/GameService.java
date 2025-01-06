@@ -3,6 +3,7 @@ package com.example.playcation.game.service;
 import static com.example.playcation.enums.Auth.MANAGER;
 import static com.example.playcation.enums.GameStatus.ON_SAL;
 
+import com.example.playcation.enums.GameStatus;
 import com.example.playcation.exception.GameErrorCode;
 import com.example.playcation.exception.GameException;
 import com.example.playcation.game.Dto.CreatedGameRequestDto;
@@ -77,5 +78,17 @@ public class GameService {
     game.updateGame(requestDto);
     gameRepository.save(game);
     return CreatedGameResponseDto.toDto(game);
+  }
+
+  public void deleteGame(Long gameId, GameStatus status, Long userId) {
+
+    Game game = gameRepository.findByIdOrElseThrow(gameId);
+
+    if (!game.getUser().getId().equals(userId)) {
+      throw new GameException(GameErrorCode.DOES_NOT_MATCH);
+    }
+
+    game.deleteGame(status);
+    gameRepository.save(game);
   }
 }
