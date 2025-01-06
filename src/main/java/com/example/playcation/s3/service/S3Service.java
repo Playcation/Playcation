@@ -5,15 +5,17 @@ import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.example.playcation.s3.repository.GameRepository;
-import com.example.playcation.s3.repository.PhotoRepository;
+import com.example.playcation.s3.entity.FileDetail;
+import com.example.playcation.s3.repository.FileDetailRepository;
 import jakarta.transaction.Transactional;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -25,13 +27,11 @@ public class S3Service {
   @Value("${cloud.aws.s3.bucket}")
   private String bucket;
 
-  private final GameRepository gameRepository;
-  private final PhotoRepository photoRepository;
+  private final FileDetailRepository fileDetailRepository;
   private final AmazonS3 s3;
 
   @Transactional
-  @Override
-  public AttachFile uploadFile(MultipartFile multipartFile){
+  public String uploadFile(MultipartFile multipartFile){
     if (multipartFile == null || multipartFile.isEmpty()) {
       return null;
     }
@@ -46,25 +46,23 @@ public class S3Service {
     } catch (IOException e){
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "파일 업로드에 실패했습니다.");
     }
-    String filePath = "https://trello-team-project.s3.ap-northeast-2.amazonaws.com/" + fileName;
-    AttachFile attachFile = new AttachFile(fileName, filePath);
-    attachFileRepository.save(attachFile);
+    String filePath = "https://" + bucket + ".s3.ap-northeast-2.amazonaws.com/" + fileName;
+    FileDetail attachFile = new FileDetail(bucket, fileName, filePath, multipartFile.getSize(), multipartFile.getContentType());
+    fileDetailRepository.save(attachFile);
 
-    return attachFile;
+    return attachFile.getFilePath();
   }
 
-  @Override
-  public AttachFile findByFileNameOrElseThrow(String fileName) {
-    AttachFile attachFile = attachFileRepository.findByFileName(fileName).orElseThrow(() -> new NotFoundException(NOT_FOUND_FILE));
+  public FileDetail findByFileNameOrElseThrow(String fileName) {
+    FileDetail attachFile = fileDetailRepository.findByFileNameOrElseThrow(fileName);
     return attachFile;
   }
 
   @Transactional
-  @Override
   public void deleteFile(String fileName){
     s3.deleteObject(new DeleteObjectRequest(bucket, fileName));
-    AttachFile attachFile = findByFileNameOrElseThrow(fileName);
-    attachFileRepository.delete(attachFile);
+    FileDetail attachFile = findByFileNameOrElseThrow(fileName);
+    fileDetailRepository.delete(attachFile);
   }
 
   // 파일명을 난수화하기 위해 UUID 를 활용하여 난수를 돌린다.
@@ -79,5 +77,13 @@ public class S3Service {
     } catch (StringIndexOutOfBoundsException e){
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "잘못된 형식의 파일" + fileName + ") 입니다.");
     }
+  }
+
+  // TODO : 리펙터링...
+  public String uploadFiles(List<MultipartFile> files) {
+    for (MultipartFile file : files) {
+      uploadFile(file);
+    }
+    return "";
   }
 }

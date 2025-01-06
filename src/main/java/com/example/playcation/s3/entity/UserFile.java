@@ -1,30 +1,31 @@
 package com.example.playcation.s3.entity;
 
+import com.example.playcation.game.entity.Game;
+import com.example.playcation.user.entity.User;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Entity
 @Getter
-@AllArgsConstructor
+@Entity
 @NoArgsConstructor
-@Table(name = "photo_file")
-public class PhotoFile {
+@Table(name = "user_file")
+public class UserFile {
+
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  private String fileName;
+  @ManyToOne(fetch = FetchType.LAZY)
+  private User user;
 
-  private String filePath;
+  @ManyToOne(fetch = FetchType.LAZY)
+  private FileDetail fileDetail;
 
-  public PhotoFile(String fileName, String filePath) {
-    this.fileName = fileName;
-    this.filePath = filePath;
-  }
 }

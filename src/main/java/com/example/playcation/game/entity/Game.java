@@ -2,7 +2,6 @@ package com.example.playcation.game.entity;
 
 import com.example.playcation.common.BaseEntity;
 import com.example.playcation.enums.GameStatus;
-import com.example.playcation.s3.entity.PhotoFile;
 import com.example.playcation.user.entity.User;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -12,7 +11,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 

@@ -3,6 +3,7 @@ package com.example.playcation.user.service;
 import com.example.playcation.enums.Auth;
 import com.example.playcation.exception.DuplicatedException;
 import com.example.playcation.exception.InvalidInputException;
+import com.example.playcation.exception.NoAuthorizedException;
 import com.example.playcation.exception.UserErrorCode;
 import com.example.playcation.user.dto.UserLoginResponseDto;
 import com.example.playcation.user.dto.UserResponseDto;
@@ -71,6 +72,16 @@ public class UserService {
     User user = userRepository.findByIdOrElseThrow(id);
     checkPassword(user, oldPassword);
     user.updatePassword(newPassword);
+    userRepository.save(user);
+    return UserResponseDto.toDto(user);
+  }
+
+  public UserResponseDto updateUserAuth(Long id) {
+    User user = userRepository.findByIdOrElseThrow(id);
+    if(user.getAuth() != Auth.USER){
+      throw new NoAuthorizedException(UserErrorCode.NOT_AUTHORIZED_MANAGER);
+    }
+    user.updateAuth();
     userRepository.save(user);
     return UserResponseDto.toDto(user);
   }

@@ -57,7 +57,10 @@ public class User extends BaseEntity {
   public void update(String name, String description){
     this.name = name == null ? this.name : name;
     this.description = description == null ? this.description : description;
-//    return this;
+  }
+
+  public void updateAuth(){
+    this.auth = Auth.MANAGER;
   }
 
   public void updatePassword(String password){

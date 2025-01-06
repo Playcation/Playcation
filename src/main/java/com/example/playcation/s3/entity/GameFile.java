@@ -1,17 +1,18 @@
 package com.example.playcation.s3.entity;
 
+import com.example.playcation.game.entity.Game;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "game_file")
 public class GameFile {
@@ -19,12 +20,10 @@ public class GameFile {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  private String fileName;
+  @ManyToOne(fetch = FetchType.LAZY)
+  private Game game;
 
-  private String filePath;
+  @ManyToOne(fetch = FetchType.LAZY)
+  private FileDetail fileDetail;
 
-  public GameFile(String fileName, String filePath) {
-    this.fileName = fileName;
-    this.filePath = filePath;
-  }
 }
