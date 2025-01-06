@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface GameRepository extends JpaRepository<Game, Long> {
+public interface GameRepository extends JpaRepository<Game, Long>, GameRepositoryCustom {
   default Game findByIdOrElseThrow(Long id) {
     Game game = findById(id).orElseThrow(() -> new GameException(GameErrorCode.GAME_NOT_FOUND));
     if (!game.getStatus().equals(GameStatus.ON_SAL)) {
