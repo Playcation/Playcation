@@ -1,6 +1,6 @@
 package com.example.playcation.game.repository;
 
-import com.example.playcation.game.Dto.PageGameResponseDto;
+import com.example.playcation.game.dto.PageGameResponseDto;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import org.springframework.data.domain.PageRequest;

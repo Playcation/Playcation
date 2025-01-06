@@ -1,15 +1,14 @@
 package com.example.playcation.game.service;
 
-import static com.example.playcation.enums.Auth.MANAGER;
 import static com.example.playcation.enums.GameStatus.ON_SAL;
 
 import com.example.playcation.enums.GameStatus;
 import com.example.playcation.exception.GameErrorCode;
 import com.example.playcation.exception.GameException;
-import com.example.playcation.game.Dto.CreatedGameRequestDto;
-import com.example.playcation.game.Dto.CreatedGameResponseDto;
-import com.example.playcation.game.Dto.PageGameResponseDto;
-import com.example.playcation.game.Dto.UpdateGameRequestDto;
+import com.example.playcation.game.dto.CreatedGameRequestDto;
+import com.example.playcation.game.dto.CreatedGameResponseDto;
+import com.example.playcation.game.dto.PageGameResponseDto;
+import com.example.playcation.game.dto.UpdateGameRequestDto;
 import com.example.playcation.game.entity.Game;
 import com.example.playcation.game.repository.GameRepository;
 import com.example.playcation.user.entity.User;

@@ -1,16 +1,13 @@
 package com.example.playcation.game.controller;
 
 import com.example.playcation.enums.GameStatus;
-import com.example.playcation.game.Dto.CreatedGameRequestDto;
-import com.example.playcation.game.Dto.CreatedGameResponseDto;
-import com.example.playcation.game.Dto.PageGameResponseDto;
-import com.example.playcation.game.Dto.UpdateGameRequestDto;
+import com.example.playcation.game.dto.CreatedGameRequestDto;
+import com.example.playcation.game.dto.CreatedGameResponseDto;
+import com.example.playcation.game.dto.PageGameResponseDto;
+import com.example.playcation.game.dto.UpdateGameRequestDto;
 import com.example.playcation.game.service.GameService;
-import com.example.playcation.user.entity.User;
 import com.example.playcation.util.JwtTokenProvider;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;

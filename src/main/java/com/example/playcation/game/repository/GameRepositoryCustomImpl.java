@@ -1,6 +1,6 @@
 package com.example.playcation.game.repository;
 
-import com.example.playcation.game.Dto.PageGameResponseDto;
+import com.example.playcation.game.dto.PageGameResponseDto;
 import com.example.playcation.game.entity.Game;
 import com.example.playcation.game.entity.QGame;
 import com.querydsl.core.types.dsl.BooleanExpression;

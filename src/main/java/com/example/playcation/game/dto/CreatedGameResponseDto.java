@@ -1,4 +1,4 @@
-package com.example.playcation.game.Dto;
+package com.example.playcation.game.dto;
 
 import com.example.playcation.enums.GameStatus;
 import com.example.playcation.game.entity.Game;

@@ -1,6 +1,5 @@
-package com.example.playcation.game.Dto;
+package com.example.playcation.game.dto;
 
-import com.example.playcation.enums.GameStatus;
 import java.math.BigDecimal;
 import lombok.Getter;
 

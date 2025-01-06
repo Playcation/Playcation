@@ -2,7 +2,7 @@ package com.example.playcation.game.entity;
 
 import com.example.playcation.common.BaseEntity;
 import com.example.playcation.enums.GameStatus;
-import com.example.playcation.game.Dto.UpdateGameRequestDto;
+import com.example.playcation.game.dto.UpdateGameRequestDto;
 import com.example.playcation.user.entity.User;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
