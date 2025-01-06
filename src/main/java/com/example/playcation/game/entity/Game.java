@@ -25,6 +25,7 @@ import org.hibernate.annotations.DynamicInsert;
 @DynamicInsert
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class Game extends BaseEntity {
 
   @Id
@@ -47,7 +48,7 @@ public class Game extends BaseEntity {
 
   private String imageUrl;
 
-  @Builder
+
   public Game(User user, String title, String category, BigDecimal price, String description, GameStatus status, String imageUrl) {
     this.user = user;
     this.title = title;
@@ -58,7 +59,7 @@ public class Game extends BaseEntity {
     this.imageUrl = imageUrl;
   }
 
-  @Builder
+
   public void updateGame(String title, String category, BigDecimal price, String description, GameStatus status, String imageUrl) {
     this.title = title;
     this.category = category;
