@@ -1,6 +1,6 @@
 package com.example.playcation.user.service;
 
-import com.example.playcation.common.Auth;
+import com.example.playcation.enums.Auth;
 import com.example.playcation.exception.DuplicatedException;
 import com.example.playcation.exception.InvalidInputException;
 import com.example.playcation.exception.UserErrorCode;
@@ -10,9 +10,6 @@ import com.example.playcation.user.entity.User;
 import com.example.playcation.user.repository.UserRepository;
 import com.example.playcation.util.JwtTokenProvider;
 import com.example.playcation.util.PasswordEncoder;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

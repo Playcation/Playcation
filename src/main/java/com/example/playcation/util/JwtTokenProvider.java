@@ -1,6 +1,6 @@
 package com.example.playcation.util;
 
-import com.example.playcation.common.Auth;
+import com.example.playcation.enums.Auth;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;

@@ -1,6 +1,6 @@
 package com.example.playcation.user.entity;
 
-import com.example.playcation.common.Auth;
+import com.example.playcation.enums.Auth;
 import com.example.playcation.common.BaseEntity;
 import com.example.playcation.util.PasswordEncoder;
 import com.fasterxml.jackson.annotation.JsonFormat;
