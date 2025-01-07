@@ -6,7 +6,6 @@ import com.example.playcation.game.dto.CreatedGameResponseDto;
 import com.example.playcation.game.dto.PageGameResponseDto;
 import com.example.playcation.game.dto.UpdatedGameRequestDto;
 import com.example.playcation.game.service.GameService;
-import com.example.playcation.util.JwtTokenProvider;
 import com.example.playcation.util.TokenUtil;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
