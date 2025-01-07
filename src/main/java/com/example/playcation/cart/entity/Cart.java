@@ -8,10 +8,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import java.util.List;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -20,6 +19,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "`cart`")
+@Builder
 public class Cart {
 
   @Id
@@ -30,15 +30,9 @@ public class Cart {
   @JoinColumn(name = "user_id", nullable = false)
   private User user;
 
-  @OneToMany
-  @JoinColumn(name = "cart_id") // 외래 키
-  private List<Game> games; // Game과의 관계
-  
-  public static Cart createCart(User user) {
-    Cart cart = new Cart();
-    cart.user = user;
+  @ManyToOne
+  @JoinColumn(name = "game_id")
+  private Game game;
 
-    return cart;
-  }
 
 }

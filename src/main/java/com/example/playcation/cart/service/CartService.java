@@ -1,11 +1,11 @@
 package com.example.playcation.cart.service;
 
-import com.example.playcation.cart.dto.CartResponseDto;
-import com.example.playcation.cart.dto.UpdatedCartResponseDto;
+import com.example.playcation.cart.dto.CartGameResponseDto;
+import com.example.playcation.cart.dto.UpdatedCartGameResponseDto;
 import com.example.playcation.cart.entity.Cart;
 import com.example.playcation.cart.repository.CartRepository;
 import com.example.playcation.exception.CartErrorCode;
-import com.example.playcation.exception.NoAuthorizedException;
+import com.example.playcation.exception.DuplicatedException;
 import com.example.playcation.game.entity.Game;
 import com.example.playcation.game.repository.GameRepository;
 import com.example.playcation.user.entity.User;
@@ -22,94 +22,56 @@ public class CartService {
   private final CartRepository cartRepository;
   private final UserRepository userRepository;
 
-  // 장바구니 생성
-  public Cart createCart(Long userId) {
-    // 사용자 확인
-    User user = userRepository.findByIdOrElseThrow(userId);
 
-    // 이미 장바구니가 존재하는지 확인
-    if (cartRepository.findByUserId(userId).isPresent()) {
-      throw new NoAuthorizedException(CartErrorCode.EXIST_CART);
-    }
-    // 새로운 장바구니 생성
-    Cart cart = Cart.createCart(user);
+  public List<CartGameResponseDto> getCartItems(Long userId) {
 
-    // 저장 및 반환
-    return cartRepository.save(cart);
-  }
-
-  public CartResponseDto getCartItems(Long userId) {
-
-    Cart cart = cartRepository.findCartByUserIdOrElseThrow(userId);
-    List<Game> gameList = cartRepository.findAllById(cart.getId());
-    List<CartResponseDto.GameInfo> gameDetails = gameList.stream()
-        .map(game -> new CartResponseDto.GameInfo(
-            game.getId(),
-            game.getTitle(),
-            game.getPrice()
+    List<Cart> cartList = cartRepository.findAllById(userId);
+    return cartList.stream()
+        .map(cart -> new CartGameResponseDto(
+            cart.getId(),
+            cart.getGame().getTitle(),
+            cart.getGame().getPrice()
         ))
         .toList();
-    return new CartResponseDto(
-        cart.getId(),
-        cart.getUser().getId(),
-        gameDetails
-    );
   }
 
   // cart에 게임 추가
-  public UpdatedCartResponseDto addGameToCart(Long userId, Long gameId) {
-
+  public UpdatedCartGameResponseDto addGameToCart(Long userId, Long gameId) {
+    User user = userRepository.findByIdOrElseThrow(userId);
     Game game = gameRepository.findByIdOrElseThrow(gameId);
-    Cart cart = cartRepository.findCartByUserIdOrElseThrow(userId);
-
-    // 장바구니에 게임 추가 (중복 방지)
-    if (!cart.getGames().contains(game)) {
-      cart.getGames().add(game);
+    // 이미 장바구니가 존재하는지 확인
+    if (cartRepository.findByUserIdAndGameId(userId, gameId).isPresent()) {
+      throw new DuplicatedException(CartErrorCode.GAME_ALREADY_IN_CART);
     }
+    // 장바구니에 게임 추가
+    Cart newCart = Cart.builder()
+        .user(user)
+        .game(game)
+        .build();
 
     // 변경된 장바구니 저장
-    Cart savedCart = cartRepository.save(cart);
+    cartRepository.save(newCart);
 
-    List<Game> updatedGameList = cartRepository.findAllById(savedCart.getId());
-    List<UpdatedCartResponseDto.GameInfo> gameDetails = updatedGameList.stream()
-        .map(addedGame -> new UpdatedCartResponseDto.GameInfo(
-            addedGame.getId(),
-            addedGame.getTitle(),
-            addedGame.getPrice()
-        ))
-        .toList();
-    return new UpdatedCartResponseDto(
-        cart.getId(),
-        cart.getUser().getId(),
-        gameDetails
-    );
+    return UpdatedCartGameResponseDto.toDto(newCart);
   }
 
-  public UpdatedCartResponseDto deleteGameFromCart(Long userId, Long gameId) {
+  public UpdatedCartGameResponseDto deleteGameFromCart(Long userId, Long gameId) {
 
-    Game game = gameRepository.findByIdOrElseThrow(gameId);
-    Cart cart = cartRepository.findCartByUserIdOrElseThrow(userId);
+    Cart cart = cartRepository.findCartByUserIdAndGameIdOrElseThrow(userId, gameId);
 
-    // 장바구니에 게임 추가 (중복 방지)
-    if (!cart.getGames().contains(game)) {
-      cart.getGames().remove(game);
-    }
+    // 장바구니에 게임 삭제
+    cartRepository.delete(cart);
 
     // 변경된 장바구니 저장
     Cart savedCart = cartRepository.save(cart);
 
-    List<Game> updatedGameList = cartRepository.findAllById(savedCart.getId());
-    List<UpdatedCartResponseDto.GameInfo> gameDetails = updatedGameList.stream()
-        .map(addedGame -> new UpdatedCartResponseDto.GameInfo(
-            addedGame.getId(),
-            addedGame.getTitle(),
-            addedGame.getPrice()
-        ))
-        .toList();
-    return new UpdatedCartResponseDto(
-        cart.getId(),
-        cart.getUser().getId(),
-        gameDetails
-    );
+    // 변경된 장바구니 저장
+    cartRepository.save(savedCart);
+
+    return UpdatedCartGameResponseDto.toDto(savedCart);
+  }
+
+  public void removeCart(Long userId) {
+    cartRepository.deleteAllByUserId(userId);
   }
 }

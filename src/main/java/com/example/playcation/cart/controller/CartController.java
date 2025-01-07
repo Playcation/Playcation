@@ -1,13 +1,14 @@
 package com.example.playcation.cart.controller;
 
-import com.example.playcation.cart.dto.CartResponseDto;
-import com.example.playcation.cart.dto.UpdatedCartResponseDto;
-import com.example.playcation.cart.entity.Cart;
+import com.example.playcation.cart.dto.CartGameResponseDto;
+import com.example.playcation.cart.dto.UpdatedCartGameResponseDto;
 import com.example.playcation.cart.service.CartService;
 import com.example.playcation.util.TokenUtil;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,37 +24,36 @@ public class CartController {
   private final CartService cartService;
   private final TokenUtil tokenUtil;
 
-  @PostMapping
-  public ResponseEntity<Cart> createCart(
-      @RequestHeader("Authorization") String authorizationHeader) {
-    Long userId = tokenUtil.findUserByToken(authorizationHeader);
-    Cart cart = cartService.createCart(userId);
-    return new ResponseEntity<>(cart, HttpStatus.CREATED);
-  }
-
   @GetMapping
-  public ResponseEntity<CartResponseDto> getCartItems(
+  public ResponseEntity<List<CartGameResponseDto>> getCartItems(
       @RequestHeader("Authorization") String authorizationHeader) {
     Long userId = tokenUtil.findUserByToken(authorizationHeader);
-    CartResponseDto games = cartService.getCartItems(userId);
+    List<CartGameResponseDto> games = cartService.getCartItems(userId);
 
     return new ResponseEntity<>(games, HttpStatus.OK);
   }
 
   @PostMapping("/add/{gameId}")
-  public ResponseEntity<UpdatedCartResponseDto> addGameToCart(@PathVariable Long gameId,
+  public ResponseEntity<UpdatedCartGameResponseDto> addGameToCart(@PathVariable Long gameId,
       @RequestHeader("Authorization") String authorizationHeader) {
     Long userId = tokenUtil.findUserByToken(authorizationHeader);
-    UpdatedCartResponseDto updatedCart = cartService.addGameToCart(userId, gameId);
+    UpdatedCartGameResponseDto updatedCart = cartService.addGameToCart(userId, gameId);
     return new ResponseEntity<>(updatedCart, HttpStatus.OK);
   }
 
   @PostMapping("/delete/{gameId}")
-  public ResponseEntity<UpdatedCartResponseDto> deleteGameFromCart(@PathVariable Long gameId,
+  public ResponseEntity<UpdatedCartGameResponseDto> deleteGameFromCart(@PathVariable Long gameId,
       @RequestHeader("Authorization") String authorizationHeader) {
     Long userId = tokenUtil.findUserByToken(authorizationHeader);
-    UpdatedCartResponseDto updatedCart = cartService.deleteGameFromCart(userId, gameId);
+    UpdatedCartGameResponseDto updatedCart = cartService.deleteGameFromCart(userId, gameId);
     return new ResponseEntity<>(updatedCart, HttpStatus.OK);
   }
 
+  @DeleteMapping("/remove")
+  public ResponseEntity<String> deleteCart(
+      @RequestHeader("Authorization") String authorizationHeader) {
+    Long userId = tokenUtil.findUserByToken(authorizationHeader);
+    cartService.removeCart(userId);
+    return new ResponseEntity<>("장바구니 삭제", HttpStatus.OK);
+  }
 }
