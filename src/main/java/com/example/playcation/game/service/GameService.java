@@ -10,10 +10,13 @@ import com.example.playcation.game.dto.PageGameResponseDto;
 import com.example.playcation.game.dto.UpdatedGameRequestDto;
 import com.example.playcation.game.entity.Game;
 import com.example.playcation.game.repository.GameRepository;
+import com.example.playcation.gametag.entity.GameTag;
+import com.example.playcation.gametag.repository.GameTagRepository;
 import com.example.playcation.user.entity.User;
 import com.example.playcation.user.repository.UserRepository;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -27,6 +30,7 @@ public class GameService {
 
   private final UserRepository userRepository;
   private final GameRepository gameRepository;
+  private final GameTagRepository gameTagRepository;
 
 
   // 게임 생성
@@ -86,11 +90,17 @@ public class GameService {
 
     Game game = gameRepository.findByIdOrElseThrow(gameId);
 
+    // 현재 접속한 유저가 게임을 생성한 유저가 맞는지 비교
     if (!game.getUser().getId().equals(userId)) {
       throw new NoAuthorizedException(GameErrorCode.DOES_NOT_MATCH);
     }
 
     game.deleteGame(status);
+
+    // 삭제하는 게임 id를 가지고 있는 게임 태그를 hard delete
+    List<GameTag> gameTagList = gameTagRepository.findGameTagsByGameId(gameId);
+    gameTagRepository.deleteAll(gameTagList);
+
     gameRepository.save(game);
   }
 }
