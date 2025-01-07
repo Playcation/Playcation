@@ -1,33 +1,51 @@
 package com.example.playcation.config;
 
-import com.example.playcation.filter.JwtAuthenticationFilter;
-import com.example.playcation.util.JwtTokenProvider;
-import lombok.RequiredArgsConstructor;
+import com.example.playcation.filter.JWTFilter;
+import com.example.playcation.filter.LoginFilter;
+import com.example.playcation.filter.CustomLogoutFilter;
+import com.example.playcation.token.repository.TokenRepository;
+import com.example.playcation.user.repository.UserRepository;
+import com.example.playcation.util.JWTUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.access.ExceptionTranslationFilter;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
 
 @Configuration
-@EnableWebSecurity
+@EnableWebSecurity(debug = true)
 public class SecurityConfig {
 
-  private final JwtTokenProvider jwtTokenProvider;
+  private final AuthenticationConfiguration authenticationConfiguration;
+  private final TokenRepository tokenRepository;
+  private final JWTUtil jwtUtil;
 
-  public SecurityConfig(JwtTokenProvider jwtTokenProvider) {
-    this.jwtTokenProvider = jwtTokenProvider;
+
+  public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, JWTUtil jwtUtil, TokenRepository tokenRepository) {
+    this.authenticationConfiguration = authenticationConfiguration;
+    this.tokenRepository = tokenRepository;
+    this.jwtUtil = jwtUtil;
   }
 
   @Bean
-  public JwtAuthenticationFilter jwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider) {
-    return new JwtAuthenticationFilter(jwtTokenProvider);
+  public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+    return configuration.getAuthenticationManager();
   }
 
   @Bean
-  public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+  public BCryptPasswordEncoder bCryptPasswordEncoder() {
+    return new BCryptPasswordEncoder();
+  }
+
+  @Bean
+  public SecurityFilterChain filterChain(HttpSecurity http, UserRepository userRepository,
+      TokenRepository tokenRepository) throws Exception {
 
     //csrf disable
     http
@@ -41,20 +59,23 @@ public class SecurityConfig {
     http
         .httpBasic((auth) -> auth.disable());
 
-    // JWT 인증 필터 추가
-    http.addFilterAt(jwtAuthenticationFilter(jwtTokenProvider), ExceptionTranslationFilter.class);
+    http
+        .authorizeHttpRequests((auth) -> auth
+            .requestMatchers("/", "/users/sign-in", "/login", "/users/refresh").permitAll()
+            .requestMatchers("/admin").hasRole("ADMIN")
+            .anyRequest().authenticated());
 
-    //인가 설정
-    http.authorizeHttpRequests((auth) -> auth
-        .requestMatchers("/users/sign-in","/users/login").permitAll() //인증 없이 허용
-        .requestMatchers("/admin").hasRole("ADMIN")             // ADMIN 권한 필요
-        .requestMatchers("/admin/**").hasRole("ADMIN")             // ADMIN 권한 필요
-        .anyRequest().authenticated()                             // 나머지 인증 필요
-    );
+    http
+        .addFilterBefore(new JWTFilter(userRepository, jwtUtil), LoginFilter.class);
+    http
+        .addFilterBefore(new CustomLogoutFilter(jwtUtil, tokenRepository), LogoutFilter.class);
+    http
+        .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, tokenRepository), UsernamePasswordAuthenticationFilter.class);
 
     //세션 설정
-    http.sessionManagement((session) -> session
-        .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+    http
+        .sessionManagement((session) -> session
+            .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
     return http.build();
   }

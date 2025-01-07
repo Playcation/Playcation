@@ -6,8 +6,7 @@ import com.example.playcation.game.dto.CreatedGameResponseDto;
 import com.example.playcation.game.dto.PageGameResponseDto;
 import com.example.playcation.game.dto.UpdatedGameRequestDto;
 import com.example.playcation.game.service.GameService;
-import com.example.playcation.util.JwtTokenProvider;
-import com.example.playcation.util.TokenUtil;
+import com.example.playcation.util.JWTUtil;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
@@ -31,14 +30,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class GameController {
 
   private final GameService gameService;
-  private final TokenUtil tokenUtil;
+  private final JWTUtil jwtUtil;
 
   // 게임 생성 컨트롤러
   @PostMapping
   public ResponseEntity<CreatedGameResponseDto> createdCard(
       @RequestHeader("Authorization") String authorizationHeader,
       @RequestBody CreatedGameRequestDto requestDto) {
-    Long id = tokenUtil.findUserByToken(authorizationHeader);
+    Long id = jwtUtil.findUserByToken(authorizationHeader);
     CreatedGameResponseDto responseDto = gameService.createdGame(id, requestDto);
     return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
   }
@@ -71,7 +70,7 @@ public class GameController {
       @PathVariable Long gameId,
       @RequestHeader("Authorization") String authorizationHeader,
       @RequestParam UpdatedGameRequestDto requestDto) {
-    Long userId = tokenUtil.findUserByToken(authorizationHeader);
+    Long userId = jwtUtil.findUserByToken(authorizationHeader);
     CreatedGameResponseDto responseDto = gameService.updateGame(gameId, userId, requestDto);
     return new ResponseEntity<>(responseDto, HttpStatus.OK);
   }
@@ -79,7 +78,7 @@ public class GameController {
   @DeleteMapping("/{gameId}")
   public ResponseEntity<String> deleteGame(@PathVariable Long gameId,
       @RequestHeader("Authorization") String authorizationHeader, @RequestParam GameStatus status) {
-    Long userId = tokenUtil.findUserByToken(authorizationHeader);
+    Long userId = jwtUtil.findUserByToken(authorizationHeader);
 
     gameService.deleteGame(gameId, status, userId);
     return new ResponseEntity<>("삭제되었습니다", HttpStatus.OK);
