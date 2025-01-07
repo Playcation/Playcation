@@ -9,10 +9,19 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 @Table(name = "`game_tag`")
 public class GameTag {
+
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
@@ -22,5 +31,10 @@ public class GameTag {
 
   @ManyToOne(fetch = FetchType.LAZY)
   private Game game;
+
+  public GameTag(Tag tag, Game game) {
+    this.tag = tag;
+    this.game = game;
+  }
 
 }
