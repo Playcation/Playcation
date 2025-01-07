@@ -21,7 +21,6 @@ import org.hibernate.annotations.OnDeleteAction;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-@DynamicInsert
 @Builder
 @Table(name = "`game_tag`")
 @OnDelete(action = OnDeleteAction.CASCADE)
