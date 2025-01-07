@@ -1,6 +1,6 @@
 package com.example.playcation.game.repository;
 
-import com.example.playcation.game.dto.PageGameResponseDto;
+import com.example.playcation.game.dto.PagingGameResponseDto;
 import com.example.playcation.game.entity.Game;
 import com.example.playcation.game.entity.QGame;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -19,7 +19,7 @@ public class GameRepositoryCustomImpl implements GameRepositoryCustom {
   private final JPAQueryFactory queryFactory;
 
   @Override
-  public PageGameResponseDto searchGames(PageRequest pageRequest, String title, String category,
+  public PagingGameResponseDto searchGames(PageRequest pageRequest, String title, String category,
       BigDecimal price, LocalDateTime createdAt) {
     QGame game = QGame.game;
 
@@ -45,7 +45,7 @@ public class GameRepositoryCustomImpl implements GameRepositoryCustom {
             eqCreatedAt(createdAt)
         )
         .fetchOne();
-    return new PageGameResponseDto(gameList, count);
+    return new PagingGameResponseDto(gameList, count);
   }
 
   private BooleanExpression eqTitle(String title) {
@@ -61,6 +61,6 @@ public class GameRepositoryCustomImpl implements GameRepositoryCustom {
   }
 
   private BooleanExpression eqCreatedAt(LocalDateTime createdAt) {
-    return createdAt != null ? QGame.game.createdAt.eq(createdAt) : null;
+    return createdAt != null ? QGame.game.createdAt.before(createdAt) : null;
   }
 }

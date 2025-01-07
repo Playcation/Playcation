@@ -3,7 +3,7 @@ package com.example.playcation.game.controller;
 import com.example.playcation.enums.GameStatus;
 import com.example.playcation.game.dto.CreatedGameRequestDto;
 import com.example.playcation.game.dto.CreatedGameResponseDto;
-import com.example.playcation.game.dto.PageGameResponseDto;
+import com.example.playcation.game.dto.PagingGameResponseDto;
 import com.example.playcation.game.dto.UpdatedGameRequestDto;
 import com.example.playcation.game.service.GameService;
 import com.example.playcation.gametag.dto.GameListResponseDto;
@@ -37,11 +37,11 @@ public class GameController {
 
   // 게임 생성 컨트롤러
   @PostMapping
-  public ResponseEntity<CreatedGameResponseDto> createdCard(
+  public ResponseEntity<CreatedGameResponseDto> createCard(
       @RequestHeader("Authorization") String authorizationHeader,
       @RequestBody CreatedGameRequestDto requestDto) {
     Long id = tokenUtil.findUserByToken(authorizationHeader);
-    CreatedGameResponseDto responseDto = gameService.createdGame(id, requestDto);
+    CreatedGameResponseDto responseDto = gameService.createGame(id, requestDto);
     return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
   }
 
@@ -54,7 +54,7 @@ public class GameController {
 
   //게임 다건 조회 컨트롤러
   @GetMapping
-  public ResponseEntity<PageGameResponseDto> findGamesAndPaging(
+  public ResponseEntity<PagingGameResponseDto> findGamesAndPaging(
       // 조회하고 싶은 페이지(미입력시 자동으로 첫 페이지가 출력)
       @RequestParam(defaultValue = "0") int page,
       // 검색 조건(tag는 게임에서 찾을 수 없음으로 따로 제작)
@@ -63,7 +63,7 @@ public class GameController {
       @RequestParam(required = false) BigDecimal price,
       @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDateTime createdAt
   ) {
-    PageGameResponseDto games = gameService.searchGames(page, title, category, price, createdAt);
+    PagingGameResponseDto games = gameService.searchGames(page, title, category, price, createdAt);
     return new ResponseEntity<>(games, HttpStatus.OK);
   }
 

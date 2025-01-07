@@ -6,7 +6,7 @@ import com.example.playcation.exception.GameErrorCode;
 import com.example.playcation.exception.NoAuthorizedException;
 import com.example.playcation.game.dto.CreatedGameRequestDto;
 import com.example.playcation.game.dto.CreatedGameResponseDto;
-import com.example.playcation.game.dto.PageGameResponseDto;
+import com.example.playcation.game.dto.PagingGameResponseDto;
 import com.example.playcation.game.dto.UpdatedGameRequestDto;
 import com.example.playcation.game.entity.Game;
 import com.example.playcation.game.repository.GameRepository;
@@ -33,7 +33,7 @@ public class GameService {
 
 
   // 게임 생성
-  public CreatedGameResponseDto createdGame(Long id,
+  public CreatedGameResponseDto createGame(Long id,
       CreatedGameRequestDto requestDto) {
 
     User user = userRepository.findByIdOrElseThrow(id);
@@ -60,7 +60,7 @@ public class GameService {
   }
 
   // 게임 다건 조회
-  public PageGameResponseDto searchGames(int page, String title, String category, BigDecimal price,
+  public PagingGameResponseDto searchGames(int page, String title, String category, BigDecimal price,
       LocalDateTime createdAt) {
 
     // 페이징시 최대 출력 갯수와 정렬조건 설정
