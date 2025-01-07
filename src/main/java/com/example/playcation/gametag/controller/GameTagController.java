@@ -8,6 +8,7 @@ import com.example.playcation.util.TokenUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -45,5 +46,12 @@ public class GameTagController {
     Long userId = tokenUtil.findUserByToken(authorizationHeader);
     GameTagResponseDto responseDto = gameTagService.updatedGameTag(userId, gameTagId, requestDto);
     return new ResponseEntity<>(responseDto, HttpStatus.OK);
+  }
+
+  @DeleteMapping("/{gameTagId}")
+  public ResponseEntity<String> deletedGameTag(@RequestHeader("Authorization") String authorizationHeader, @PathVariable Long gameTagId) {
+    Long userId = tokenUtil.findUserByToken(authorizationHeader);
+    gameTagService.deletedGame(userId, gameTagId);
+    return new ResponseEntity<>("삭제 완료되었습니다", HttpStatus.OK);
   }
 }

@@ -1,7 +1,7 @@
 package com.example.playcation.gametag.service;
 
-import com.example.playcation.exception.GameErrorCode;
-import com.example.playcation.exception.NoAuthorizedException;
+import com.example.playcation.exception.GameTagErrorCode;
+import com.example.playcation.exception.NotFoundException;
 import com.example.playcation.game.entity.Game;
 import com.example.playcation.game.repository.GameRepository;
 import com.example.playcation.gametag.dto.GameListResponseDto;
@@ -65,7 +65,7 @@ public class GameTagService {
     GameTag gameTag = gameTagRepository.findByIdOrElseThrow(gameTagId);
 
     if (!gameTag.getGame().getUser().getId().equals(userId)) {
-      throw new NoAuthorizedException(GameErrorCode.DOES_NOT_MATCH);
+      throw new NotFoundException(GameTagErrorCode.GAME_TAG_NOT_FOUND);
     }
 
     Tag tag = tagRepository.findByIdOrElseThrow(requestDto.getTagId());
@@ -75,5 +75,16 @@ public class GameTagService {
     gameTagRepository.save(gameTag);
 
     return GameTagResponseDto.toDto(gameTag);
+  }
+
+  public void deletedGame(Long userId, Long gameTagId) {
+
+    GameTag gameTag = gameTagRepository.findByIdOrElseThrow(gameTagId);
+
+    if (!gameTag.getGame().getUser().getId().equals(userId)) {
+      throw new NotFoundException(GameTagErrorCode.GAME_TAG_NOT_FOUND);
+    }
+
+    gameTagRepository.delete(gameTag);
   }
 }
