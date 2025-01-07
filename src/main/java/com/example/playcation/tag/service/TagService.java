@@ -18,7 +18,7 @@ public class TagService {
 
   private final TagRepository tagRepository;
 
-  public CreatedTagResponseDto CreatedTag(CreatedTagRequestDto requestDto) {
+  public CreatedTagResponseDto CreateTag(CreatedTagRequestDto requestDto) {
 
     Tag tag = Tag.builder()
         .tagName(requestDto.getTagName())
@@ -42,7 +42,7 @@ public class TagService {
     return tagRepository.findAll(pageRequest).stream().map(CreatedTagResponseDto::toDto).toList();
   }
 
-  public CreatedTagResponseDto updatedTag(Long tagId, CreatedTagRequestDto requestDto) {
+  public CreatedTagResponseDto updateTag(Long tagId, CreatedTagRequestDto requestDto) {
     Tag tag = tagRepository.findByIdOrElseThrow(tagId);
 
     tag.updateTag(requestDto);
@@ -52,7 +52,7 @@ public class TagService {
     return CreatedTagResponseDto.toDto(tag);
   }
 
-  public void deletedTag(Long tagId) {
+  public void deleteTag(Long tagId) {
     Tag tag = tagRepository.findByIdOrElseThrow(tagId);
 
     tagRepository.delete(tag);

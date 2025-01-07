@@ -30,8 +30,8 @@ public class TagController {
   private final TokenUtil tokenUtil;
 
   @PostMapping
-  public ResponseEntity<CreatedTagResponseDto> createdTag(@RequestBody CreatedTagRequestDto requestDto) {
-    CreatedTagResponseDto responseDto = tagService.CreatedTag(requestDto);
+  public ResponseEntity<CreatedTagResponseDto> createTag(@RequestBody CreatedTagRequestDto requestDto) {
+    CreatedTagResponseDto responseDto = tagService.CreateTag(requestDto);
     return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
   }
 
@@ -50,14 +50,14 @@ public class TagController {
   }
 
   @PatchMapping("/{tagId}")
-  public ResponseEntity<CreatedTagResponseDto> updatedTag(@PathVariable Long tagId, @RequestBody CreatedTagRequestDto requestDto) {
-    CreatedTagResponseDto responseDto = tagService.updatedTag(tagId, requestDto);
+  public ResponseEntity<CreatedTagResponseDto> updateTag(@PathVariable Long tagId, @RequestBody CreatedTagRequestDto requestDto) {
+    CreatedTagResponseDto responseDto = tagService.updateTag(tagId, requestDto);
     return new ResponseEntity<>(responseDto, HttpStatus.OK);
   }
 
   @DeleteMapping("/{tagId}")
-  public ResponseEntity<String> deletedTag(@PathVariable Long tagId) {
-    tagService.deletedTag(tagId);
+  public ResponseEntity<String> deleteTag(@PathVariable Long tagId) {
+    tagService.deleteTag(tagId);
     return new ResponseEntity<>("삭제되었습니다", HttpStatus.OK);
   }
 }
