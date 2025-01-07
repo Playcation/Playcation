@@ -2,10 +2,8 @@ package com.example.playcation.user.entity;
 
 import com.example.playcation.enums.Auth;
 import com.example.playcation.common.BaseEntity;
-import com.example.playcation.util.PasswordEncoder;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.Column;
-import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;

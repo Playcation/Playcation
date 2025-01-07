@@ -3,11 +3,10 @@ package com.example.playcation.game.controller;
 import com.example.playcation.enums.GameStatus;
 import com.example.playcation.game.dto.CreatedGameRequestDto;
 import com.example.playcation.game.dto.CreatedGameResponseDto;
-import com.example.playcation.game.dto.PagingGameResponseDto;
+import com.example.playcation.game.dto.PageGameResponseDto;
 import com.example.playcation.game.dto.UpdatedGameRequestDto;
 import com.example.playcation.game.service.GameService;
-import com.example.playcation.gametag.dto.GameListResponseDto;
-import com.example.playcation.gametag.service.GameTagService;
+import com.example.playcation.util.JwtTokenProvider;
 import com.example.playcation.util.TokenUtil;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -32,8 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class GameController {
 
   private final GameService gameService;
-  private final GameTagService gameTagService;
-  private final TokenUtil tokenUtil;
+  private final JWTUtil jwtUtil;
 
   // 게임 생성 컨트롤러
   @PostMapping
@@ -42,6 +40,8 @@ public class GameController {
       @RequestBody CreatedGameRequestDto requestDto) {
     Long id = tokenUtil.findUserByToken(authorizationHeader);
     CreatedGameResponseDto responseDto = gameService.createGame(id, requestDto);
+    Long id = jwtUtil.findUserByToken(authorizationHeader);
+    CreatedGameResponseDto responseDto = gameService.createdGame(id, requestDto);
     return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
   }
 
@@ -67,22 +67,13 @@ public class GameController {
     return new ResponseEntity<>(games, HttpStatus.OK);
   }
 
-  // 게임 다건 조회(태그)
-  @GetMapping
-  public ResponseEntity<GameListResponseDto> findGameTag(
-      @RequestParam(required = false) int page,
-      @RequestParam Long tagId) {
-    GameListResponseDto responseDto = gameTagService.findGameTag(page, tagId);
-    return new ResponseEntity<>(responseDto, HttpStatus.OK);
-  }
-
   // 게임 수정 컨트롤러
   @PatchMapping("/{gameId}")
   public ResponseEntity<CreatedGameResponseDto> updateGame(
       @PathVariable Long gameId,
       @RequestHeader("Authorization") String authorizationHeader,
       @RequestParam UpdatedGameRequestDto requestDto) {
-    Long userId = tokenUtil.findUserByToken(authorizationHeader);
+    Long userId = jwtUtil.findUserByToken(authorizationHeader);
     CreatedGameResponseDto responseDto = gameService.updateGame(gameId, userId, requestDto);
     return new ResponseEntity<>(responseDto, HttpStatus.OK);
   }
@@ -90,7 +81,7 @@ public class GameController {
   @DeleteMapping("/{gameId}")
   public ResponseEntity<String> deleteGame(@PathVariable Long gameId,
       @RequestHeader("Authorization") String authorizationHeader, @RequestParam GameStatus status) {
-    Long userId = tokenUtil.findUserByToken(authorizationHeader);
+    Long userId = jwtUtil.findUserByToken(authorizationHeader);
 
     gameService.deleteGame(gameId, status, userId);
     return new ResponseEntity<>("삭제되었습니다", HttpStatus.OK);

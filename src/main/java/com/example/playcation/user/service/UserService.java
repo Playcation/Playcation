@@ -15,10 +15,9 @@ import com.example.playcation.user.dto.UpdatedUserRequestDto;
 import com.example.playcation.user.dto.UserResponseDto;
 import com.example.playcation.user.entity.User;
 import com.example.playcation.user.repository.UserRepository;
-import com.example.playcation.util.JwtTokenProvider;
-import com.example.playcation.util.PasswordEncoder;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -27,8 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class UserService {
 
   private final UserRepository userRepository;
-  private final PasswordEncoder passwordEncoder;
-  private final JwtTokenProvider jwtTokenProvider;
+  private final BCryptPasswordEncoder bCryptPasswordEncoder;
   private final S3Service s3Service;
 
   // 로그인
@@ -36,11 +34,11 @@ public class UserService {
     User user = userRepository.findByEmailOrElseThrow(loginUserRequestDto.getEmail());
     checkPassword(user, loginUserRequestDto.getPassword());
 
-    String token = jwtTokenProvider.createToken(user.getId(), user.getAuth(), 60*60*600L);
-    return LoginUserResponseDto.toDto(user, token);
+    return LoginUserResponseDto.toDto(user, "");
   }
 
   // 회원 삭제
+  @Transactional
   public void delete(Long id, DeletedUserRequestDto deletedUserRequestDto) {
     User user = userRepository.findByIdOrElseThrow(id);
     checkPassword(user, deletedUserRequestDto.getPassword());
@@ -50,7 +48,7 @@ public class UserService {
 
   // 비밀번호 변경
   public void checkPassword(User user, String password) {
-    if (!passwordEncoder.matches(password, user.getPassword())) {
+    if (!bCryptPasswordEncoder.matches(password, user.getPassword())) {
       throw new InvalidInputException(UserErrorCode.WRONG_PASSWORD);
     }
   }
@@ -61,7 +59,7 @@ public class UserService {
     if(userRepository.existsByEmail(signInUserRequestDto.getEmail())){
       throw new DuplicatedException(UserErrorCode.EMAIL_EXIST);
     }
-    String password = passwordEncoder.encoder(signInUserRequestDto.getPassword());
+    String password = bCryptPasswordEncoder.encode(signInUserRequestDto.getPassword());
     String filePath = s3Service.uploadFile(file);
     User user = userRepository.save( User.builder()
         .email(signInUserRequestDto.getEmail())
@@ -97,7 +95,7 @@ public class UserService {
   public UserResponseDto updateUserPassword(Long id, UpdatedUserPasswordRequestDto updatedUserPasswordRequestDto) {
     User user = userRepository.findByIdOrElseThrow(id);
     checkPassword(user, updatedUserPasswordRequestDto.getOldPassword());
-    user.updatePassword(passwordEncoder.encoder(updatedUserPasswordRequestDto.getNewPassword()));
+    user.updatePassword(bCryptPasswordEncoder.encode(updatedUserPasswordRequestDto.getNewPassword()));
     return UserResponseDto.toDto(user);
   }
 
