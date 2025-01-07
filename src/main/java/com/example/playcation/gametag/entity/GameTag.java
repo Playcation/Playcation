@@ -14,6 +14,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Getter
@@ -22,6 +24,7 @@ import org.hibernate.annotations.DynamicInsert;
 @DynamicInsert
 @Builder
 @Table(name = "`game_tag`")
+@OnDelete(action = OnDeleteAction.CASCADE)
 public class GameTag {
 
   @Id
