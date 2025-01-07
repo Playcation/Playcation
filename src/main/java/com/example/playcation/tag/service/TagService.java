@@ -41,4 +41,20 @@ public class TagService {
 
     return tagRepository.findAll(pageRequest).stream().map(CreatedTagResponseDto::toDto).toList();
   }
+
+  public CreatedTagResponseDto updatedTag(Long tagId, CreatedTagRequestDto requestDto) {
+    Tag tag = tagRepository.findByIdOrElseThrow(tagId);
+
+    tag.updateTag(requestDto.getTagName());
+
+    tagRepository.save(tag);
+
+    return CreatedTagResponseDto.toDto(tag);
+  }
+
+  public void deletedTag(Long tagId) {
+    Tag tag = tagRepository.findByIdOrElseThrow(tagId);
+
+    tagRepository.delete(tag);
+  }
 }

@@ -10,7 +10,9 @@ import javax.net.ssl.HttpsURLConnection;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -45,5 +47,17 @@ public class TagController {
   ) {
     List<CreatedTagResponseDto> responseDto = tagService.findAllTag(page);
     return new ResponseEntity<>(responseDto, HttpStatus.OK);
+  }
+
+  @PatchMapping("/{tagId}")
+  public ResponseEntity<CreatedTagResponseDto> updatedTag(@PathVariable Long tagId, @RequestBody CreatedTagRequestDto requestDto) {
+    CreatedTagResponseDto responseDto = tagService.updatedTag(tagId, requestDto);
+    return new ResponseEntity<>(responseDto, HttpStatus.OK);
+  }
+
+  @DeleteMapping("/{tagId}")
+  public ResponseEntity<String> deletedTag(@PathVariable Long tagId) {
+    tagService.deletedTag(tagId);
+    return new ResponseEntity<>("삭제되었습니다", HttpStatus.OK);
   }
 }
