@@ -10,6 +10,7 @@ import com.example.playcation.s3.repository.FileDetailRepository;
 import jakarta.transaction.Transactional;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -79,11 +80,11 @@ public class S3Service {
     }
   }
 
-  // TODO : 리펙터링...
-  public String uploadFiles(List<MultipartFile> files) {
+  public List<String> uploadFiles(List<MultipartFile> files) {
+    List<String> filePaths = new ArrayList<>();
     for (MultipartFile file : files) {
-      uploadFile(file);
+      filePaths.add(uploadFile(file));
     }
-    return "";
+    return filePaths;
   }
 }

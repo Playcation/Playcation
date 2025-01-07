@@ -25,11 +25,11 @@ public class S3Controller {
   }
 
   @PostMapping("/files")
-  public ResponseEntity<String> uploadFiles(
+  public ResponseEntity<List<String>> uploadFiles(
       @RequestPart("files") List<MultipartFile> files
   ){
-    String url = s3Service.uploadFiles(files);
-    return ResponseEntity.ok(url);
+    List<String> urls = s3Service.uploadFiles(files);
+    return ResponseEntity.ok(urls);
   }
 
 }
