@@ -13,11 +13,13 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.DynamicInsert;
 
 @Entity
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
+@DynamicInsert
 @Builder
 @Table(name = "`game_tag`")
 public class GameTag {
@@ -32,9 +34,8 @@ public class GameTag {
   @ManyToOne(fetch = FetchType.LAZY)
   private Game game;
 
-  public GameTag(Tag tag, Game game) {
+  public void updateGameTag(Tag tag) {
     this.tag = tag;
-    this.game = game;
   }
 
 }
