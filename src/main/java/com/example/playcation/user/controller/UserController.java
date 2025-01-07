@@ -1,14 +1,15 @@
 package com.example.playcation.user.controller;
 
-import com.example.playcation.user.dto.UserLoginRequestDto;
-import com.example.playcation.user.dto.UserLoginResponseDto;
-import com.example.playcation.user.dto.UserDeleteRequestDto;
+import com.example.playcation.user.dto.LoginUserRequestDto;
+import com.example.playcation.user.dto.LoginUserResponseDto;
+import com.example.playcation.user.dto.DeletedUserRequestDto;
 import com.example.playcation.user.dto.UserResponseDto;
-import com.example.playcation.user.dto.UserSignInRequestDto;
-import com.example.playcation.user.dto.UserUpdatePasswordRequestDto;
-import com.example.playcation.user.dto.UserUpdateRequestDto;
+import com.example.playcation.user.dto.SignInUserRequestDto;
+import com.example.playcation.user.dto.UpdatedUserPasswordRequestDto;
+import com.example.playcation.user.dto.UpdatedUserRequestDto;
 import com.example.playcation.user.service.UserService;
 import com.example.playcation.util.JwtTokenProvider;
+import com.example.playcation.util.TokenUtil;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +21,9 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/users")
@@ -28,20 +31,18 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
 
   private final UserService userService;
-  private final JwtTokenProvider jwtTokenProvider;
+  private final TokenUtil tokenUtil;
 
   // 로그인
   @PostMapping("/login")
-  public ResponseEntity<UserLoginResponseDto> login(
-      @Valid @RequestBody UserLoginRequestDto userLoginRequestDto
+  public ResponseEntity<LoginUserResponseDto> login(
+      @Valid @RequestBody LoginUserRequestDto userLoginRequestDto
   ) {
-    UserLoginResponseDto responseDto = userService.login(
-        userLoginRequestDto.getEmail(),
-        userLoginRequestDto.getPassword()
-    );
+    LoginUserResponseDto responseDto = userService.login(userLoginRequestDto);
     return ResponseEntity.ok(responseDto);
   }
 
+  // 로그 아웃
   @PostMapping("/logout")
   public ResponseEntity<String> logout(
       @RequestHeader("Authorization") String authorizationHeader
@@ -50,59 +51,56 @@ public class UserController {
     return ResponseEntity.ok().body("로그아웃 되었습니다.");
   }
 
+  // 회원 가입
   @PostMapping("/sign-in")
   public ResponseEntity<UserResponseDto> signUp(
-      @Valid @RequestBody UserSignInRequestDto userSignInRequestDto
+      @Valid @RequestPart(value = "json") SignInUserRequestDto userSignInRequestDto,
+      @RequestPart(required = false) MultipartFile file
   ) {
-    return ResponseEntity.ok().body(userService.signUp(
-        userSignInRequestDto.getEmail(),
-        userSignInRequestDto.getPassword(),
-        userSignInRequestDto.getName()
-    ));
+    return ResponseEntity.ok().body(userService.signUp(userSignInRequestDto, file));
   }
 
+  // 유저 프로필 조회
   @GetMapping
   public ResponseEntity<UserResponseDto> findUser(
       @RequestHeader("Authorization") String authorizationHeader
   ){
-    String token = authorizationHeader.replace("Bearer ", "").trim();
-    Long id = Long.parseLong(jwtTokenProvider.getUserId(token));
+    Long id = tokenUtil.findUserByToken(authorizationHeader);
 
     return ResponseEntity.ok().body(userService.findUser(id));
   }
 
+  // 유저 수정
   @PutMapping
   public ResponseEntity<UserResponseDto> updateUser(
       @RequestHeader("Authorization") String authorizationHeader,
-      @RequestBody UserUpdateRequestDto userUpdateRequestDto
+      @Valid @RequestPart(value = "json") UpdatedUserRequestDto userUpdateRequestDto,
+      @RequestPart(required = false) MultipartFile file
   ){
-    String token = authorizationHeader.replace("Bearer ", "").trim();
-    Long id = Long.parseLong(jwtTokenProvider.getUserId(token));
+    Long id = tokenUtil.findUserByToken(authorizationHeader);
 
-    return ResponseEntity.ok().body(userService.updateUser(id, userUpdateRequestDto.getPassword(), userUpdateRequestDto.getName(), userUpdateRequestDto.getDescription()));
+    return ResponseEntity.ok().body(userService.updateUser(id, userUpdateRequestDto, file));
   }
 
+  // 비밀번호 변경
   @PatchMapping("/password")
   public ResponseEntity<UserResponseDto> changePassword(
       @RequestHeader("Authorization") String authorizationHeader,
-      @RequestBody UserUpdatePasswordRequestDto userUpdatePasswordRequestDto
+      @Valid @RequestBody UpdatedUserPasswordRequestDto userUpdatePasswordRequestDto
   ){
-    String token = authorizationHeader.replace("Bearer ", "").trim();
-    Long id = Long.parseLong(jwtTokenProvider.getUserId(token));
-    return ResponseEntity.ok().body(userService.updateUserPassword(id, userUpdatePasswordRequestDto.getOldPassword(), userUpdatePasswordRequestDto.getNewPassword()));
+    Long id = tokenUtil.findUserByToken(authorizationHeader);
+    return ResponseEntity.ok().body(userService.updateUserPassword(id, userUpdatePasswordRequestDto));
   }
 
   //회원 탈퇴
   @DeleteMapping("/delete")
   public String deleteAccount(
       @RequestHeader("Authorization") String authorizationHeader,
-      @RequestBody UserDeleteRequestDto userLogoutRequestDto
+      @Valid @RequestBody DeletedUserRequestDto userLogoutRequestDto
   ) {
-    // Authorization 헤더에서 JWT 토큰 추출
-    String token = authorizationHeader.replace("Bearer ", "").trim();
-    Long id = Long.parseLong(jwtTokenProvider.getUserId(token));
+    Long id = tokenUtil.findUserByToken(authorizationHeader);
     // 탈퇴 처리 메서드 호출
-    userService.delete(id, userLogoutRequestDto.getPassword());
+    userService.delete(id, userLogoutRequestDto);
     return "회원 탈퇴가 완료되었습니다.";
   }
 }

@@ -13,38 +13,38 @@ public class GlobalExceptionController {
     //커스텀
     @ExceptionHandler
     public ResponseEntity<ExceptionResponseDto> duplicatedException(DuplicatedException e) {
-        return new ResponseEntity<>(new ExceptionResponseDto(e.getErrorCode(), e.getMessage()), e.getHttpStatus());
+        return new ResponseEntity<>(new ExceptionResponseDto(e.getHttpStatus().toString(), e.getErrorName(), e.getMessage()), e.getHttpStatus());
     }
 
     @ExceptionHandler
     public ResponseEntity<ExceptionResponseDto> internalServerException(InternalServerException e) {
-        return new ResponseEntity<>(new ExceptionResponseDto(e.getErrorCode(), e.getMessage()), e.getHttpStatus());
+        return new ResponseEntity<>(new ExceptionResponseDto(e.getHttpStatus().toString(), e.getErrorName(), e.getMessage()), e.getHttpStatus());
     }
 
     @ExceptionHandler
     public ResponseEntity<ExceptionResponseDto> invalidInputException(InvalidInputException e) {
-        return new ResponseEntity<>(new ExceptionResponseDto(e.getErrorCode(), e.getMessage()), e.getHttpStatus());
+        return new ResponseEntity<>(new ExceptionResponseDto(e.getHttpStatus().toString(), e.getErrorName(), e.getMessage()), e.getHttpStatus());
     }
 
     @ExceptionHandler
     public ResponseEntity<ExceptionResponseDto> notFoundException(NotFoundException e) {
-        return new ResponseEntity<>(new ExceptionResponseDto(e.getErrorCode(), e.getMessage()), e.getHttpStatus());
+        return new ResponseEntity<>(new ExceptionResponseDto(e.getHttpStatus().toString(), e.getErrorName(), e.getMessage()), e.getHttpStatus());
     }
 
     @ExceptionHandler
     public ResponseEntity<ExceptionResponseDto> noAuthorizedException(NoAuthorizedException e) {
-        return new ResponseEntity<>(new ExceptionResponseDto(e.getErrorCode(), e.getMessage()), e.getHttpStatus());
+        return new ResponseEntity<>(new ExceptionResponseDto(e.getHttpStatus().toString(), e.getErrorName(), e.getMessage()), e.getHttpStatus());
     }
 
     //자바
     @ExceptionHandler
     public ResponseEntity<ExceptionResponseDto> constrainViolationException(ConstraintViolationException e) {
-        return new ResponseEntity<>(new ExceptionResponseDto(HttpStatus.BAD_REQUEST.getReasonPhrase(), e.getMessage()), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(new ExceptionResponseDto(HttpStatus.BAD_REQUEST.getReasonPhrase(), "WRONG_INPUT", e.getMessage()), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler
     public ResponseEntity<ExceptionResponseDto> methodArgumentNotValidException(MethodArgumentNotValidException e) {
         String message = e.getBindingResult().getAllErrors().get(0).getDefaultMessage();
-        return new ResponseEntity<>(new ExceptionResponseDto(HttpStatus.BAD_REQUEST.getReasonPhrase(), message), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(new ExceptionResponseDto(HttpStatus.BAD_REQUEST.getReasonPhrase(), "VALIDATION_EXCEPTION", message), HttpStatus.BAD_REQUEST);
     }
 }

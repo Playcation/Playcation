@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.springframework.http.HttpStatus;
 
 @Getter
 @AllArgsConstructor
@@ -12,12 +11,15 @@ public class ExceptionResponseDto {
 
     private static final ObjectMapper objectmapper = new ObjectMapper();
 
-    private String errorCode;
+    private String httpStatus;
+
+    private String errorName;
 
     private String message;
 
     public ExceptionResponseDto(ExceptionType exceptionType) {
-        this.errorCode = exceptionType.getErrorName();
+        this.httpStatus = exceptionType.getErrorName();
+        this.errorName = exceptionType.getErrorName();
         this.message = exceptionType.getMessage();
     }
 

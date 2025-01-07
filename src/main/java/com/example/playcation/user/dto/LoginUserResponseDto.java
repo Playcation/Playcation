@@ -6,15 +6,15 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class UserLoginResponseDto {
+public class LoginUserResponseDto {
 
   private String email;
 
   private String token;
 
-  public static UserLoginResponseDto toDto(User user, String token) {
+  public static LoginUserResponseDto toDto(User user, String token) {
     token= "Bearer " + token;
-    return new UserLoginResponseDto(
+    return new LoginUserResponseDto(
         user.getEmail(),
         token
     );
