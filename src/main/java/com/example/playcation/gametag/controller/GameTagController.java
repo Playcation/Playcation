@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/gameTags")
+@RequestMapping("/gametags")
 @RequiredArgsConstructor
 public class GameTagController {
 
@@ -31,14 +31,6 @@ public class GameTagController {
   public ResponseEntity<GameTagResponseDto> createdGameTag(@RequestBody GameTagRequestDto requestDto) {
     GameTagResponseDto responseDto = gameTagService.createdGameTag(requestDto);
     return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
-  }
-
-  @GetMapping
-  public ResponseEntity<GameListResponseDto> findGameTag(
-      @RequestParam(required = false) int page,
-      @RequestParam Long tagId) {
-    GameListResponseDto responseDto = gameTagService.findGameTag(page, tagId);
-    return new ResponseEntity<>(responseDto, HttpStatus.OK);
   }
 
   @PatchMapping("/{gameTagId}")

@@ -6,6 +6,8 @@ import com.example.playcation.game.dto.CreatedGameResponseDto;
 import com.example.playcation.game.dto.PageGameResponseDto;
 import com.example.playcation.game.dto.UpdatedGameRequestDto;
 import com.example.playcation.game.service.GameService;
+import com.example.playcation.gametag.dto.GameListResponseDto;
+import com.example.playcation.gametag.service.GameTagService;
 import com.example.playcation.util.TokenUtil;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -30,6 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class GameController {
 
   private final GameService gameService;
+  private final GameTagService gameTagService;
   private final TokenUtil tokenUtil;
 
   // 게임 생성 컨트롤러
@@ -62,6 +65,15 @@ public class GameController {
   ) {
     PageGameResponseDto games = gameService.searchGames(page, title, category, price, createdAt);
     return new ResponseEntity<>(games, HttpStatus.OK);
+  }
+
+  // 게임 다건 조회(태그)
+  @GetMapping
+  public ResponseEntity<GameListResponseDto> findGameTag(
+      @RequestParam(required = false) int page,
+      @RequestParam Long tagId) {
+    GameListResponseDto responseDto = gameTagService.findGameTag(page, tagId);
+    return new ResponseEntity<>(responseDto, HttpStatus.OK);
   }
 
   // 게임 수정 컨트롤러
