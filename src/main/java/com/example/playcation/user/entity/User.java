@@ -15,11 +15,13 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "`user`")
@@ -32,9 +34,10 @@ public class User extends BaseEntity {
   @Column(unique = true, length = 100)
   private String email;
 
-  @Convert(converter = PasswordEncoder.class)
   @Column(length = 100)
   private String password;
+
+  private String imageUrl;
 
   @Column(length = 10)
   private String name;
@@ -54,10 +57,14 @@ public class User extends BaseEntity {
     this.auth = auth;
   }
 
-  public void update(String name, String description){
+  public void update(String name, String description, String imageUrl) {
     this.name = name == null ? this.name : name;
+    this.imageUrl = imageUrl.isEmpty() ? this.imageUrl : imageUrl;
     this.description = description == null ? this.description : description;
-//    return this;
+  }
+
+  public void updateAuth(){
+    this.auth = Auth.MANAGER;
   }
 
   public void updatePassword(String password){

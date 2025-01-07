@@ -6,7 +6,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 
 @Getter
-public class UserSignInRequestDto {
+public class SignInUserRequestDto {
 
   @NotBlank(message = "이메일은 필수값입니다.")
   @Size(max = 100, message = "이메일은 최대 100글자 입니다.")
