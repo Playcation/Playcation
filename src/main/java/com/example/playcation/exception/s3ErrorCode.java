@@ -6,13 +6,12 @@ import org.springframework.http.HttpStatus;
 
 @Getter
 @RequiredArgsConstructor
-public enum GameErrorCode implements ExceptionType{
+public enum s3ErrorCode implements ExceptionType {
 
-  GAME_NOT_FOUND("게임을 찾을 수 없습니다", HttpStatus.NOT_FOUND),
-  DOES_NOT_MATCH("게임을 생성한 유저와 일치하지 않습니다", HttpStatus.FORBIDDEN);
+  NOT_FOUND_FILE(HttpStatus.NOT_FOUND, "파일을 찾을 수 없습니다.");
 
-  private final String message;
   private final HttpStatus httpStatus;
+  private final String message;
 
   @Override
   public String getErrorName() {
