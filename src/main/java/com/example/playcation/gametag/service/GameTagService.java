@@ -28,7 +28,7 @@ public class GameTagService {
   private final GameRepository gameRepository;
 
 
-  public GameTagResponseDto createdGameTag(GameTagRequestDto requestDto) {
+  public GameTagResponseDto createGameTag(GameTagRequestDto requestDto) {
 
     Tag tag = tagRepository.findByIdOrElseThrow(requestDto.getTagId());
 
@@ -47,7 +47,7 @@ public class GameTagService {
 
   public GameListResponseDto findGameTag(int page, Long tagId) {
 
-    PageRequest pageRequest = PageRequest.of(page, 10, Sort.by(Direction.DESC, "id"));
+    PageRequest pageRequest = PageRequest.of(page, 10, Sort.by(Direction.DESC, ""));
 
     List<GameTag> gameTagList = gameTagRepository.findGameTagByTagId(pageRequest, tagId).stream().toList();
 
@@ -60,7 +60,7 @@ public class GameTagService {
   }
 
   // 게임 태그 수정(게임 id는 수정 불가)
-  public GameTagResponseDto updatedGameTag(Long userId, Long gameTagId, GameTagRequestDto requestDto) {
+  public GameTagResponseDto updateGameTag(Long userId, Long gameTagId, GameTagRequestDto requestDto) {
 
     GameTag gameTag = gameTagRepository.findByIdOrElseThrow(gameTagId);
 
@@ -77,7 +77,7 @@ public class GameTagService {
     return GameTagResponseDto.toDto(gameTag);
   }
 
-  public void deletedGame(Long userId, Long gameTagId) {
+  public void deleteGame(Long userId, Long gameTagId) {
 
     GameTag gameTag = gameTagRepository.findByIdOrElseThrow(gameTagId);
 

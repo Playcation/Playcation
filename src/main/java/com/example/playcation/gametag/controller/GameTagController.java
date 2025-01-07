@@ -28,22 +28,22 @@ public class GameTagController {
   private final TokenUtil tokenUtil;
 
   @PostMapping
-  public ResponseEntity<GameTagResponseDto> createdGameTag(@RequestBody GameTagRequestDto requestDto) {
-    GameTagResponseDto responseDto = gameTagService.createdGameTag(requestDto);
+  public ResponseEntity<GameTagResponseDto> createGameTag(@RequestBody GameTagRequestDto requestDto) {
+    GameTagResponseDto responseDto = gameTagService.createGameTag(requestDto);
     return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
   }
 
   @PatchMapping("/{gameTagId}")
-  public ResponseEntity<GameTagResponseDto> updatedGameTag(@RequestHeader("Authorization") String authorizationHeader, @PathVariable Long gameTagId, @RequestBody GameTagRequestDto requestDto) {
+  public ResponseEntity<GameTagResponseDto> updateGameTag(@RequestHeader("Authorization") String authorizationHeader, @PathVariable Long gameTagId, @RequestBody GameTagRequestDto requestDto) {
     Long userId = tokenUtil.findUserByToken(authorizationHeader);
-    GameTagResponseDto responseDto = gameTagService.updatedGameTag(userId, gameTagId, requestDto);
+    GameTagResponseDto responseDto = gameTagService.updateGameTag(userId, gameTagId, requestDto);
     return new ResponseEntity<>(responseDto, HttpStatus.OK);
   }
 
   @DeleteMapping("/{gameTagId}")
-  public ResponseEntity<String> deletedGameTag(@RequestHeader("Authorization") String authorizationHeader, @PathVariable Long gameTagId) {
+  public ResponseEntity<String> deleteGameTag(@RequestHeader("Authorization") String authorizationHeader, @PathVariable Long gameTagId) {
     Long userId = tokenUtil.findUserByToken(authorizationHeader);
-    gameTagService.deletedGame(userId, gameTagId);
+    gameTagService.deleteGame(userId, gameTagId);
     return new ResponseEntity<>("삭제 완료되었습니다", HttpStatus.OK);
   }
 }
