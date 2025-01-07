@@ -16,4 +16,6 @@ public interface GameTagRepository extends JpaRepository<GameTag, Long> {
   }
 
   List<GameTag> findGameTagByTagId(PageRequest pageRequest, Long tagId);
+
+  List<GameTag> findGameTagsByGameId(Long game_id);
 }
