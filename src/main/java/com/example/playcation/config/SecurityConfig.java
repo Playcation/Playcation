@@ -1,60 +1,66 @@
 package com.example.playcation.config;
 
 import com.example.playcation.filter.JwtAuthenticationFilter;
+import com.example.playcation.filter.LoginFilter;
+import com.example.playcation.util.JWTUtil;
 import com.example.playcation.util.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.ExceptionTranslationFilter;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
-  private final JwtTokenProvider jwtTokenProvider;
+  private final AuthenticationConfiguration authenticationConfiguration;
+  private final JWTUtil jwtUtil;
 
-  public SecurityConfig(JwtTokenProvider jwtTokenProvider) {
-    this.jwtTokenProvider = jwtTokenProvider;
+  public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, JWTUtil jwtUtil) {
+
+    this.authenticationConfiguration = authenticationConfiguration;
+    this.jwtUtil = jwtUtil;
   }
 
   @Bean
-  public JwtAuthenticationFilter jwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider) {
-    return new JwtAuthenticationFilter(jwtTokenProvider);
+  public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+
+    return configuration.getAuthenticationManager();
   }
 
   @Bean
-  public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+  public SecurityFilterChain filterChain(HttpSecurity http,
+      AuthenticationConfiguration authenticationConfiguration) throws Exception {
 
-    //csrf disable
+
     http
         .csrf((auth) -> auth.disable());
 
-    //From 로그인 방식 disable
     http
         .formLogin((auth) -> auth.disable());
 
-    //http basic 인증 방식 disable
     http
         .httpBasic((auth) -> auth.disable());
 
-    // JWT 인증 필터 추가
-    http.addFilterAt(jwtAuthenticationFilter(jwtTokenProvider), ExceptionTranslationFilter.class);
+    http
+        .authorizeHttpRequests((auth) -> auth
+            .requestMatchers("/login", "/", "/join").permitAll()
+            .anyRequest().authenticated());
 
-    //인가 설정
-    http.authorizeHttpRequests((auth) -> auth
-        .requestMatchers("/users/sign-in","/users/login").permitAll() //인증 없이 허용
-        .requestMatchers("/admin").hasRole("ADMIN")             // ADMIN 권한 필요
-        .requestMatchers("/admin/**").hasRole("ADMIN")             // ADMIN 권한 필요
-        .anyRequest().authenticated()                             // 나머지 인증 필요
-    );
+    //필터 추가 LoginFilter()는 인자를 받음 (AuthenticationManager() 메소드에 authenticationConfiguration 객체를 넣어야 함) 따라서 등록 필요
+    http
+        .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil), UsernamePasswordAuthenticationFilter.class);
 
-    //세션 설정
-    http.sessionManagement((session) -> session
-        .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+    http
+        .sessionManagement((session) -> session
+            .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
     return http.build();
   }
