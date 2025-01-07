@@ -26,7 +26,7 @@ public class FileDetail {
 
   private Long fileSize;
 
-  private String fileType;  // 예) image/jpeg
+  private String fileType;  // 예) image/jpeg, .zip
 
   public FileDetail(String bucket, String fileName, String filePath, Long fileSize, String fileType) {
     this.bucket = bucket;

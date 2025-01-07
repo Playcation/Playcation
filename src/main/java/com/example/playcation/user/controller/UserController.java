@@ -21,7 +21,9 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/users")
@@ -50,9 +52,10 @@ public class UserController {
 
   @PostMapping("/sign-in")
   public ResponseEntity<UserResponseDto> signUp(
-      @Valid @RequestBody SignInUserRequestDto userSignInRequestDto
+      @Valid @RequestPart SignInUserRequestDto userSignInRequestDto,
+      @RequestPart MultipartFile file
   ) {
-    return ResponseEntity.ok().body(userService.signUp(userSignInRequestDto));
+    return ResponseEntity.ok().body(userService.signUp(userSignInRequestDto, file));
   }
 
   @GetMapping
@@ -67,11 +70,12 @@ public class UserController {
   @PutMapping
   public ResponseEntity<UserResponseDto> updateUser(
       @RequestHeader("Authorization") String authorizationHeader,
-      @RequestBody UpdatedUserRequestDto userUpdateRequestDto
+      @RequestPart UpdatedUserRequestDto userUpdateRequestDto,
+      @RequestPart MultipartFile file
   ){
     Long id = tokenUtil.findUserByToken(authorizationHeader);
 
-    return ResponseEntity.ok().body(userService.updateUser(id, userUpdateRequestDto));
+    return ResponseEntity.ok().body(userService.updateUser(id, userUpdateRequestDto, file));
   }
 
   @PatchMapping("/password")

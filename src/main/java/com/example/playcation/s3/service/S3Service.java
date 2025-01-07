@@ -10,6 +10,8 @@ import com.example.playcation.s3.repository.FileDetailRepository;
 import jakarta.transaction.Transactional;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -68,7 +70,7 @@ public class S3Service {
 
   // 파일명을 난수화하기 위해 UUID 를 활용하여 난수를 돌린다.
   public String createFileName(String fileName){
-    return UUID.randomUUID().toString().concat(getFileExtension(fileName));
+    return LocalDateTime.now() + UUID.randomUUID().toString().concat(getFileExtension(fileName));
   }
 
   //  "."의 존재 유무만 판단

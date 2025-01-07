@@ -38,6 +38,8 @@ public class User extends BaseEntity {
   @Column(length = 100)
   private String password;
 
+  private String imageUrl;
+
   @Column(length = 10)
   private String name;
 
@@ -56,8 +58,9 @@ public class User extends BaseEntity {
     this.auth = auth;
   }
 
-  public void update(String name, String description){
+  public void update(String name, String description, String imageUrl) {
     this.name = name == null ? this.name : name;
+    this.imageUrl = imageUrl.isEmpty() ? this.imageUrl : imageUrl;
     this.description = description == null ? this.description : description;
   }
 
