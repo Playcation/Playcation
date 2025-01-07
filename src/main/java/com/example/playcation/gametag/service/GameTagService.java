@@ -1,5 +1,7 @@
 package com.example.playcation.gametag.service;
 
+import com.example.playcation.exception.GameErrorCode;
+import com.example.playcation.exception.NoAuthorizedException;
 import com.example.playcation.game.entity.Game;
 import com.example.playcation.game.repository.GameRepository;
 import com.example.playcation.gametag.dto.GameListResponseDto;
@@ -55,5 +57,23 @@ public class GameTagService {
     }
 
     return new GameListResponseDto(gameList);
+  }
+
+  // 게임 태그 수정(게임 id는 수정 불가)
+  public GameTagResponseDto updatedGameTag(Long userId, Long gameTagId, GameTagRequestDto requestDto) {
+
+    GameTag gameTag = gameTagRepository.findByIdOrElseThrow(gameTagId);
+
+    if (!gameTag.getGame().getUser().getId().equals(userId)) {
+      throw new NoAuthorizedException(GameErrorCode.DOES_NOT_MATCH);
+    }
+
+    Tag tag = tagRepository.findByIdOrElseThrow(requestDto.getTagId());
+
+    gameTag.updateGameTag(tag);
+
+    gameTagRepository.save(gameTag);
+
+    return GameTagResponseDto.toDto(gameTag);
   }
 }
