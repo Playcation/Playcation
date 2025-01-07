@@ -8,9 +8,9 @@ import lombok.Getter;
 @AllArgsConstructor
 public class UpdatedCartGameResponseDto {
 
-  private final Long cartId;
-  private final Long userId;
-  private final Long gameId;
+  private Long cartId;
+  private Long userId;
+  private Long gameId;
 
   public static UpdatedCartGameResponseDto toDto(Cart cart) {
     return new UpdatedCartGameResponseDto(

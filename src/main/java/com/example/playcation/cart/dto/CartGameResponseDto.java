@@ -10,9 +10,9 @@ import lombok.Getter;
 @AllArgsConstructor
 public class CartGameResponseDto {
 
-  private final Long id;
-  private final String title;
-  private final BigDecimal price;
+  private Long id;
+  private String title;
+  private BigDecimal price;
 
   public static CartGameResponseDto toDto(Game game) {
     return new CartGameResponseDto(
