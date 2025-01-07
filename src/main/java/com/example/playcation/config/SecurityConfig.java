@@ -2,6 +2,7 @@ package com.example.playcation.config;
 
 import com.example.playcation.filter.JWTFilter;
 import com.example.playcation.filter.LoginFilter;
+import com.example.playcation.user.service.UserService;
 import com.example.playcation.util.JWTUtil;
 import com.example.playcation.util.PasswordEncoder;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,6 +23,8 @@ public class SecurityConfig {
 
   private final AuthenticationConfiguration authenticationConfiguration;
   private final JWTUtil jwtUtil;
+  private final ObjectMapper objectMapper;
+
 
   public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, JWTUtil jwtUtil, ObjectMapper objectMapper) {
 
@@ -35,6 +38,14 @@ public class SecurityConfig {
 
     return configuration.getAuthenticationManager();
   }
+
+  @Bean
+  public LoginFilter loginFilter() throws Exception {
+    LoginFilter filter = new LoginFilter(jwtUtil, objectMapper);
+    filter.setAuthenticationManager(authenticationManager(authenticationConfiguration));
+    return filter;
+  }
+
 
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {

@@ -2,9 +2,11 @@ package com.example.playcation.filter;
 
 import com.example.playcation.user.entity.User;
 import com.example.playcation.util.JWTUtil;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
@@ -18,11 +20,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
   private final JWTUtil jwtUtil;
+  private final ObjectMapper objectMapper;
 
-  public LoginFilter(AuthenticationManager authenticationManager, JWTUtil jwtUtil) {
-
-    this.authenticationManager = authenticationManager;
+  public LoginFilter(JWTUtil jwtUtil, ObjectMapper objectMapper) {
     this.jwtUtil = jwtUtil;
+    this.objectMapper = objectMapper;
+    setFilterProcessesUrl("/users/login");
   }
 
   @Override
