@@ -42,6 +42,7 @@ public class UserController {
     return ResponseEntity.ok(responseDto);
   }
 
+  // 로그 아웃
   @PostMapping("/logout")
   public ResponseEntity<String> logout(
       @RequestHeader("Authorization") String authorizationHeader
@@ -50,14 +51,16 @@ public class UserController {
     return ResponseEntity.ok().body("로그아웃 되었습니다.");
   }
 
+  // 회원 가입
   @PostMapping("/sign-in")
   public ResponseEntity<UserResponseDto> signUp(
-      @Valid @RequestPart SignInUserRequestDto userSignInRequestDto,
-      @RequestPart MultipartFile file
+      @Valid @RequestPart(value = "json") SignInUserRequestDto userSignInRequestDto,
+      @RequestPart(required = false) MultipartFile file
   ) {
     return ResponseEntity.ok().body(userService.signUp(userSignInRequestDto, file));
   }
 
+  // 유저 프로필 조회
   @GetMapping
   public ResponseEntity<UserResponseDto> findUser(
       @RequestHeader("Authorization") String authorizationHeader
@@ -67,21 +70,23 @@ public class UserController {
     return ResponseEntity.ok().body(userService.findUser(id));
   }
 
+  // 유저 수정
   @PutMapping
   public ResponseEntity<UserResponseDto> updateUser(
       @RequestHeader("Authorization") String authorizationHeader,
-      @RequestPart UpdatedUserRequestDto userUpdateRequestDto,
-      @RequestPart MultipartFile file
+      @Valid @RequestPart(value = "json") UpdatedUserRequestDto userUpdateRequestDto,
+      @RequestPart(required = false) MultipartFile file
   ){
     Long id = tokenUtil.findUserByToken(authorizationHeader);
 
     return ResponseEntity.ok().body(userService.updateUser(id, userUpdateRequestDto, file));
   }
 
+  // 비밀번호 변경
   @PatchMapping("/password")
   public ResponseEntity<UserResponseDto> changePassword(
       @RequestHeader("Authorization") String authorizationHeader,
-      @RequestBody UpdatedUserPasswordRequestDto userUpdatePasswordRequestDto
+      @Valid @RequestBody UpdatedUserPasswordRequestDto userUpdatePasswordRequestDto
   ){
     Long id = tokenUtil.findUserByToken(authorizationHeader);
     return ResponseEntity.ok().body(userService.updateUserPassword(id, userUpdatePasswordRequestDto));
@@ -91,7 +96,7 @@ public class UserController {
   @DeleteMapping("/delete")
   public String deleteAccount(
       @RequestHeader("Authorization") String authorizationHeader,
-      @RequestBody DeletedUserRequestDto userLogoutRequestDto
+      @Valid @RequestBody DeletedUserRequestDto userLogoutRequestDto
   ) {
     Long id = tokenUtil.findUserByToken(authorizationHeader);
     // 탈퇴 처리 메서드 호출

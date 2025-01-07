@@ -2,6 +2,8 @@ package com.example.playcation.s3.controller;
 
 import com.example.playcation.s3.service.S3Service;
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,10 +28,10 @@ public class S3Controller {
 
   @PostMapping("/files")
   public ResponseEntity<List<String>> uploadFiles(
-      @RequestPart("files") List<MultipartFile> files
+      @RequestPart(value = "files") List<MultipartFile> files
   ){
-    List<String> urls = s3Service.uploadFiles(files);
-    return ResponseEntity.ok(urls);
+    CompletableFuture<List<String>> urls = s3Service.uploadFiles(files);
+    return ResponseEntity.ok(urls.join());
   }
 
 }

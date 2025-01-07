@@ -15,10 +15,12 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -47,7 +49,8 @@ public class S3Service {
       s3.putObject(new PutObjectRequest(bucket, fileName, inputStream, objectMetadata)
           .withCannedAcl(CannedAccessControlList.PublicRead));
     } catch (IOException e){
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "파일 업로드에 실패했습니다.");
+      return multipartFile.getOriginalFilename() + "의 업로드가 실패했습니다.";
+//      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "파일 업로드에 실패했습니다.");
     }
     String filePath = "https://" + bucket + ".s3.ap-northeast-2.amazonaws.com/" + fileName;
     FileDetail attachFile = new FileDetail(bucket, fileName, filePath, multipartFile.getSize(), multipartFile.getContentType());
@@ -70,7 +73,7 @@ public class S3Service {
 
   // 파일명을 난수화하기 위해 UUID 를 활용하여 난수를 돌린다.
   public String createFileName(String fileName){
-    return LocalDateTime.now() + UUID.randomUUID().toString().concat(getFileExtension(fileName));
+    return LocalDateTime.now().withNano(0) + "_" + UUID.randomUUID().toString().concat(getFileExtension(fileName));
   }
 
   //  "."의 존재 유무만 판단
@@ -82,11 +85,13 @@ public class S3Service {
     }
   }
 
-  public List<String> uploadFiles(List<MultipartFile> files) {
+  @Async
+  @Transactional
+  public CompletableFuture<List<String>> uploadFiles(List<MultipartFile> files) {
     List<String> filePaths = new ArrayList<>();
     for (MultipartFile file : files) {
       filePaths.add(uploadFile(file));
     }
-    return filePaths;
+    return CompletableFuture.completedFuture(filePaths);
   }
 }

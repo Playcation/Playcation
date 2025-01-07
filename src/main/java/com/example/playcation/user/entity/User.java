@@ -34,7 +34,6 @@ public class User extends BaseEntity {
   @Column(unique = true, length = 100)
   private String email;
 
-  @Convert(converter = PasswordEncoder.class)
   @Column(length = 100)
   private String password;
 
