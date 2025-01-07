@@ -28,8 +28,8 @@ public class GameRepositoryCustomImpl implements GameRepositoryCustom {
         .where(
             eqTitle(title),
             eqCategory(category),
-            eqPrice(price),
-            eqCreatedAt(createdAt)
+            gtPrice(price),
+            afterCreatedAt(createdAt)
         )
         .offset(pageRequest.getOffset())
         .limit(pageRequest.getPageSize())
@@ -41,8 +41,8 @@ public class GameRepositoryCustomImpl implements GameRepositoryCustom {
         .where(
             eqTitle(title),
             eqCategory(category),
-            eqPrice(price),
-            eqCreatedAt(createdAt)
+            gtPrice(price),
+            afterCreatedAt(createdAt)
         )
         .fetchOne();
     return new PagingGameResponseDto(gameList, count);
@@ -56,11 +56,11 @@ public class GameRepositoryCustomImpl implements GameRepositoryCustom {
     return category != null ? QGame.game.category.eq(category) : null;
   }
 
-  private BooleanExpression eqPrice(BigDecimal price) {
-    return price != null ? QGame.game.price.eq(price) : null;
+  private BooleanExpression gtPrice(BigDecimal price) {
+    return price != null ? QGame.game.price.gt(price) : null;
   }
 
-  private BooleanExpression eqCreatedAt(LocalDateTime createdAt) {
-    return createdAt != null ? QGame.game.createdAt.before(createdAt) : null;
+  private BooleanExpression afterCreatedAt(LocalDateTime createdAt) {
+    return createdAt != null ? QGame.game.createdAt.after(createdAt) : null;
   }
 }
