@@ -5,7 +5,7 @@ import java.util.List;
 import lombok.Getter;
 
 @Getter
-public class CartGameDto {
+public class CartResponseDto {
 
   private final Long cartId;
   private final Long userId;
@@ -27,7 +27,7 @@ public class CartGameDto {
   }
 
   // Cart -> CartGameDto 변환 메서드
-  public CartGameDto(Long cartId, Long userId, List<GameInfo> games) {
+  public CartResponseDto(Long cartId, Long userId, List<GameInfo> games) {
     this.cartId = cartId;
     this.userId = userId;
     this.games = games;

@@ -1,6 +1,6 @@
 package com.example.playcation.cart.service;
 
-import com.example.playcation.cart.dto.CartGameDto;
+import com.example.playcation.cart.dto.CartResponseDto;
 import com.example.playcation.cart.dto.UpdatedCartResponseDto;
 import com.example.playcation.cart.entity.Cart;
 import com.example.playcation.cart.repository.CartRepository;
@@ -38,18 +38,18 @@ public class CartService {
     return cartRepository.save(cart);
   }
 
-  public CartGameDto getCartItems(Long userId) {
+  public CartResponseDto getCartItems(Long userId) {
 
     Cart cart = cartRepository.findCartByUserIdOrElseThrow(userId);
     List<Game> gameList = cartRepository.findAllById(cart.getId());
-    List<CartGameDto.GameInfo> gameDetails = gameList.stream()
-        .map(game -> new CartGameDto.GameInfo(
+    List<CartResponseDto.GameInfo> gameDetails = gameList.stream()
+        .map(game -> new CartResponseDto.GameInfo(
             game.getId(),
             game.getTitle(),
             game.getPrice()
         ))
         .toList();
-    return new CartGameDto(
+    return new CartResponseDto(
         cart.getId(),
         cart.getUser().getId(),
         gameDetails
