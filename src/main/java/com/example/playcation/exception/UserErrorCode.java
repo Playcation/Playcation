@@ -10,6 +10,7 @@ public enum UserErrorCode implements ExceptionType {
   //InvalidInputException
   //비밀번호가 틀렸을 때 출력하는 오류 메시지
   WRONG_PASSWORD(HttpStatus.BAD_REQUEST, "비밀 번호가 틀렸습니다."),
+  WRONG_INPUT(HttpStatus.BAD_REQUEST, "입력값이 잘못되었습니다."),
 
   // NotFoundException
   NOT_FOUND_USER(HttpStatus.NOT_FOUND, "유저를 찾을 수 없습니다."),
@@ -27,6 +28,6 @@ public enum UserErrorCode implements ExceptionType {
 
   @Override
   public String getErrorName() {
-    return "";
+    return this.name();
   }
 }

@@ -15,6 +15,6 @@ public enum s3ErrorCode implements ExceptionType {
 
   @Override
   public String getErrorName() {
-    return "";
+    return this.name();
   }
 }
