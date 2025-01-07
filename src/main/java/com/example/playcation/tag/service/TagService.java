@@ -45,7 +45,7 @@ public class TagService {
   public CreatedTagResponseDto updatedTag(Long tagId, CreatedTagRequestDto requestDto) {
     Tag tag = tagRepository.findByIdOrElseThrow(tagId);
 
-    tag.updateTag(requestDto.getTagName());
+    tag.updateTag(requestDto);
 
     tagRepository.save(tag);
 
