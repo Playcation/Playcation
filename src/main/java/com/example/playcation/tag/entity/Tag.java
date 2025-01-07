@@ -1,5 +1,7 @@
 package com.example.playcation.tag.entity;
 
+import com.example.playcation.tag.Dto.CreatedTagRequestDto;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -9,11 +11,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.DynamicInsert;
 
 @Entity
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder
 @Table(name = "tag")
 public class Tag {
@@ -22,14 +24,10 @@ public class Tag {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
+  @Column(nullable = false)
   private String tagName;
 
-  public Tag(Long id, String tagName) {
-    this.id = id;
-    this.tagName = tagName;
-  }
-
-  public void updateTag(String tagName) {
-    this.tagName = tagName;
+  public void updateTag(CreatedTagRequestDto requestDto) {
+    this.tagName = requestDto.getTagName();
   }
 }
