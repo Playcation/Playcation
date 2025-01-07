@@ -15,6 +15,6 @@ public enum GameTagErrorCode implements ExceptionType{
 
   @Override
   public String getErrorName() {
-    return "";
+    return this.name();
   }
 }
