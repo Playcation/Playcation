@@ -8,8 +8,7 @@ import com.example.playcation.user.dto.SignInUserRequestDto;
 import com.example.playcation.user.dto.UpdatedUserPasswordRequestDto;
 import com.example.playcation.user.dto.UpdatedUserRequestDto;
 import com.example.playcation.user.service.UserService;
-import com.example.playcation.util.JwtTokenProvider;
-import com.example.playcation.util.TokenUtil;
+import com.example.playcation.util.JWTUtil;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -31,7 +30,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class UserController {
 
   private final UserService userService;
-  private final TokenUtil tokenUtil;
+  private final JWTUtil jwtUtil;
 
   // 로그인
   @PostMapping("/login")
@@ -65,7 +64,7 @@ public class UserController {
   public ResponseEntity<UserResponseDto> findUser(
       @RequestHeader("Authorization") String authorizationHeader
   ){
-    Long id = tokenUtil.findUserByToken(authorizationHeader);
+    Long id = jwtUtil.findUserByToken(authorizationHeader);
 
     return ResponseEntity.ok().body(userService.findUser(id));
   }
@@ -77,7 +76,7 @@ public class UserController {
       @Valid @RequestPart(value = "json") UpdatedUserRequestDto userUpdateRequestDto,
       @RequestPart(required = false) MultipartFile file
   ){
-    Long id = tokenUtil.findUserByToken(authorizationHeader);
+    Long id = jwtUtil.findUserByToken(authorizationHeader);
 
     return ResponseEntity.ok().body(userService.updateUser(id, userUpdateRequestDto, file));
   }
@@ -88,7 +87,7 @@ public class UserController {
       @RequestHeader("Authorization") String authorizationHeader,
       @Valid @RequestBody UpdatedUserPasswordRequestDto userUpdatePasswordRequestDto
   ){
-    Long id = tokenUtil.findUserByToken(authorizationHeader);
+    Long id = jwtUtil.findUserByToken(authorizationHeader);
     return ResponseEntity.ok().body(userService.updateUserPassword(id, userUpdatePasswordRequestDto));
   }
 
@@ -98,7 +97,7 @@ public class UserController {
       @RequestHeader("Authorization") String authorizationHeader,
       @Valid @RequestBody DeletedUserRequestDto userLogoutRequestDto
   ) {
-    Long id = tokenUtil.findUserByToken(authorizationHeader);
+    Long id = jwtUtil.findUserByToken(authorizationHeader);
     // 탈퇴 처리 메서드 호출
     userService.delete(id, userLogoutRequestDto);
     return "회원 탈퇴가 완료되었습니다.";

@@ -5,6 +5,7 @@ import com.example.playcation.exception.DuplicatedException;
 import com.example.playcation.exception.InvalidInputException;
 import com.example.playcation.exception.NoAuthorizedException;
 import com.example.playcation.exception.UserErrorCode;
+import com.example.playcation.game.repository.GameRepository;
 import com.example.playcation.s3.service.S3Service;
 import com.example.playcation.user.dto.DeletedUserRequestDto;
 import com.example.playcation.user.dto.LoginUserRequestDto;
@@ -15,7 +16,6 @@ import com.example.playcation.user.dto.UpdatedUserRequestDto;
 import com.example.playcation.user.dto.UserResponseDto;
 import com.example.playcation.user.entity.User;
 import com.example.playcation.user.repository.UserRepository;
-import com.example.playcation.util.JwtTokenProvider;
 import com.example.playcation.util.PasswordEncoder;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +28,6 @@ public class UserService {
 
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
-  private final JwtTokenProvider jwtTokenProvider;
   private final S3Service s3Service;
 
   // 로그인
@@ -36,11 +35,11 @@ public class UserService {
     User user = userRepository.findByEmailOrElseThrow(loginUserRequestDto.getEmail());
     checkPassword(user, loginUserRequestDto.getPassword());
 
-    String token = jwtTokenProvider.createToken(user.getId(), user.getAuth(), 60*60*600L);
-    return LoginUserResponseDto.toDto(user, token);
+    return LoginUserResponseDto.toDto(user, "");
   }
 
   // 회원 삭제
+  @Transactional
   public void delete(Long id, DeletedUserRequestDto deletedUserRequestDto) {
     User user = userRepository.findByIdOrElseThrow(id);
     checkPassword(user, deletedUserRequestDto.getPassword());
