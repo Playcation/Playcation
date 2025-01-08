@@ -1,5 +1,6 @@
 package com.example.playcation.filter;
 
+import com.example.playcation.common.TokenSettings;
 import com.example.playcation.token.repository.TokenRepository;
 import com.example.playcation.util.JWTUtil;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -30,11 +31,13 @@ public class CustomLogoutFilter extends GenericFilterBean {
 
   private void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
 
+    // 엔드포인트가 logout 인지 확인
     String requestUri = request.getRequestURI();
     if (!requestUri.matches("^\\/logout$")) {
       filterChain.doFilter(request, response);
       return;
     }
+    // POST 요청인지 확인
     String requestMethod = request.getMethod();
     if (!requestMethod.equals("POST")) {
       filterChain.doFilter(request, response);
@@ -45,7 +48,7 @@ public class CustomLogoutFilter extends GenericFilterBean {
     String refresh = null;
     Cookie[] cookies = request.getCookies();
     for (Cookie cookie : cookies) {
-      if (cookie.getName().equals("refresh")) {
+      if (cookie.getName().equals(TokenSettings.REFRESH_TOKEN_CATEGORY)) {
         refresh = cookie.getValue();
       }
     }
@@ -56,9 +59,10 @@ public class CustomLogoutFilter extends GenericFilterBean {
       return;
     }
 
-    // 만료 확인
+    // 만료 확인 / 토큰 발급자 확인
     try {
       jwtUtil.isExpired(refresh);
+      jwtUtil.isIssuer(refresh);
     } catch (ExpiredJwtException e) {
       //response status code
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -67,7 +71,7 @@ public class CustomLogoutFilter extends GenericFilterBean {
 
     // 토큰이 refresh인지 확인 (발급시 페이로드에 명시)
     String category = jwtUtil.getCategory(refresh);
-    if (!category.equals("refresh")) {
+    if (!category.equals(TokenSettings.REFRESH_TOKEN_CATEGORY)) {
       //response status code
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
       return;
@@ -86,7 +90,7 @@ public class CustomLogoutFilter extends GenericFilterBean {
     tokenRepository.deleteByRefresh(refresh);
 
     //Refresh 토큰 Cookie 값 0
-    Cookie cookie = new Cookie("refresh", null);
+    Cookie cookie = new Cookie(TokenSettings.REFRESH_TOKEN_CATEGORY, null);
     cookie.setMaxAge(0);
     cookie.setPath("/");
 

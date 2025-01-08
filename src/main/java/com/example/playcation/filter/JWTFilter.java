@@ -1,5 +1,6 @@
 package com.example.playcation.filter;
 
+import com.example.playcation.common.TokenSettings;
 import com.example.playcation.enums.Role;
 import com.example.playcation.user.entity.CustomUserDetails;
 import com.example.playcation.user.entity.User;
@@ -27,8 +28,11 @@ public class JWTFilter extends OncePerRequestFilter {
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
-    // 헤더에서 access키에 담긴 토큰을 꺼냄
-    String accessToken = request.getHeader("access");
+    // 헤더에서 Authorization키에 담긴 토큰을 꺼냄
+    String accessToken = request.getHeader(TokenSettings.ACCESS_TOKEN_CATEGORY);
+   if(accessToken != null) {
+     accessToken = accessToken.replace(TokenSettings.TOKEN_TYPE, "").trim();
+   }
 
     // 토큰이 없다면 다음 필터로 넘김
     if (accessToken == null) {
@@ -38,9 +42,10 @@ public class JWTFilter extends OncePerRequestFilter {
       return;
     }
 
-    // 토큰 만료 여부 확인, 만료시 다음 필터로 넘기지 않음
+    // 토큰 만료 여부 확인, 토큰의 발급자 확인 만료시 다음 필터로 넘기지 않음
     try {
       jwtUtil.isExpired(accessToken);
+      jwtUtil.isIssuer(accessToken);
     } catch (ExpiredJwtException e) {
 
       //response body
@@ -52,14 +57,14 @@ public class JWTFilter extends OncePerRequestFilter {
       return;
     }
 
-    // 토큰이 access인지 확인 (발급시 페이로드에 명시)
+    // 토큰이 Authorization인지 확인 (발급시 페이로드에 명시)
     String category = jwtUtil.getCategory(accessToken);
 
-    if (!category.equals("access")) {
+    if (!category.equals(TokenSettings.ACCESS_TOKEN_CATEGORY)) {
 
       //response body
       PrintWriter writer = response.getWriter();
-      writer.print("invalid access token");
+      writer.print("잘못된 토큰입니다.");
 
       //response status code
       response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);

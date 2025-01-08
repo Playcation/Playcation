@@ -61,11 +61,11 @@ public class SecurityConfig {
 
     http
         .authorizeHttpRequests((auth) -> auth
-            .requestMatchers("/", "/users/sign-in", "/login", "/users/refresh").permitAll()
-            .requestMatchers("/admin").hasAuthority("ADMIN")
-            .requestMatchers("/manager").hasAuthority("MANAGER")
-            .anyRequest().hasAuthority("USER"));
-//            .anyRequest().authenticated());
+            .requestMatchers("/", "/users/sign-in", "/login", "/refresh").permitAll()
+            .requestMatchers("/users/\\d/update/role").hasAuthority("ADMIN")
+            .requestMatchers("/cards").hasAuthority("MANAGER")
+//            .anyRequest().hasAuthority("USER"));
+            .anyRequest().authenticated());
 
     http
         .addFilterBefore(new JWTFilter(userRepository, jwtUtil), CustomLoginFilter.class);
