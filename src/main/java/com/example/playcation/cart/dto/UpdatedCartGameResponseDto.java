@@ -4,6 +4,9 @@ import com.example.playcation.cart.entity.Cart;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+/**
+ * 장바구니에 게임 추가 및 삭제 시 필요한 Dto
+ */
 @Getter
 @AllArgsConstructor
 public class UpdatedCartGameResponseDto {

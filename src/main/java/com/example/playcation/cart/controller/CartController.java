@@ -24,6 +24,12 @@ public class CartController {
   private final CartService cartService;
   private final TokenUtil tokenUtil;
 
+  /**
+   * 회원의 장바구니 게임을 전체 조회하는 메서드
+   *
+   * @param authorizationHeader
+   * @return CartGameResponseDto 리스트
+   */
   @GetMapping
   public ResponseEntity<List<CartGameResponseDto>> getCartItems(
       @RequestHeader("Authorization") String authorizationHeader) {
@@ -33,6 +39,13 @@ public class CartController {
     return new ResponseEntity<>(games, HttpStatus.OK);
   }
 
+  /**
+   * 장바구니에 게임울 추가하는 메서드
+   *
+   * @param gameId
+   * @param authorizationHeader
+   * @return UpdatedCartGameResponseDto ( cart 엔티티와 필드 동일 )
+   */
   @PostMapping("/add/{gameId}")
   public ResponseEntity<UpdatedCartGameResponseDto> addGameToCart(@PathVariable Long gameId,
       @RequestHeader("Authorization") String authorizationHeader) {
@@ -41,6 +54,13 @@ public class CartController {
     return new ResponseEntity<>(updatedCart, HttpStatus.OK);
   }
 
+  /**
+   * 장바구니에서 특정 게임을 삭제하는 메서드
+   *
+   * @param gameId
+   * @param authorizationHeader
+   * @return UpdatedCartGameResponseDto ( cart 엔티티와 필드 동일 )
+   */
   @PostMapping("/delete/{gameId}")
   public ResponseEntity<UpdatedCartGameResponseDto> deleteGameFromCart(@PathVariable Long gameId,
       @RequestHeader("Authorization") String authorizationHeader) {
@@ -49,11 +69,17 @@ public class CartController {
     return new ResponseEntity<>(updatedCart, HttpStatus.OK);
   }
 
+  /**
+   * 회원이 자발적으로 장바구니를 삭제하는 메서드 이 메서드는 주문 과정과는 무관하며, 사용자가 장바구니를 비우려는 경우 호출됨
+   *
+   * @param authorizationHeader
+   * @return String ( 장바구니 삭제 완료 메시지 )
+   */
   @DeleteMapping("/remove")
-  public ResponseEntity<String> deleteCart(
+  public ResponseEntity<String> deleteCartByUserRequest(
       @RequestHeader("Authorization") String authorizationHeader) {
     Long userId = tokenUtil.findUserByToken(authorizationHeader);
-    cartService.removeCart(userId);
-    return new ResponseEntity<>("장바구니 삭제", HttpStatus.OK);
+    cartService.removeCart(userId); // cart는 hard delete 됨
+    return new ResponseEntity<>("장바구니 삭제 완료", HttpStatus.OK);
   }
 }

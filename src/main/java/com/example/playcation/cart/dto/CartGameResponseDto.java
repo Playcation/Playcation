@@ -1,11 +1,13 @@
 package com.example.playcation.cart.dto;
 
 
-import com.example.playcation.game.entity.Game;
 import java.math.BigDecimal;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+/**
+ * 장바구니 내 게임 전체 조회 시 개별 게임 정보 Dto
+ */
 @Getter
 @AllArgsConstructor
 public class CartGameResponseDto {
@@ -14,11 +16,4 @@ public class CartGameResponseDto {
   private String title;
   private BigDecimal price;
 
-  public static CartGameResponseDto toDto(Game game) {
-    return new CartGameResponseDto(
-        game.getId(),
-        game.getTitle(),
-        game.getPrice()
-    );
-  }
 }
