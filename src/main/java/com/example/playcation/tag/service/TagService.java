@@ -37,7 +37,7 @@ public class TagService {
 
   public List<CreatedTagResponseDto> findAllTag(int page) {
 
-    PageRequest pageRequest = PageRequest.of(page, 10, Sort.by(Direction.DESC, "id"));
+    PageRequest pageRequest = PageRequest.of(page, 10);
 
     return tagRepository.findAll(pageRequest).stream().map(CreatedTagResponseDto::toDto).toList();
   }

@@ -10,12 +10,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface GameTagRepository extends JpaRepository<GameTag, Long> {
+public interface GameTagRepository extends JpaRepository<GameTag, Long>, GameTagRepositoryCustom {
   default GameTag findByIdOrElseThrow(Long id) {
     return findById(id).orElseThrow(() -> new NotFoundException(GameTagErrorCode.GAME_TAG_NOT_FOUND));
   }
 
-  List<GameTag> findGameTagByTagId(PageRequest pageRequest, Long tagId);
 
   List<GameTag> findGameTagsByGameId(Long game_id);
 }
