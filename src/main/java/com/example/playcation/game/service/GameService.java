@@ -71,7 +71,7 @@ public class GameService {
 
   // 게임 수정
   public CreatedGameResponseDto updateGame(Long gameId, Long userId,
-      UpdatedGameRequestDto requestDto) {
+      UpdatedGameRequestDto requestDto, String imageUrl) {
 
     Game game = gameRepository.findByIdOrElseThrow(gameId);
 
@@ -80,12 +80,12 @@ public class GameService {
       throw new NoAuthorizedException(GameErrorCode.DOES_NOT_MATCH);
     }
 
-    game.updateGame(requestDto);
+    game.updateGame(requestDto, imageUrl);
     gameRepository.save(game);
     return CreatedGameResponseDto.toDto(game);
   }
 
-  public void deleteGame(Long gameId, GameStatus status, Long userId) {
+  public void deleteGame(Long gameId, Long userId) {
 
     Game game = gameRepository.findByIdOrElseThrow(gameId);
 
@@ -94,7 +94,7 @@ public class GameService {
       throw new NoAuthorizedException(GameErrorCode.DOES_NOT_MATCH);
     }
 
-    game.deleteGame(status);
+    game.deleteGame();
 
     // 삭제하는 게임 id를 가지고 있는 게임 태그를 hard delete
     List<GameTag> gameTagList = gameTagRepository.findGameTagsByGameId(gameId);
