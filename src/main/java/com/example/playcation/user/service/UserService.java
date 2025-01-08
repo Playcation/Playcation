@@ -1,14 +1,13 @@
 package com.example.playcation.user.service;
 
-import com.example.playcation.enums.Auth;
+import com.example.playcation.enums.Role;
+import com.example.playcation.enums.Role;
 import com.example.playcation.exception.DuplicatedException;
 import com.example.playcation.exception.InvalidInputException;
 import com.example.playcation.exception.NoAuthorizedException;
 import com.example.playcation.exception.UserErrorCode;
 import com.example.playcation.s3.service.S3Service;
 import com.example.playcation.user.dto.DeletedUserRequestDto;
-import com.example.playcation.user.dto.LoginUserRequestDto;
-import com.example.playcation.user.dto.LoginUserResponseDto;
 import com.example.playcation.user.dto.SignInUserRequestDto;
 import com.example.playcation.user.dto.UpdatedUserPasswordRequestDto;
 import com.example.playcation.user.dto.UpdatedUserRequestDto;
@@ -29,13 +28,13 @@ public class UserService {
   private final BCryptPasswordEncoder bCryptPasswordEncoder;
   private final S3Service s3Service;
 
-  // 로그인
-  public LoginUserResponseDto login(LoginUserRequestDto loginUserRequestDto) {
-    User user = userRepository.findByEmailOrElseThrow(loginUserRequestDto.getEmail());
-    checkPassword(user, loginUserRequestDto.getPassword());
-
-    return LoginUserResponseDto.toDto(user, "");
-  }
+//  // 로그인
+//  public LoginUserResponseDto login(LoginUserRequestDto loginUserRequestDto) {
+//    User user = userRepository.findByEmailOrElseThrow(loginUserRequestDto.getEmail());
+//    checkPassword(user, loginUserRequestDto.getPassword());
+//
+//    return LoginUserResponseDto.toDto(user, "");
+//  }
 
   // 회원 삭제
   @Transactional
@@ -66,7 +65,7 @@ public class UserService {
         .password(password)
         .imageUrl(filePath)
         .name(signInUserRequestDto.getName())
-        .auth(Auth.USER)
+        .role(Role.USER)
         .build()
     );
     return UserResponseDto.toDto(user);
@@ -103,10 +102,10 @@ public class UserService {
   @Transactional
   public UserResponseDto updateUserAuth(Long id) {
     User user = userRepository.findByIdOrElseThrow(id);
-    if(user.getAuth() != Auth.USER){
+    if(user.getRole() != Role.USER){
       throw new NoAuthorizedException(UserErrorCode.NOT_AUTHORIZED_MANAGER);
     }
-    user.updateAuth();
+    user.updateRole();
     return UserResponseDto.toDto(user);
   }
 }

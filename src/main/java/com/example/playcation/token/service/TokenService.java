@@ -1,5 +1,6 @@
 package com.example.playcation.token.service;
 
+import com.example.playcation.common.TokenSettings;
 import com.example.playcation.exception.NoAuthorizedException;
 import com.example.playcation.exception.TokenErrorCode;
 import com.example.playcation.token.entity.RefreshToken;
@@ -24,7 +25,7 @@ public class TokenService {
     String refresh = null;
     Cookie[] cookies = request.getCookies();
     for (Cookie cookie : cookies) {
-      if (cookie.getName().equals("refresh")) {
+      if (cookie.getName().equals(TokenSettings.REFRESH_TOKEN_CATEGORY)) {
         refresh = cookie.getValue();
       }
     }
@@ -34,7 +35,7 @@ public class TokenService {
       throw new NoAuthorizedException(TokenErrorCode.NO_REFRESH_TOKEN);
     }
 
-    //expired check
+    // 토큰 만료 확인
     try {
       jwtUtil.isExpired(refresh);
     } catch (ExpiredJwtException e) {
@@ -45,7 +46,7 @@ public class TokenService {
     // 토큰이 refresh인지 확인 (발급시 페이로드에 명시)
     String category = jwtUtil.getCategory(refresh);
 
-    if (!category.equals("refresh")) {
+    if (!category.equals(TokenSettings.REFRESH_TOKEN_CATEGORY)) {
       // 리플레시 토큰이 아닐 때
       throw new NoAuthorizedException(TokenErrorCode.NO_REFRESH_TOKEN);
     }
@@ -56,15 +57,15 @@ public class TokenService {
     }
 
     String userId = jwtUtil.getUserId(refresh);
-    String role = jwtUtil.getAuth(refresh);
+    String auth = jwtUtil.getAuth(refresh);
 
-    //make new JWT
-    String newAccess = jwtUtil.createJwt("access", userId, role, 600000L);
-    String newRefresh = jwtUtil.createJwt("refresh", userId, role, 86400000L);
+    // JWT 토큰 생성
+    String newAccess = TokenSettings.TOKEN_TYPE + jwtUtil.createJwt(TokenSettings.ACCESS_TOKEN_CATEGORY, userId, auth, TokenSettings.ACCESS_TOKEN_EXPIRATION);
+    String newRefresh = jwtUtil.createJwt(TokenSettings.REFRESH_TOKEN_CATEGORY, userId, auth, TokenSettings.REFRESH_TOKEN_EXPIRATION);
 
     //Refresh 토큰 저장 DB에 기존의 Refresh 토큰 삭제 후 새 Refresh 토큰 저장
     tokenRepository.deleteByRefresh(refresh);
-    addRefreshEntity(userId, newRefresh, 86400000L);
+    addRefreshEntity(userId, newRefresh, TokenSettings.REFRESH_TOKEN_EXPIRATION);
 
     return new String[] {newAccess, newRefresh};
   }
