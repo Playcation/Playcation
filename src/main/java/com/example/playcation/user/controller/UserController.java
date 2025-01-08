@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -36,24 +37,6 @@ public class UserController {
 
   private final UserService userService;
   private final JWTUtil jwtUtil;
-
-  // 로그인
-  @PostMapping("/login")
-  public ResponseEntity<LoginUserResponseDto> login(
-      @Valid @RequestBody LoginUserRequestDto userLoginRequestDto
-  ) {
-    LoginUserResponseDto responseDto = userService.login(userLoginRequestDto);
-    return ResponseEntity.ok(responseDto);
-  }
-
-  // 로그 아웃
-  @PostMapping("/logout")
-  public ResponseEntity<String> logout(
-      @RequestHeader("Authorization") String authorizationHeader
-  ){
-
-    return ResponseEntity.ok().body("로그아웃 되었습니다.");
-  }
 
   // 회원 가입
   @PostMapping("/sign-in")
@@ -106,5 +89,14 @@ public class UserController {
     // 탈퇴 처리 메서드 호출
     userService.delete(id, userLogoutRequestDto);
     return "회원 탈퇴가 완료되었습니다.";
+  }
+
+  // ADMIN
+  @PutMapping("/{userId}/update/role")
+  public ResponseEntity<UserResponseDto> updateUserRole(
+      @RequestHeader("Authorization") String authorizationHeader,
+      @RequestParam Long userId
+  ){
+    return ResponseEntity.ok().body(userService.updateUserAuth(userId));
   }
 }
