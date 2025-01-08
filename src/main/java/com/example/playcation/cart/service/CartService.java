@@ -35,6 +35,7 @@ public class CartService {
     return cartList.stream()
         .map(cart -> new CartGameResponseDto(
             cart.getGame().getId(),
+            cart.getGame().getImageUrl(),
             cart.getGame().getTitle(),
             cart.getGame().getPrice()
         ))

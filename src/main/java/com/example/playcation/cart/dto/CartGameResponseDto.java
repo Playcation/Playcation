@@ -13,6 +13,7 @@ import lombok.Getter;
 public class CartGameResponseDto {
 
   private Long id;
+  private String imageUrl;
   private String title;
   private BigDecimal price;
 
