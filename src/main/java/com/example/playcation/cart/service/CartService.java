@@ -88,6 +88,7 @@ public class CartService {
 
   }
 
+  @Transactional
   public void removeCart(Long userId) {
     // 요청한 회원 id와 일치하는 장바구니 모두 삭제
     cartRepository.deleteAllByUserId(userId);
