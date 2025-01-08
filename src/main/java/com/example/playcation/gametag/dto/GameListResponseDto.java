@@ -4,7 +4,7 @@ import com.example.playcation.game.dto.CreatedGameResponseDto;
 import com.example.playcation.game.entity.Game;
 import java.util.List;
 
-public class  GameListResponseDto {
+public class GameListResponseDto {
 
   private List<CreatedGameResponseDto> gameList;
 

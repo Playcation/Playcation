@@ -3,11 +3,10 @@ package com.example.playcation.game.controller;
 import com.example.playcation.enums.GameStatus;
 import com.example.playcation.game.dto.CreatedGameRequestDto;
 import com.example.playcation.game.dto.CreatedGameResponseDto;
-import com.example.playcation.game.dto.PageGameResponseDto;
+import com.example.playcation.game.dto.PagingGameResponseDto;
 import com.example.playcation.game.dto.UpdatedGameRequestDto;
 import com.example.playcation.game.service.GameService;
-import com.example.playcation.util.JwtTokenProvider;
-import com.example.playcation.util.TokenUtil;
+import com.example.playcation.util.JWTUtil;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
@@ -38,10 +37,8 @@ public class GameController {
   public ResponseEntity<CreatedGameResponseDto> createCard(
       @RequestHeader("Authorization") String authorizationHeader,
       @RequestBody CreatedGameRequestDto requestDto) {
-    Long id = tokenUtil.findUserByToken(authorizationHeader);
-    CreatedGameResponseDto responseDto = gameService.createGame(id, requestDto);
     Long id = jwtUtil.findUserByToken(authorizationHeader);
-    CreatedGameResponseDto responseDto = gameService.createdGame(id, requestDto);
+    CreatedGameResponseDto responseDto = gameService.createGame(id, requestDto);
     return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
   }
 

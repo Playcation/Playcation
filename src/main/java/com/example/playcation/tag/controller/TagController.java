@@ -4,7 +4,7 @@ package com.example.playcation.tag.controller;
 import com.example.playcation.tag.Dto.CreatedTagRequestDto;
 import com.example.playcation.tag.Dto.CreatedTagResponseDto;
 import com.example.playcation.tag.service.TagService;
-import com.example.playcation.util.TokenUtil;
+import com.example.playcation.util.JWTUtil;
 import java.util.List;
 import javax.net.ssl.HttpsURLConnection;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class TagController {
 
   private final TagService tagService;
-  private final TokenUtil tokenUtil;
+  private final JWTUtil jwtUtil;
 
   @PostMapping
   public ResponseEntity<CreatedTagResponseDto> createTag(@RequestBody CreatedTagRequestDto requestDto) {
