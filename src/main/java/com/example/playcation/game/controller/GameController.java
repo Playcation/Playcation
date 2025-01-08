@@ -68,7 +68,7 @@ public class GameController {
   }
 
   // 다건 조회(태그)
-  @GetMapping
+  @GetMapping("/tag")
   public ResponseEntity<GameListResponseDto> findGameTag(
       @RequestParam(required = false) int page,
       @RequestParam Long tagId) {
