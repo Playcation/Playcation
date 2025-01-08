@@ -58,10 +58,9 @@ public class GameController {
       @RequestParam(required = false) String title,
       @RequestParam(required = false) String category,
       @RequestParam(required = false) BigDecimal price,
-//      @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDateTime createdAt
-      @RequestParam(required = false) String createdAt
+      @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDateTime createdAt
   ) {
-    PageGameResponseDto games = gameService.searchGames(page, title, category, price, null);
+    PageGameResponseDto games = gameService.searchGames(page, title, category, price, createdAt);
     return new ResponseEntity<>(games, HttpStatus.OK);
   }
 
