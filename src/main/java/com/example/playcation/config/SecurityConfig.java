@@ -10,6 +10,7 @@ import com.example.playcation.token.repository.TokenRepository;
 import com.example.playcation.user.repository.UserRepository;
 import com.example.playcation.util.JWTUtil;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.Arrays;
 import java.util.Collections;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -62,57 +63,46 @@ public class SecurityConfig {
 
             CorsConfiguration configuration = new CorsConfiguration();
 
-            configuration.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
-            configuration.setAllowedMethods(Collections.singletonList("*"));
             configuration.setAllowCredentials(true);
-            configuration.setAllowedHeaders(Collections.singletonList("*"));
+            configuration.setAllowedOrigins(Arrays.asList("http://localhost:8080"));
+            configuration.setAllowedMethods(Arrays.asList("*"));
+            configuration.setAllowedHeaders(Arrays.asList("*"));
             configuration.setMaxAge(3600L);
 
-            configuration.setExposedHeaders(Collections.singletonList("Set-Cookie"));
-            configuration.setExposedHeaders(Collections.singletonList("Authorization"));
+            configuration.setExposedHeaders(Arrays.asList("Set-Cookie", "Authorization"));
 
             return configuration;
           }
         }));
 
     // csrf disable
-    http
-        .csrf(AbstractHttpConfigurer::disable);
-
+    http.csrf(AbstractHttpConfigurer::disable);
     //form 로그인 방식 disable
-    http
-        .formLogin(AbstractHttpConfigurer::disable);
-
+    http.formLogin(AbstractHttpConfigurer::disable);
     // http basic 인증 방식 disable
-    http
-        .httpBasic(AbstractHttpConfigurer::disable);
+    http.httpBasic(AbstractHttpConfigurer::disable);
 
     // oauth2
-    http
-        .oauth2Login((oauth2) -> oauth2
-            .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig
-                .userService(oAuth2Service))
+    http.oauth2Login((oauth2) -> oauth2
+            .userInfoEndpoint((userInfoEndpointConfig) ->
+                userInfoEndpointConfig.userService(oAuth2Service))
             .successHandler(successHandler));
 
-    http
-        .authorizeHttpRequests((auth) -> auth
-            .requestMatchers("/", "/users/sign-in", "/login", "/refresh").permitAll()
+    http.authorizeHttpRequests((auth) -> auth
+            .requestMatchers("/", "/users/sign-in", "/login/**", "/oauth2/**", "/refresh").permitAll()
             .requestMatchers("/users/\\d/update/role").hasAuthority("ADMIN")
             .requestMatchers("/cards").hasAuthority("MANAGER")
-            .anyRequest().authenticated());
-//            .anyRequest().hasAuthority("USER"));
+            .anyRequest().authenticated()
+    );
 
-    http
-        .addFilterBefore(new JWTFilter(userRepository, jwtUtil), CustomLoginFilter.class);
-    http
-        .addFilterBefore(new CustomLogoutFilter(jwtUtil, tokenRepository), LogoutFilter.class);
-    http
-        .addFilterAt(new CustomLoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, tokenRepository), UsernamePasswordAuthenticationFilter.class);
+    http.addFilterBefore(new JWTFilter(userRepository, jwtUtil), CustomLoginFilter.class);
+//    http.addFilterBefore(new CustomLogoutFilter(jwtUtil, tokenRepository), LogoutFilter.class);
+    http.addFilterAt(new CustomLoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, tokenRepository), UsernamePasswordAuthenticationFilter.class);
 
     // 세션 설정
-    http
-        .sessionManagement((session) -> session
-            .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+    http.sessionManagement((session) ->
+        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+    );
 
     return http.build();
   }

@@ -41,7 +41,7 @@ public class OAuth2Service extends DefaultOAuth2UserService {
     else {
       return null;
     }
-    String email = oAuth2Response.getProvider()+" "+oAuth2Response.getProviderId();
+    String email = oAuth2Response.getEmail();
     
     // 유저가 가입한 유저인지 조회 ( 다른 방법으로 )
     User existData = userRepository.findByEmail(email).orElse(null);
@@ -59,17 +59,13 @@ public class OAuth2Service extends DefaultOAuth2UserService {
 
       userRepository.save(user);
 
-      UserDto userDTO = new UserDto(email, oAuth2Response.getName(), existData.getRole());
+      UserDto userDTO = new UserDto(email, oAuth2Response.getName(), Role.USER);
 
       return new OAuth2UserDto(userDTO);
     }
     // 이미 있는 유저에 소셜로그인 연결
     else {
 
-      // 이미 소셜 아이디가 있으면 실패
-      if(existData.getSocial() != Social.NORMAL){
-        throw new DuplicatedException(UserErrorCode.EMAIL_EXIST);
-      }
 //      existData.setEmail(oAuth2Response.getEmail());
 //      existData.setName(oAuth2Response.getName());
 

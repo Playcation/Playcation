@@ -30,30 +30,24 @@ public class JWTFilter extends OncePerRequestFilter {
 
     // 일반 로그인과 oauth2를 이용한 로그인이라면 통과
     String requestUri = request.getRequestURI();
-    if (requestUri.matches("^\\/login(?:\\/.*)?$")) {
-
+    if (requestUri.matches("^\\/login(?:\\/.*)?$") ||
+        requestUri.matches("^\\/oauth2(?:\\/.*)?$")) {
       filterChain.doFilter(request, response);
       return;
     }
-    if (requestUri.matches("^\\/oauth2(?:\\/.*)?$")) {
-
-      filterChain.doFilter(request, response);
-      return;
-    }
-
 
     // 헤더에서 Authorization키에 담긴 토큰을 꺼냄
     String accessToken = request.getHeader(TokenSettings.ACCESS_TOKEN_CATEGORY);
-   if(accessToken != null) {
-     accessToken = accessToken.replace(TokenSettings.TOKEN_TYPE, "").trim();
-   }
 
     // 토큰이 없다면 다음 필터로 넘김
     if (accessToken == null) {
-
       filterChain.doFilter(request, response);
-
       return;
+    }
+
+    // "Bearer " 부분 제거
+    if(accessToken.startsWith(TokenSettings.TOKEN_TYPE)) {
+      accessToken = accessToken.substring(TokenSettings.TOKEN_TYPE.length()).trim();
     }
 
     // 토큰 만료 여부 확인, 토큰의 발급자 확인 만료시 다음 필터로 넘기지 않음
@@ -61,7 +55,6 @@ public class JWTFilter extends OncePerRequestFilter {
       jwtUtil.isExpired(accessToken);
       jwtUtil.isIssuer(accessToken);
     } catch (ExpiredJwtException e) {
-
       //response body
       PrintWriter writer = response.getWriter();
       writer.print("토큰이 만료되었습니다.");
@@ -69,29 +62,36 @@ public class JWTFilter extends OncePerRequestFilter {
       //response status code
       response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
       return;
+    } catch (Exception e) {
+      PrintWriter writer = response.getWriter();
+      writer.print("잘못된 토큰입니다.");
+      response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+      return;
     }
 
     // 토큰이 Authorization인지 확인 (발급시 페이로드에 명시)
     String category = jwtUtil.getCategory(accessToken);
-
-    if (!category.equals(TokenSettings.ACCESS_TOKEN_CATEGORY)) {
-
+    if (!TokenSettings.ACCESS_TOKEN_CATEGORY.equals(category)) {
       //response body
       PrintWriter writer = response.getWriter();
-      writer.print("잘못된 토큰입니다.");
+      writer.print("잘못된 토큰입니다 : 카테고리 불일치");
 
       //response status code
       response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
       return;
     }
 
+    // 유저 조회
     Long userId = Long.parseLong(jwtUtil.getUserId(accessToken));
-
     User user = userRepository.findByIdOrElseThrow(userId);
 
+    // 인증 셋팅
     CustomUserDetails customUserDetails = new CustomUserDetails(user);
-
-    Authentication authToken = new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
+    Authentication authToken = new UsernamePasswordAuthenticationToken(
+        customUserDetails,
+        null,
+        customUserDetails.getAuthorities()
+    );
     SecurityContextHolder.getContext().setAuthentication(authToken);
 
     filterChain.doFilter(request, response);
