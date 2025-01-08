@@ -25,9 +25,9 @@ public class GameTagRepositoryCustomImpl implements GameTagRepositoryCustom{
         .selectFrom(gameTag)
         .join(gameTag.game, game).fetchJoin()
         .where(gameTag.tag.eq(tag))
+        .orderBy(game.updatedAt.desc())
         .offset(pageRequest.getOffset())
         .limit(pageRequest.getPageSize())
-        .orderBy(game.updatedAt.desc())
         .fetch();
 
     return gameTagList;
