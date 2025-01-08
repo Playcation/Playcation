@@ -1,14 +1,21 @@
 package com.example.playcation.config;
 
+import com.example.playcation.common.TokenSettings;
 import com.example.playcation.filter.JWTFilter;
 import com.example.playcation.filter.CustomLoginFilter;
 import com.example.playcation.filter.CustomLogoutFilter;
+import com.example.playcation.oauth2.handler.SuccessHandler;
+import com.example.playcation.oauth2.service.OAuth2Service;
 import com.example.playcation.token.repository.TokenRepository;
 import com.example.playcation.user.repository.UserRepository;
 import com.example.playcation.util.JWTUtil;
+import jakarta.servlet.http.HttpServletRequest;
+import java.util.Collections;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -18,18 +25,18 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 @Configuration
 @EnableWebSecurity(debug = true)
+@RequiredArgsConstructor
 public class SecurityConfig {
 
   private final AuthenticationConfiguration authenticationConfiguration;
+  private final SuccessHandler successHandler;
+  private final OAuth2Service oAuth2Service;
   private final JWTUtil jwtUtil;
-
-  public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, JWTUtil jwtUtil) {
-    this.authenticationConfiguration = authenticationConfiguration;
-    this.jwtUtil = jwtUtil;
-  }
 
   @Bean
   public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
@@ -47,6 +54,27 @@ public class SecurityConfig {
       UserRepository userRepository,
       TokenRepository tokenRepository) throws Exception {
 
+    http
+        .cors(corsCustomizer -> corsCustomizer.configurationSource(new CorsConfigurationSource() {
+
+          @Override
+          public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
+
+            CorsConfiguration configuration = new CorsConfiguration();
+
+            configuration.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
+            configuration.setAllowedMethods(Collections.singletonList("*"));
+            configuration.setAllowCredentials(true);
+            configuration.setAllowedHeaders(Collections.singletonList("*"));
+            configuration.setMaxAge(3600L);
+
+            configuration.setExposedHeaders(Collections.singletonList("Set-Cookie"));
+            configuration.setExposedHeaders(Collections.singletonList("Authorization"));
+
+            return configuration;
+          }
+        }));
+
     // csrf disable
     http
         .csrf(AbstractHttpConfigurer::disable);
@@ -59,13 +87,20 @@ public class SecurityConfig {
     http
         .httpBasic(AbstractHttpConfigurer::disable);
 
+    // oauth2
+    http
+        .oauth2Login((oauth2) -> oauth2
+            .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig
+                .userService(oAuth2Service))
+            .successHandler(successHandler));
+
     http
         .authorizeHttpRequests((auth) -> auth
             .requestMatchers("/", "/users/sign-in", "/login", "/refresh").permitAll()
             .requestMatchers("/users/\\d/update/role").hasAuthority("ADMIN")
             .requestMatchers("/cards").hasAuthority("MANAGER")
-//            .anyRequest().hasAuthority("USER"));
             .anyRequest().authenticated());
+//            .anyRequest().hasAuthority("USER"));
 
     http
         .addFilterBefore(new JWTFilter(userRepository, jwtUtil), CustomLoginFilter.class);

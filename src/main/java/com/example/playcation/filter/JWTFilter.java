@@ -28,6 +28,20 @@ public class JWTFilter extends OncePerRequestFilter {
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
+    // 일반 로그인과 oauth2를 이용한 로그인이라면 통과
+    String requestUri = request.getRequestURI();
+    if (requestUri.matches("^\\/login(?:\\/.*)?$")) {
+
+      filterChain.doFilter(request, response);
+      return;
+    }
+    if (requestUri.matches("^\\/oauth2(?:\\/.*)?$")) {
+
+      filterChain.doFilter(request, response);
+      return;
+    }
+
+
     // 헤더에서 Authorization키에 담긴 토큰을 꺼냄
     String accessToken = request.getHeader(TokenSettings.ACCESS_TOKEN_CATEGORY);
    if(accessToken != null) {
