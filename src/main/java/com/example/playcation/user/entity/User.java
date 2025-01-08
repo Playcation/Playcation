@@ -1,11 +1,9 @@
 package com.example.playcation.user.entity;
 
-import com.example.playcation.enums.Auth;
+import com.example.playcation.enums.Role;
 import com.example.playcation.common.BaseEntity;
-import com.example.playcation.util.PasswordEncoder;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.Column;
-import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -45,16 +43,16 @@ public class User extends BaseEntity {
   private String description;
 
   @Enumerated(value = EnumType.STRING)
-  private Auth auth;
+  private Role role;
 
   @JsonFormat(pattern = "yy:MM:dd hh:mm:ss")
   private LocalDateTime deletedAt;
 
-  public User(String email, String password, String name, Auth auth) {
+  public User(String email, String password, String name, Role role) {
     this.email = email;
     this.password = password;
     this.name = name;
-    this.auth = auth;
+    this.role = role;
   }
 
   public void update(String name, String description, String imageUrl) {
@@ -63,8 +61,8 @@ public class User extends BaseEntity {
     this.description = description == null ? this.description : description;
   }
 
-  public void updateAuth(){
-    this.auth = Auth.MANAGER;
+  public void updateRole(){
+    this.role = Role.MANAGER;
   }
 
   public void updatePassword(String password){

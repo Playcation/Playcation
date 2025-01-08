@@ -10,8 +10,18 @@ public class UserResponseDto {
 
   private String email;
 
-  public static UserResponseDto toDto(User user){
-    return new UserResponseDto(user.getEmail());
-  }
+  private String filePath;
 
+  private String name;
+
+  private String description;
+
+  public static UserResponseDto toDto(User user){
+    return new UserResponseDto(
+        user.getEmail(),
+        user.getImageUrl(),
+        user.getName(),
+        user.getDescription()
+    );
+  }
 }
