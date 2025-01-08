@@ -63,7 +63,7 @@ public class SecurityConfig {
         .authorizeHttpRequests((auth) -> auth
             .requestMatchers("/", "/users/sign-in", "/login", "/refresh").permitAll()
             .requestMatchers("/users/\\d/update/role").hasAuthority("ADMIN")
-            .requestMatchers("/cards").hasAuthority("MANAGER")
+            .requestMatchers("/games").hasAuthority("MANAGER")
 //            .anyRequest().hasAuthority("USER"));
             .anyRequest().authenticated());
 
