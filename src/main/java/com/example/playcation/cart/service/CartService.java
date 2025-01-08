@@ -83,9 +83,6 @@ public class CartService {
     // 변경된 장바구니 저장
     Cart savedCart = cartRepository.save(cart);
 
-    // 변경된 장바구니 저장
-    cartRepository.save(savedCart);
-
     return UpdatedCartGameResponseDto.toDto(savedCart);
   }
 
