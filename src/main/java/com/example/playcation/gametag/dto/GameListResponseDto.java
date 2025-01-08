@@ -3,7 +3,9 @@ package com.example.playcation.gametag.dto;
 import com.example.playcation.game.dto.CreatedGameResponseDto;
 import com.example.playcation.game.entity.Game;
 import java.util.List;
+import lombok.Getter;
 
+@Getter
 public class GameListResponseDto {
 
   private List<CreatedGameResponseDto> gameList;
