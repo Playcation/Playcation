@@ -61,15 +61,15 @@ public class Game extends BaseEntity {
     this.imageUrl = imageUrl;
   }
 
-  public void updateGame(UpdatedGameRequestDto requestDto) {
+  public void updateGame(UpdatedGameRequestDto requestDto, String imageUrl) {
     this.title = requestDto.getTitle();
     this.category = requestDto.getCategory();
     this.price = requestDto.getPrice();
     this.description = requestDto.getDescription();
-    this.imageUrl = requestDto.getImageUrl();
+    this.imageUrl = imageUrl;
   }
 
-  public void deleteGame(GameStatus status) {
-    this.status = status;
+  public void deleteGame() {
+    this.status = GameStatus.OFF_SAL;
   }
 }

@@ -5,12 +5,12 @@ import java.util.List;
 import lombok.Getter;
 
 @Getter
-public class PageGameResponseDto {
+public class PagingGameResponseDto {
 
   private List<CreatedGameResponseDto> gameList;
   private Long count;
 
-  public PageGameResponseDto(List<Game> gameList, Long count) {
+  public PagingGameResponseDto(List<Game> gameList, Long count) {
     this.gameList = gameList.stream()
         .map(CreatedGameResponseDto::toDto)
         .toList();
