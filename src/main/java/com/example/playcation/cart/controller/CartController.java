@@ -10,8 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,10 +31,10 @@ public class CartController {
    * @return CartGameResponseDto 리스트
    */
   @GetMapping
-  public ResponseEntity<List<CartGameResponseDto>> getCartItems(
+  public ResponseEntity<List<CartGameResponseDto>> findCartItems(
       @RequestHeader("Authorization") String authorizationHeader) {
     Long userId = jwtUtil.findUserByToken(authorizationHeader);
-    List<CartGameResponseDto> games = cartService.getCartItems(userId);
+    List<CartGameResponseDto> games = cartService.findCartItems(userId);
 
     return new ResponseEntity<>(games, HttpStatus.OK);
   }
@@ -46,7 +46,7 @@ public class CartController {
    * @param authorizationHeader
    * @return UpdatedCartGameResponseDto ( cart 엔티티와 필드 동일 )
    */
-  @PatchMapping("/add/{gameId}")
+  @PostMapping("/add/{gameId}")
   public ResponseEntity<UpdatedCartGameResponseDto> addGameToCart(@PathVariable Long gameId,
       @RequestHeader("Authorization") String authorizationHeader) {
     Long userId = jwtUtil.findUserByToken(authorizationHeader);
@@ -59,7 +59,7 @@ public class CartController {
    *
    * @param gameId
    * @param authorizationHeader
-   * @return UpdatedCartGameResponseDto ( cart 엔티티와 필드 동일 )
+   * @return String ( 게임 삭제 완료 메시지 )
    */
   @DeleteMapping("/delete/{gameId}")
   public ResponseEntity<String> deleteGameFromCart(@PathVariable Long gameId,

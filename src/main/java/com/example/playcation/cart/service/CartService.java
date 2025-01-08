@@ -29,7 +29,7 @@ public class CartService {
    * @param userId
    * @return CartGameResponseDto 리스트
    */
-  public List<CartGameResponseDto> getCartItems(Long userId) {
+  public List<CartGameResponseDto> findCartItems(Long userId) {
 
     List<Cart> cartList = cartRepository.findAllByUserId(userId);
     return cartList.stream()
@@ -77,7 +77,6 @@ public class CartService {
    *
    * @param userId
    * @param gameId
-   * @return UpdatedCartGameResponseDto ( cart 엔티티와 필드 동일 )
    */
   @Transactional
   public void deleteGameFromCart(Long userId, Long gameId) {
