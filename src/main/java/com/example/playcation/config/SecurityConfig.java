@@ -47,15 +47,15 @@ public class SecurityConfig {
       UserRepository userRepository,
       TokenRepository tokenRepository) throws Exception {
 
-    //csrf disable
+    // csrf disable
     http
         .csrf(AbstractHttpConfigurer::disable);
 
-    //From 로그인 방식 disable
+    //form 로그인 방식 disable
     http
         .formLogin(AbstractHttpConfigurer::disable);
 
-    //http basic 인증 방식 disable
+    // http basic 인증 방식 disable
     http
         .httpBasic(AbstractHttpConfigurer::disable);
 
@@ -74,7 +74,7 @@ public class SecurityConfig {
     http
         .addFilterAt(new CustomLoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, tokenRepository), UsernamePasswordAuthenticationFilter.class);
 
-    //세션 설정
+    // 세션 설정
     http
         .sessionManagement((session) -> session
             .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
