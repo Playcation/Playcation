@@ -63,12 +63,13 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
 
     Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
     Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
-    GrantedAuthority author = iterator.next();
+    GrantedAuthority auth = iterator.next();
 
-    String auth = author.getAuthority();
+    String role = auth.getAuthority();
 
-    String access = TokenSettings.TOKEN_TYPE +  jwtUtil.createJwt(TokenSettings.ACCESS_TOKEN_CATEGORY, userId, auth, TokenSettings.ACCESS_TOKEN_EXPIRATION);
-    String refresh = jwtUtil.createJwt(TokenSettings.REFRESH_TOKEN_CATEGORY, userId, auth, TokenSettings.REFRESH_TOKEN_EXPIRATION);
+    String access = TokenSettings.TOKEN_TYPE +  jwtUtil.createJwt(TokenSettings.ACCESS_TOKEN_CATEGORY, userId,
+        role, TokenSettings.ACCESS_TOKEN_EXPIRATION);
+    String refresh = jwtUtil.createJwt(TokenSettings.REFRESH_TOKEN_CATEGORY, userId, role, TokenSettings.REFRESH_TOKEN_EXPIRATION);
 
     //Refresh 토큰 저장
     Date date = new Date(System.currentTimeMillis() + TokenSettings.REFRESH_TOKEN_EXPIRATION);
