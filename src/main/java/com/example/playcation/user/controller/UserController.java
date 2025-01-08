@@ -37,23 +37,23 @@ public class UserController {
   private final UserService userService;
   private final JWTUtil jwtUtil;
 
-  // 로그인
-  @PostMapping("/login")
-  public ResponseEntity<LoginUserResponseDto> login(
-      @Valid @RequestBody LoginUserRequestDto userLoginRequestDto
-  ) {
-    LoginUserResponseDto responseDto = userService.login(userLoginRequestDto);
-    return ResponseEntity.ok(responseDto);
-  }
-
-  // 로그 아웃
-  @PostMapping("/logout")
-  public ResponseEntity<String> logout(
-      @RequestHeader("Authorization") String authorizationHeader
-  ){
-
-    return ResponseEntity.ok().body("로그아웃 되었습니다.");
-  }
+//  // 로그인
+//  @PostMapping("/login")
+//  public ResponseEntity<LoginUserResponseDto> login(
+//      @Valid @RequestBody LoginUserRequestDto userLoginRequestDto
+//  ) {
+//    LoginUserResponseDto responseDto = userService.login(userLoginRequestDto);
+//    return ResponseEntity.ok(responseDto);
+//  }
+//
+//  // 로그 아웃
+//  @PostMapping("/logout")
+//  public ResponseEntity<String> logout(
+//      @RequestHeader("Authorization") String authorizationHeader
+//  ){
+//
+//    return ResponseEntity.ok().body("로그아웃 되었습니다.");
+//  }
 
   // 회원 가입
   @PostMapping("/sign-in")
@@ -67,7 +67,7 @@ public class UserController {
   // 유저 프로필 조회
   @GetMapping
   public ResponseEntity<UserResponseDto> findUser(
-      @RequestHeader("Authorization") String authorizationHeader
+      @RequestHeader("access") String authorizationHeader
   ){
     Long id = jwtUtil.findUserByToken(authorizationHeader);
 

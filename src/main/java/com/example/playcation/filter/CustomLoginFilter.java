@@ -19,13 +19,13 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-public class LoginFilter extends UsernamePasswordAuthenticationFilter {
+public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
 
   private final AuthenticationManager authenticationManager;
   private final TokenRepository tokenRepository;
   private final JWTUtil jwtUtil;
 
-  public LoginFilter(AuthenticationManager authenticationManager, JWTUtil jwtUtil, TokenRepository tokenRepository) {
+  public CustomLoginFilter(AuthenticationManager authenticationManager, JWTUtil jwtUtil, TokenRepository tokenRepository) {
     this.authenticationManager = authenticationManager;
     this.tokenRepository = tokenRepository;
     this.jwtUtil = jwtUtil;
@@ -36,8 +36,6 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     String username = obtainUsername(request);
     String password = obtainPassword(request);
-
-    System.out.println(username);
 
     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(username, password, null);
 
@@ -52,12 +50,12 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
     Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
-    GrantedAuthority auth = iterator.next();
+    GrantedAuthority author = iterator.next();
 
-    String role = auth.getAuthority();
+    String auth = author.getAuthority();
 
-    String access = jwtUtil.createJwt("access", userId, role, 600000L);
-    String refresh = jwtUtil.createJwt("refresh", userId, role, 86400000L);
+    String access = jwtUtil.createJwt("access", userId, auth, 600000L);
+    String refresh = jwtUtil.createJwt("refresh", userId, auth, 86400000L);
 
     //Refresh 토큰 저장
     Date date = new Date(System.currentTimeMillis() + 86400000L);
@@ -72,21 +70,13 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
   private Cookie createCookie(String key, String value) {
 
     Cookie cookie = new Cookie(key, value);
+    // 쿠키 1일 유지
     cookie.setMaxAge(24*60*60);
     //cookie.setSecure(true);
     //cookie.setPath("/");
     cookie.setHttpOnly(true);
 
     return cookie;
-  }
-
-  private void addRefreshEntity(String userId, String refresh, Long expiredMs) {
-
-    Date date = new Date(System.currentTimeMillis() + expiredMs);
-
-    RefreshToken refreshEntity = new RefreshToken(userId, refresh, date.toString());
-
-    tokenRepository.save(refreshEntity);
   }
 
   @Override

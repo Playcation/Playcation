@@ -1,7 +1,7 @@
 package com.example.playcation.config;
 
 import com.example.playcation.filter.JWTFilter;
-import com.example.playcation.filter.LoginFilter;
+import com.example.playcation.filter.CustomLoginFilter;
 import com.example.playcation.filter.CustomLogoutFilter;
 import com.example.playcation.token.repository.TokenRepository;
 import com.example.playcation.user.repository.UserRepository;
@@ -12,6 +12,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -23,13 +24,10 @@ import org.springframework.security.web.authentication.logout.LogoutFilter;
 public class SecurityConfig {
 
   private final AuthenticationConfiguration authenticationConfiguration;
-  private final TokenRepository tokenRepository;
   private final JWTUtil jwtUtil;
 
-
-  public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, JWTUtil jwtUtil, TokenRepository tokenRepository) {
+  public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, JWTUtil jwtUtil) {
     this.authenticationConfiguration = authenticationConfiguration;
-    this.tokenRepository = tokenRepository;
     this.jwtUtil = jwtUtil;
   }
 
@@ -44,33 +42,37 @@ public class SecurityConfig {
   }
 
   @Bean
-  public SecurityFilterChain filterChain(HttpSecurity http, UserRepository userRepository,
+  public SecurityFilterChain filterChain(
+      HttpSecurity http,
+      UserRepository userRepository,
       TokenRepository tokenRepository) throws Exception {
 
     //csrf disable
     http
-        .csrf((auth) -> auth.disable());
+        .csrf(AbstractHttpConfigurer::disable);
 
     //From 로그인 방식 disable
     http
-        .formLogin((auth) -> auth.disable());
+        .formLogin(AbstractHttpConfigurer::disable);
 
     //http basic 인증 방식 disable
     http
-        .httpBasic((auth) -> auth.disable());
+        .httpBasic(AbstractHttpConfigurer::disable);
 
     http
         .authorizeHttpRequests((auth) -> auth
             .requestMatchers("/", "/users/sign-in", "/login", "/users/refresh").permitAll()
-            .requestMatchers("/admin").hasRole("ADMIN")
-            .anyRequest().authenticated());
+            .requestMatchers("/admin").hasAuthority("ADMIN")
+            .requestMatchers("/manager").hasAuthority("MANAGER")
+            .anyRequest().hasAuthority("USER"));
+//            .anyRequest().authenticated());
 
     http
-        .addFilterBefore(new JWTFilter(userRepository, jwtUtil), LoginFilter.class);
+        .addFilterBefore(new JWTFilter(userRepository, jwtUtil), CustomLoginFilter.class);
     http
         .addFilterBefore(new CustomLogoutFilter(jwtUtil, tokenRepository), LogoutFilter.class);
     http
-        .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, tokenRepository), UsernamePasswordAuthenticationFilter.class);
+        .addFilterAt(new CustomLoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, tokenRepository), UsernamePasswordAuthenticationFilter.class);
 
     //세션 설정
     http

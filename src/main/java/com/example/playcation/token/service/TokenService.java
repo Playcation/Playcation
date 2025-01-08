@@ -34,7 +34,7 @@ public class TokenService {
       throw new NoAuthorizedException(TokenErrorCode.NO_REFRESH_TOKEN);
     }
 
-    //expired check
+    // 토큰 만료 확인
     try {
       jwtUtil.isExpired(refresh);
     } catch (ExpiredJwtException e) {
@@ -56,11 +56,11 @@ public class TokenService {
     }
 
     String userId = jwtUtil.getUserId(refresh);
-    String role = jwtUtil.getAuth(refresh);
+    String auth = jwtUtil.getAuth(refresh);
 
     //make new JWT
-    String newAccess = jwtUtil.createJwt("access", userId, role, 600000L);
-    String newRefresh = jwtUtil.createJwt("refresh", userId, role, 86400000L);
+    String newAccess = jwtUtil.createJwt("access", userId, auth, 600000L);
+    String newRefresh = jwtUtil.createJwt("refresh", userId, auth, 86400000L);
 
     //Refresh 토큰 저장 DB에 기존의 Refresh 토큰 삭제 후 새 Refresh 토큰 저장
     tokenRepository.deleteByRefresh(refresh);
