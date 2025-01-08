@@ -3,23 +3,35 @@ package com.example.playcation.s3.service;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
+import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.model.S3ObjectInputStream;
+import com.amazonaws.util.IOUtils;
 import com.example.playcation.s3.entity.FileDetail;
 import com.example.playcation.s3.repository.FileDetailRepository;
 import jakarta.transaction.Transactional;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.LocalDate;
+import java.net.MalformedURLException;
+import java.net.URLEncoder;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -56,7 +68,8 @@ public class S3Service {
     FileDetail attachFile = new FileDetail(bucket, fileName, filePath, multipartFile.getSize(), multipartFile.getContentType());
     fileDetailRepository.save(attachFile);
 
-    return attachFile.getFilePath();
+//    return attachFile.getFilePath();
+    return attachFile.getFileName();
   }
 
   public FileDetail findByFileNameOrElseThrow(String fileName) {
@@ -94,4 +107,21 @@ public class S3Service {
     }
     return CompletableFuture.completedFuture(filePaths);
   }
+
+  @Transactional
+  public byte[] getObject(String storedFileName) throws IOException{
+    S3Object o = s3.getObject(new GetObjectRequest(bucket, storedFileName));
+    S3ObjectInputStream objectInputStream = o.getObjectContent();
+    byte[] bytes = IOUtils.toByteArray(objectInputStream);
+
+    String fileName = URLEncoder.encode(storedFileName, "UTF-8").replaceAll("\\+", "%20");
+    HttpHeaders httpHeaders = new HttpHeaders();
+//    httpHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+    httpHeaders.setContentType(MediaType.IMAGE_JPEG);
+    httpHeaders.setContentLength(bytes.length);
+    httpHeaders.setContentDispositionFormData("attachment", fileName);
+
+    return bytes;
+  }
+
 }
