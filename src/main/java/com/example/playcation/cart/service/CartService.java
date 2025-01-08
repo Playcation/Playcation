@@ -4,10 +4,13 @@ import com.example.playcation.cart.dto.CartGameResponseDto;
 import com.example.playcation.cart.dto.UpdatedCartGameResponseDto;
 import com.example.playcation.cart.entity.Cart;
 import com.example.playcation.cart.repository.CartRepository;
+import com.example.playcation.exception.CartErrorCode;
+import com.example.playcation.exception.DuplicatedException;
 import com.example.playcation.game.entity.Game;
 import com.example.playcation.game.repository.GameRepository;
 import com.example.playcation.user.entity.User;
 import com.example.playcation.user.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,10 +31,10 @@ public class CartService {
    */
   public List<CartGameResponseDto> getCartItems(Long userId) {
 
-    List<Cart> cartList = cartRepository.findAllById(userId);
+    List<Cart> cartList = cartRepository.findAllByUserId(userId);
     return cartList.stream()
         .map(cart -> new CartGameResponseDto(
-            cart.getId(),
+            cart.getGame().getId(),
             cart.getGame().getTitle(),
             cart.getGame().getPrice()
         ))
@@ -45,13 +48,16 @@ public class CartService {
    * @param gameId
    * @return UpdatedCartGameResponseDto ( cart 엔티티와 필드 동일 )
    */
+  @Transactional
   public UpdatedCartGameResponseDto addGameToCart(Long userId, Long gameId) {
     // User, game 조회 및 예외 처리
     User user = userRepository.findByIdOrElseThrow(userId);
     Game game = gameRepository.findByIdOrElseThrow(gameId);
 
     // 이미 회원의 장바구니에 게임이 존재하는지 확인
-    cartRepository.findCartByUserIdAndGameIdOrElseThrow(userId, gameId);
+    if (cartRepository.findByUserIdAndGameId(userId, gameId).isPresent()) {
+      throw new DuplicatedException(CartErrorCode.GAME_ALREADY_IN_CART);
+    }
 
     // 해당 회원의 장바구니에 게임 추가
     Cart newCart = Cart.builder()
@@ -72,18 +78,14 @@ public class CartService {
    * @param gameId
    * @return UpdatedCartGameResponseDto ( cart 엔티티와 필드 동일 )
    */
-  public UpdatedCartGameResponseDto deleteGameFromCart(Long userId, Long gameId) {
-
+  @Transactional
+  public void deleteGameFromCart(Long userId, Long gameId) {
     // 회원의 장바구니에 게임이 존재하는지 확인
     Cart cart = cartRepository.findCartByUserIdAndGameIdOrElseThrow(userId, gameId);
 
     // 장바구니에서 게임 삭제
-    cartRepository.delete(cart);
+    cartRepository.deleteCartById(cart.getId());
 
-    // 변경된 장바구니 저장
-    Cart savedCart = cartRepository.save(cart);
-
-    return UpdatedCartGameResponseDto.toDto(savedCart);
   }
 
   public void removeCart(Long userId) {

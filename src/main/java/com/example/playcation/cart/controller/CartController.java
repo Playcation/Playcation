@@ -46,7 +46,7 @@ public class CartController {
    * @param authorizationHeader
    * @return UpdatedCartGameResponseDto ( cart 엔티티와 필드 동일 )
    */
-  @PatchMapping("/add/{gameId}")
+  @PatchMapping("/{userId}/games/{gameId}")
   public ResponseEntity<UpdatedCartGameResponseDto> addGameToCart(@PathVariable Long gameId,
       @RequestHeader("Authorization") String authorizationHeader) {
     Long userId = tokenUtil.findUserByToken(authorizationHeader);
@@ -61,12 +61,12 @@ public class CartController {
    * @param authorizationHeader
    * @return UpdatedCartGameResponseDto ( cart 엔티티와 필드 동일 )
    */
-  @DeleteMapping("/delete/{gameId}")
-  public ResponseEntity<UpdatedCartGameResponseDto> deleteGameFromCart(@PathVariable Long gameId,
+  @DeleteMapping("/{userId}/games/{gameId}")
+  public ResponseEntity<String> deleteGameFromCart(@PathVariable Long gameId,
       @RequestHeader("Authorization") String authorizationHeader) {
     Long userId = tokenUtil.findUserByToken(authorizationHeader);
-    UpdatedCartGameResponseDto updatedCart = cartService.deleteGameFromCart(userId, gameId);
-    return new ResponseEntity<>(updatedCart, HttpStatus.OK);
+    cartService.deleteGameFromCart(userId, gameId);
+    return new ResponseEntity<>("게임 삭제 완료", HttpStatus.OK);
   }
 
   /**
