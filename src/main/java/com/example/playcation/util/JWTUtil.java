@@ -3,6 +3,7 @@ package com.example.playcation.util;
 import com.example.playcation.common.TokenSettings;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import jakarta.servlet.http.Cookie;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import javax.crypto.SecretKey;
@@ -62,5 +63,17 @@ public class JWTUtil {
         .expiration(new Date(System.currentTimeMillis() + expiredMs)) // 토큰 만료시간
         .signWith(secretKey)  // secretKey를 통한 토큰 암호화
         .compact();
+  }
+
+  // 쿠키에 리플레시 토큰을 담기위해 쿠키를 생성하는 로직
+  public Cookie createCookie(String key, String value) {
+    Cookie cookie = new Cookie(key, value);
+    // 쿠키 1일 유지
+    cookie.setMaxAge(TokenSettings.COOKIE_EXPIRATION);
+    //cookie.setSecure(true);
+    cookie.setPath("/");
+    cookie.setHttpOnly(true);
+
+    return cookie;
   }
 }

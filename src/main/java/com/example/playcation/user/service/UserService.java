@@ -2,6 +2,7 @@ package com.example.playcation.user.service;
 
 import com.example.playcation.enums.Role;
 import com.example.playcation.enums.Role;
+import com.example.playcation.enums.Social;
 import com.example.playcation.exception.DuplicatedException;
 import com.example.playcation.exception.InvalidInputException;
 import com.example.playcation.exception.NoAuthorizedException;
@@ -27,14 +28,6 @@ public class UserService {
   private final UserRepository userRepository;
   private final BCryptPasswordEncoder bCryptPasswordEncoder;
   private final S3Service s3Service;
-
-//  // 로그인
-//  public LoginUserResponseDto login(LoginUserRequestDto loginUserRequestDto) {
-//    User user = userRepository.findByEmailOrElseThrow(loginUserRequestDto.getEmail());
-//    checkPassword(user, loginUserRequestDto.getPassword());
-//
-//    return LoginUserResponseDto.toDto(user, "");
-//  }
 
   // 회원 삭제
   @Transactional
@@ -66,6 +59,7 @@ public class UserService {
         .imageUrl(filePath)
         .name(signInUserRequestDto.getName())
         .role(Role.USER)
+        .social(Social.NORMAL)
         .build()
     );
     return UserResponseDto.toDto(user);
