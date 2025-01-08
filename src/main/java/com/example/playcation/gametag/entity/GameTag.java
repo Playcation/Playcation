@@ -22,13 +22,13 @@ import org.hibernate.annotations.OnDeleteAction;
 @NoArgsConstructor
 @Builder
 @Table(name = "`game_tag`")
-@OnDelete(action = OnDeleteAction.CASCADE)
 public class GameTag {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
+  @OnDelete(action = OnDeleteAction.CASCADE)
   @ManyToOne(fetch = FetchType.LAZY)
   private Tag tag;
 
