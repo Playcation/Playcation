@@ -16,6 +16,7 @@ import com.example.playcation.library.entity.Library;
 import com.example.playcation.library.repository.LibraryRepository;
 import com.example.playcation.user.entity.User;
 import com.example.playcation.user.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -36,6 +37,7 @@ public class GameService {
 
 
   // 게임 생성
+  @Transactional
   public CreatedGameResponseDto createGame(Long id,
       CreatedGameRequestDto requestDto) {
 
@@ -73,6 +75,7 @@ public class GameService {
   }
 
   // 게임 수정
+  @Transactional
   public CreatedGameResponseDto updateGame(Long gameId, Long userId,
       UpdatedGameRequestDto requestDto, String imageUrl) {
 
@@ -88,6 +91,7 @@ public class GameService {
     return CreatedGameResponseDto.toDto(game);
   }
 
+  @Transactional
   public void deleteGame(Long gameId, Long userId) {
 
     Game game = gameRepository.findByIdOrElseThrow(gameId);
