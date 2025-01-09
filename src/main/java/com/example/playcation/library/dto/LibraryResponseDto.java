@@ -26,7 +26,7 @@ public class LibraryResponseDto {
         library.getId(),
         library.getUser().getId(),
         library.getGame().getId(),
-        library.getIsFavourite()
+        library.getFavourite()
     );
   }
 }

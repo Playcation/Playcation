@@ -1,6 +1,7 @@
 package com.example.playcation.library.service;
 
 import com.example.playcation.exception.DuplicatedException;
+import com.example.playcation.exception.LibraryErrorCode;
 import com.example.playcation.game.entity.Game;
 import com.example.playcation.game.repository.GameRepository;
 import com.example.playcation.gametag.dto.GameListResponseDto;
@@ -8,6 +9,7 @@ import com.example.playcation.library.dto.LibraryGameResponseDto;
 import com.example.playcation.library.dto.LibraryListResponseDto;
 import com.example.playcation.library.dto.LibraryRequestDto;
 import com.example.playcation.library.dto.LibraryResponseDto;
+import com.example.playcation.library.dto.UpdatedFavouriteRequestDto;
 import com.example.playcation.library.entity.Library;
 import com.example.playcation.library.repository.LibraryRepository;
 import com.example.playcation.user.entity.User;
@@ -38,7 +40,7 @@ public class LibraryService {
     Library library = Library.builder()
         .user(user)
         .game(game)
-        .isFavourite(false)
+        .favourite(false)
         .build();
 
     libraryRepository.save(library);
@@ -63,10 +65,40 @@ public class LibraryService {
 
     List<LibraryGameResponseDto> gameList = new ArrayList<>();
     for (Library library : libraryList) {
-      gameList.add(new LibraryGameResponseDto(library.getGame(), library.getIsFavourite(), listDto.getCount()));
+      gameList.add(new LibraryGameResponseDto(library.getGame(), library.getFavourite(), listDto.getCount()));
     }
 
     return gameList;
 
+  }
+
+  public LibraryResponseDto updateFavourite(Long libraryId, UpdatedFavouriteRequestDto requestDto, Long userId) {
+    Library library = libraryRepository.findByIdOrElseThrow(libraryId);
+
+    // 접속한 유저가 수정하려는 라이브러리의 소유자가 맞는지 확인
+    if (!library.getUser().getId().equals(userId)) {
+      throw new DuplicatedException(LibraryErrorCode.CANNOT_BE_MODIFIED);
+    }
+
+    // 유저가 바꾸려는 즐겨찾기 상태와 현재 라이브러리의 즐겨찾기의 상태가 같은지 확인
+    if (library.getFavourite() == requestDto.isFavourite()) {
+      throw new DuplicatedException(LibraryErrorCode.INVALID_INPUT);
+    }
+
+    library.updateFavourite(requestDto.isFavourite());
+    libraryRepository.save(library);
+
+    return LibraryResponseDto.toDto(library);
+  }
+
+
+  public void deleteLibrary(Long libraryId, Long userId) {
+    Library library = libraryRepository.findByIdOrElseThrow(libraryId);
+
+    if (!library.getUser().getId().equals(userId)) {
+      throw new DuplicatedException(LibraryErrorCode.CANNOT_BE_MODIFIED);
+    }
+
+    libraryRepository.delete(library);
   }
 }
