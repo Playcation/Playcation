@@ -28,4 +28,9 @@ public class UserFile {
   @ManyToOne(fetch = FetchType.LAZY)
   private FileDetail fileDetail;
 
+  public UserFile(User user, FileDetail fileDetail) {
+    this.user = user;
+    this.fileDetail = fileDetail;
+  }
+
 }

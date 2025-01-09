@@ -20,10 +20,15 @@ public class GameFile {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.EAGER)
   private Game game;
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.EAGER)
   private FileDetail fileDetail;
+
+  public GameFile(Game game, FileDetail fileDetail) {
+    this.game = game;
+    this.fileDetail = fileDetail;
+  }
 
 }

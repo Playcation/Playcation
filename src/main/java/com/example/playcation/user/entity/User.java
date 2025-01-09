@@ -3,6 +3,7 @@ package com.example.playcation.user.entity;
 import com.example.playcation.enums.Role;
 import com.example.playcation.common.BaseEntity;
 import com.example.playcation.enums.Social;
+import com.example.playcation.s3.entity.FileDetail;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -60,9 +61,9 @@ public class User extends BaseEntity {
     this.social = social;
   }
 
-  public void update(String name, String description, String imageUrl) {
+  public void update(String name, String description, FileDetail fileDetail) {
     this.name = name == null ? this.name : name;
-    this.imageUrl = imageUrl.isEmpty() ? this.imageUrl : imageUrl;
+    this.imageUrl = fileDetail == null ? this.imageUrl : fileDetail.getFilePath();
     this.description = description == null ? this.description : description;
   }
 
