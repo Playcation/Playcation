@@ -33,5 +33,9 @@ public class Library{
   @ManyToOne(fetch = FetchType.LAZY)
   private Game game;
 
-  private Boolean isFavourite;
+  private Boolean favourite;
+
+  public void updateFavourite(boolean Favourite) {
+    this.favourite = Favourite;
+  }
 }

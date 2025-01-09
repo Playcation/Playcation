@@ -10,13 +10,13 @@ public class LibraryGameResponseDto {
 
   private CreatedGameResponseDto game;
 
-  private Boolean isFavourite;
+  private Boolean favourite;
 
   private Long count;
 
-  public LibraryGameResponseDto(Game game, boolean isFavourite, Long count) {
+  public LibraryGameResponseDto(Game game, boolean favourite, Long count) {
     this.game = CreatedGameResponseDto.toDto(game);
-    this.isFavourite = isFavourite;
+    this.favourite = favourite;
     this.count = count;
   }
 }
