@@ -84,7 +84,7 @@ public class GameController {
       @PathVariable Long gameId,
       @RequestHeader("Authorization") String authorizationHeader,
       @RequestPart("dto") UpdatedGameRequestDto requestDto,
-      @RequestPart("file") String imageUrl) {
+      @RequestPart(value = "file", required = false) String imageUrl) {
     Long userId = jwtUtil.findUserByToken(authorizationHeader);
     CreatedGameResponseDto responseDto = gameService.updateGame(gameId, userId, requestDto, imageUrl);
     return new ResponseEntity<>(responseDto, HttpStatus.OK);
