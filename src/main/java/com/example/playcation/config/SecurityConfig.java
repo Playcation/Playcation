@@ -91,7 +91,7 @@ public class SecurityConfig {
     http.authorizeHttpRequests((auth) -> auth
             .requestMatchers("/", "/users/sign-in", "/login/**", "/oauth2/**", "/refresh").permitAll()
             .requestMatchers("/users/\\d/update/role").hasAuthority("ADMIN")
-            .requestMatchers("/cards").hasAuthority("MANAGER")
+            .requestMatchers("/games").hasAuthority("MANAGER")
             .anyRequest().authenticated()
     );
 

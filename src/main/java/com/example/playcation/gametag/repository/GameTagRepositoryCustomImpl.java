@@ -2,6 +2,8 @@ package com.example.playcation.gametag.repository;
 
 import static com.example.playcation.game.entity.QGame.game;
 
+import com.example.playcation.game.dto.PagingGameResponseDto;
+import com.example.playcation.gametag.dto.GameTagListResponseDto;
 import com.example.playcation.gametag.entity.GameTag;
 import com.example.playcation.gametag.entity.QGameTag;
 import com.example.playcation.tag.entity.Tag;
@@ -18,7 +20,7 @@ public class GameTagRepositoryCustomImpl implements GameTagRepositoryCustom{
   private final JPAQueryFactory queryFactory;
 
   @Override
-  public List<GameTag> findGameTagByTag(PageRequest pageRequest, Tag tag) {
+  public GameTagListResponseDto findGameTagByTag(PageRequest pageRequest, Tag tag) {
     QGameTag gameTag = QGameTag.gameTag;
 
     List<GameTag> gameTagList = queryFactory
@@ -30,6 +32,14 @@ public class GameTagRepositoryCustomImpl implements GameTagRepositoryCustom{
         .limit(pageRequest.getPageSize())
         .fetch();
 
-    return gameTagList;
+    Long count = queryFactory
+        .select(gameTag.count())
+        .from(gameTag)
+        .where(
+            gameTag.tag.eq(tag)
+        )
+        .fetchOne();
+    return new GameTagListResponseDto(gameTagList, count);
   }
 }
+
