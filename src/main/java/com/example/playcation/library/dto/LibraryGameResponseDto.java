@@ -14,7 +14,7 @@ public class LibraryGameResponseDto {
 
   private Long count;
 
-  public LibraryGameResponseDto(Game game, Boolean isFavourite, Long count) {
+  public LibraryGameResponseDto(Game game, boolean isFavourite, Long count) {
     this.game = CreatedGameResponseDto.toDto(game);
     this.isFavourite = isFavourite;
     this.count = count;
