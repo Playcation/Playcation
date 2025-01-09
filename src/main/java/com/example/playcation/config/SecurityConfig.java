@@ -9,12 +9,16 @@ import com.example.playcation.oauth2.service.OAuth2Service;
 import com.example.playcation.token.repository.TokenRepository;
 import com.example.playcation.user.repository.UserRepository;
 import com.example.playcation.util.JWTUtil;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -22,10 +26,15 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.access.ExceptionTranslationFilter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
+import org.springframework.security.web.authentication.ui.DefaultLoginPageGeneratingFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
@@ -55,8 +64,7 @@ public class SecurityConfig {
       UserRepository userRepository,
       TokenRepository tokenRepository) throws Exception {
 
-    http
-        .cors(corsCustomizer -> corsCustomizer.configurationSource(new CorsConfigurationSource() {
+    http.cors(corsCustomizer -> corsCustomizer.configurationSource(new CorsConfigurationSource() {
 
           @Override
           public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
@@ -89,14 +97,14 @@ public class SecurityConfig {
             .successHandler(successHandler));
 
     http.authorizeHttpRequests((auth) -> auth
-            .requestMatchers("/", "/users/sign-in", "/login/**", "/oauth2/**", "/refresh").permitAll()
+            .requestMatchers("/", "/users/sign-in", "/login/**", "/oauth2/**", "/refresh", "/error").permitAll()
             .requestMatchers("/users/\\d/update/role").hasAuthority("ADMIN")
             .requestMatchers("/games").hasAuthority("MANAGER")
             .anyRequest().authenticated()
     );
 
     http.addFilterBefore(new JWTFilter(userRepository, jwtUtil), CustomLoginFilter.class);
-//    http.addFilterBefore(new CustomLogoutFilter(jwtUtil, tokenRepository), LogoutFilter.class);
+    http.addFilterBefore(new CustomLogoutFilter(jwtUtil, tokenRepository), LogoutFilter.class);
     http.addFilterAt(new CustomLoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, tokenRepository), UsernamePasswordAuthenticationFilter.class);
 
     // 세션 설정

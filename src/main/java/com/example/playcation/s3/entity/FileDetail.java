@@ -20,7 +20,9 @@ public class FileDetail {
 
   private String bucket;
 
-  private String fileName;
+  private String originFileName;
+
+  private String serverFileName;
 
   private String filePath;
 
@@ -28,9 +30,10 @@ public class FileDetail {
 
   private String fileType;  // 예) image/jpeg, .zip
 
-  public FileDetail(String bucket, String fileName, String filePath, Long fileSize, String fileType) {
+  public FileDetail(String bucket, String originFileName, String serverFileName, String filePath, Long fileSize, String fileType) {
     this.bucket = bucket;
-    this.fileName = fileName;
+    this.originFileName = originFileName;
+    this.serverFileName = serverFileName;
     this.filePath = filePath;
     this.fileSize = fileSize;
     this.fileType = fileType;

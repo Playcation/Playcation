@@ -6,9 +6,9 @@ import org.springframework.http.HttpStatus;
 
 @Getter
 @RequiredArgsConstructor
-public enum s3ErrorCode implements ExceptionType {
+public enum OrderErrorCode implements ExceptionType {
 
-  NOT_FOUND_FILE(HttpStatus.NOT_FOUND, "파일을 찾을 수 없습니다.");
+  INVALID_ITEM_INCLUDED(HttpStatus.BAD_REQUEST, "유효하지 않은 게임이 포함되어 있습니다.");
 
   private final HttpStatus httpStatus;
   private final String message;
