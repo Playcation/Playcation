@@ -3,7 +3,9 @@ package com.example.playcation.s3.controller;
 import com.example.playcation.s3.dto.FileResponseDto;
 import com.example.playcation.s3.entity.FileDetail;
 import com.example.playcation.s3.service.S3Service;
+import com.nimbusds.openid.connect.sdk.assurance.evidences.attachment.Attachment;
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 import lombok.RequiredArgsConstructor;
@@ -53,10 +55,10 @@ public class S3Controller {
     headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
     headers.setContentLength(fileDTO.getFile().length);
 
-//    ContentDisposition contentDisposition = ContentDisposition.builder("attachment")
-//        .filename(fileDTO.getFileName(), StandardCharsets.UTF_8)
-//        .build();
-//    headers.setContentDisposition(contentDisposition);
+    String encodedName = URLEncoder.encode(fileDTO.getFileName(), StandardCharsets.UTF_8)
+        .replace("+", "%20");
+    String contentDisposition = "attachment; filename=\"" + encodedName + "\"";
+    headers.add(HttpHeaders.CONTENT_DISPOSITION, contentDisposition);
 
     return ResponseEntity.ok().headers(headers).body(fileDTO.getFile());
   }
