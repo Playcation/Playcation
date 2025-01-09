@@ -66,7 +66,7 @@ public class S3Service {
       throw new InternalServerException(FileErrorCode.FAIL_UPLOAD_FILE);
     }
     String filePath = "https://" + bucket + ".s3.ap-northeast-2.amazonaws.com/" + fileName;
-//    FileDetail attachFile = new FileDetail(bucket, fileName, filePath, multipartFile.getSize(), multipartFile.getContentType());
+
     // 파일이름은 사용자가 지정한 파일이름으로 저장합니다.
     FileDetail attachFile = new FileDetail(bucket,
         multipartFile.getOriginalFilename(),
@@ -140,7 +140,7 @@ public class S3Service {
     return new FileResponseDto(bytes, fileDetail.getOriginFileName());
   }
 
-  // 밀리 초가 붙은 파일 이름
+  // URL에서 파일 이름 가져오는 함수
   public String pathToFileName(String filePath){
     return filePath.substring(filePath.lastIndexOf(".com/") + 5);
   }

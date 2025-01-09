@@ -1,7 +1,7 @@
 USE playcation;
 
 INSERT INTO user (email, password, name, role, social)
-VALUES ('a@a.com', 'password', 'name', 'USER', 'NORMAL');
+VALUES ('choLuckUser@choLuckUser.com', 'password', 'name', 'USER', 'NORMAL');
 
 INSERT INTO game (title, description, category, user_id, price, image_url, status)
 VALUES ('game1', 'description1', 'rpg', 1, 10000, '', 'ON_SAL');
