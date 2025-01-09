@@ -8,7 +8,6 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-@Repository
 public interface FileDetailRepository extends JpaRepository<FileDetail, Long> {
 
   Optional<FileDetail> findByOriginFileName(String fileName);

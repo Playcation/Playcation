@@ -7,7 +7,6 @@ import com.example.playcation.s3.entity.GameFile;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-@Repository
 public interface GameFileRepository extends JpaRepository<GameFile, Long> {
 
   default GameFile findByIdOrElseThrow(Long id){
