@@ -44,9 +44,9 @@ public class GameController {
   // 게임 생성 컨트롤러
   @PostMapping
   public ResponseEntity<CreatedGameResponseDto> createGame(
-      @RequestHeader("Authorization") String authorizationHeader,
+      @RequestHeader String ACCESS_TOKEN_CATEGORY,
       @RequestBody CreatedGameRequestDto requestDto) {
-    Long id = jwtUtil.findUserByToken(authorizationHeader);
+    Long id = jwtUtil.findUserByToken(ACCESS_TOKEN_CATEGORY);
     CreatedGameResponseDto responseDto = gameService.createGame(id, requestDto);
     return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
   }
@@ -87,18 +87,18 @@ public class GameController {
   @PatchMapping("/{gameId}")
   public ResponseEntity<CreatedGameResponseDto> updateGame(
       @PathVariable Long gameId,
-      @RequestHeader("Authorization") String authorizationHeader,
+      @RequestHeader String ACCESS_TOKEN_CATEGORY,
       @RequestPart("dto") UpdatedGameRequestDto requestDto,
       @RequestPart(value = "file", required = false) String imageUrl) {
-    Long userId = jwtUtil.findUserByToken(authorizationHeader);
+    Long userId = jwtUtil.findUserByToken(ACCESS_TOKEN_CATEGORY);
     CreatedGameResponseDto responseDto = gameService.updateGame(gameId, userId, requestDto, imageUrl);
     return new ResponseEntity<>(responseDto, HttpStatus.OK);
   }
 
   @DeleteMapping("/{gameId}")
   public ResponseEntity<String> deleteGame(@PathVariable Long gameId,
-      @RequestHeader("Authorization") String authorizationHeader) {
-    Long userId = jwtUtil.findUserByToken(authorizationHeader);
+      @RequestHeader String ACCESS_TOKEN_CATEGORY) {
+    Long userId = jwtUtil.findUserByToken(ACCESS_TOKEN_CATEGORY);
 
     gameService.deleteGame(gameId, userId);
     return new ResponseEntity<>("삭제되었습니다", HttpStatus.OK);
