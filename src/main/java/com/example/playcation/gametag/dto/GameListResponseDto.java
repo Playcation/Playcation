@@ -10,10 +10,13 @@ public class GameListResponseDto {
 
   private List<CreatedGameResponseDto> gameList;
 
-  public GameListResponseDto(List<Game> gameList) {
+  private Long count;
+
+  public GameListResponseDto(List<Game> gameList, Long count) {
     this.gameList = gameList.stream()
         .map(CreatedGameResponseDto::toDto)
         .toList();
+    this.count = count;
   }
 
 }

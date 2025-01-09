@@ -5,6 +5,7 @@ import com.example.playcation.exception.NotFoundException;
 import com.example.playcation.game.entity.Game;
 import com.example.playcation.game.repository.GameRepository;
 import com.example.playcation.gametag.dto.GameListResponseDto;
+import com.example.playcation.gametag.dto.GameTagListResponseDto;
 import com.example.playcation.gametag.dto.GameTagRequestDto;
 import com.example.playcation.gametag.dto.GameTagResponseDto;
 import com.example.playcation.gametag.entity.GameTag;
@@ -47,18 +48,20 @@ public class GameTagService {
 
   public GameListResponseDto findGameTagByTag(int page, Long tagId) {
 
-    PageRequest pageRequest = PageRequest.of(page, 10, Sort.by(Direction.DESC, "id"));
+    PageRequest pageRequest = PageRequest.of(page, 10);
 
     Tag tag = tagRepository.findByIdOrElseThrow(tagId);
 
-    List<GameTag> gameTagList = gameTagRepository.findGameTagByTag(pageRequest, tag).stream().toList();
+    GameTagListResponseDto gameTagListDto = gameTagRepository.findGameTagByTag(pageRequest, tag);
+
+    List<GameTag> gameTagList = gameTagListDto.getGameTagList();
 
     List<Game> gameList = new ArrayList<>();
     for (GameTag gameTag : gameTagList) {
       gameList.add(gameTag.getGame());
     }
 
-    return new GameListResponseDto(gameList);
+    return new GameListResponseDto(gameList, gameTagListDto.getCount());
   }
 
   // 게임 태그 수정(게임 id는 수정 불가)

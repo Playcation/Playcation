@@ -8,10 +8,13 @@ import com.example.playcation.game.dto.UpdatedGameRequestDto;
 import com.example.playcation.game.service.GameService;
 import com.example.playcation.gametag.dto.GameListResponseDto;
 import com.example.playcation.gametag.service.GameTagService;
+import com.example.playcation.library.dto.LibraryGameResponseDto;
+import com.example.playcation.library.service.LibraryService;
 import com.example.playcation.util.JWTUtil;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -35,11 +38,12 @@ public class GameController {
 
   private final GameService gameService;
   private final GameTagService gameTagService;
+  private final LibraryService libraryService;
   private final JWTUtil jwtUtil;
 
   // 게임 생성 컨트롤러
   @PostMapping
-  public ResponseEntity<CreatedGameResponseDto> createCard(
+  public ResponseEntity<CreatedGameResponseDto> createGame(
       @RequestHeader("Authorization") String authorizationHeader,
       @RequestBody CreatedGameRequestDto requestDto) {
     Long id = jwtUtil.findUserByToken(authorizationHeader);
@@ -78,13 +82,14 @@ public class GameController {
     return new ResponseEntity<>(responseDto, HttpStatus.OK);
   }
 
+
   // 게임 수정 컨트롤러
   @PatchMapping("/{gameId}")
   public ResponseEntity<CreatedGameResponseDto> updateGame(
       @PathVariable Long gameId,
       @RequestHeader("Authorization") String authorizationHeader,
       @RequestPart("dto") UpdatedGameRequestDto requestDto,
-      @RequestPart("file") String imageUrl) {
+      @RequestPart(value = "file", required = false) String imageUrl) {
     Long userId = jwtUtil.findUserByToken(authorizationHeader);
     CreatedGameResponseDto responseDto = gameService.updateGame(gameId, userId, requestDto, imageUrl);
     return new ResponseEntity<>(responseDto, HttpStatus.OK);
