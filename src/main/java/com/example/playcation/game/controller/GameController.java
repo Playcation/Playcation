@@ -43,7 +43,7 @@ public class GameController {
 
   // 게임 생성 컨트롤러
   @PostMapping
-  public ResponseEntity<CreatedGameResponseDto> createCard(
+  public ResponseEntity<CreatedGameResponseDto> createGame(
       @RequestHeader("Authorization") String authorizationHeader,
       @RequestBody CreatedGameRequestDto requestDto) {
     Long id = jwtUtil.findUserByToken(authorizationHeader);
