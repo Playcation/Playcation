@@ -89,7 +89,7 @@ public class S3Service {
   public void deleteFile(String filePath){
     String fileName = pathToFileName(filePath);
     s3.deleteObject(new DeleteObjectRequest(bucket, fileName));
-    FileDetail attachFile = fileDetailRepository.findByFileNameOrElseThrow(fileName);
+    FileDetail attachFile = fileDetailRepository.findByServerFileNameOrElseThrow(fileName);
     fileDetailRepository.delete(attachFile);
   }
 
@@ -143,12 +143,5 @@ public class S3Service {
   // 밀리 초가 붙은 파일 이름
   public String pathToFileName(String filePath){
     return filePath.substring(filePath.lastIndexOf(".com/") + 5);
-  }
-
-  // 저장할 때의 파일 명 반환
-  public String pathToRawFileName(Long gameId){
-    GameFile gameFile = gameFileRepository.findByIdOrElseThrow(gameId);
-    FileDetail fileDetail = fileDetailRepository.findByIdOrElseThrow(gameFile.getFileDetail().getId());
-    return fileDetail.getFilePath();
   }
 }

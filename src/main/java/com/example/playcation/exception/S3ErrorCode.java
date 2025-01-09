@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatus;
 
 @Getter
 @RequiredArgsConstructor
-public enum s3ErrorCode implements ExceptionType {
+public enum S3ErrorCode implements ExceptionType {
 
   NOT_FOUND_FILE(HttpStatus.NOT_FOUND, "파일을 찾을 수 없습니다.");
 
