@@ -90,10 +90,6 @@ public class SecurityConfig {
     // http basic 인증 방식 disable
     http.httpBasic(AbstractHttpConfigurer::disable);
 
-//    http .exceptionHandling(handler -> handler
-//        .authenticationEntryPoint(authEntryPoint)
-//        .accessDeniedHandler(accessDeniedHandler));
-
     // oauth2
     http.oauth2Login((oauth2) -> oauth2
             .userInfoEndpoint((userInfoEndpointConfig) ->
