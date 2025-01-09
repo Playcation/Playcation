@@ -14,6 +14,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -99,4 +100,14 @@ public class UserController {
   ){
     return ResponseEntity.ok().body(userService.updateUserAuth(userId));
   }
+
+  @PostMapping("/upload/files")
+  public ResponseEntity<UserResponseDto> uploadFiles(
+      @RequestHeader("Authorization") String authorizationHeader,
+      @RequestPart(value = "files") List<MultipartFile> files
+  ){
+    Long id = jwtUtil.findUserByToken(authorizationHeader);
+    return ResponseEntity.ok().body(userService.uploadFiles(id, files));
+  }
+
 }

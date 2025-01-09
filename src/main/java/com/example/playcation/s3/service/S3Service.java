@@ -11,11 +11,10 @@ import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.amazonaws.util.IOUtils;
 import com.example.playcation.exception.FileErrorCode;
 import com.example.playcation.exception.InternalServerException;
+import com.example.playcation.exception.S3ErrorCode;
 import com.example.playcation.s3.dto.FileResponseDto;
 import com.example.playcation.s3.entity.FileDetail;
-import com.example.playcation.s3.entity.GameFile;
 import com.example.playcation.s3.repository.FileDetailRepository;
-import com.example.playcation.s3.repository.GameFileRepository;
 import jakarta.transaction.Transactional;
 import java.io.IOException;
 import java.io.InputStream;
@@ -37,10 +36,12 @@ import org.springframework.web.server.ResponseStatusException;
 public class S3Service {
 
   @Value("${cloud.aws.s3.bucket}")
-  private String bucket;
+  private String imageBucket;
+
+  @Value("${cloud.aws.s3.bucket.game}")
+  private String gameBucket;
 
   private final FileDetailRepository fileDetailRepository;
-  private final GameFileRepository gameFileRepository;
   private final AmazonS3 s3;
 
   /**
@@ -54,11 +55,17 @@ public class S3Service {
     if (multipartFile == null || multipartFile.isEmpty()) {
       return null;
     }
+    String fileType = multipartFile.getOriginalFilename().substring(multipartFile.getOriginalFilename().lastIndexOf(".") + 1);
+    String bucket;
+    if("zip".equals(fileType)){
+      bucket = gameBucket;
+    }else{
+      bucket = imageBucket;
+    }
     String fileName = createFileName(multipartFile.getOriginalFilename());
     ObjectMetadata objectMetadata = new ObjectMetadata();
     objectMetadata.setContentLength(multipartFile.getSize());
     objectMetadata.setContentType(multipartFile.getContentType());
-
     try(InputStream inputStream = multipartFile.getInputStream()){
       s3.putObject(new PutObjectRequest(bucket, fileName, inputStream, objectMetadata)
           .withCannedAcl(CannedAccessControlList.PublicRead));
@@ -87,10 +94,9 @@ public class S3Service {
    */
   @Transactional
   public void deleteFile(String filePath){
-    String fileName = pathToFileName(filePath);
-    s3.deleteObject(new DeleteObjectRequest(bucket, fileName));
-    FileDetail attachFile = fileDetailRepository.findByServerFileNameOrElseThrow(fileName);
-    fileDetailRepository.delete(attachFile);
+    FileDetail fileDetail = fileDetailRepository.findByFilePathOrElseThrow(filePath);
+    s3.deleteObject(new DeleteObjectRequest(fileDetail.getBucket(), fileDetail.getServerFileName()));
+    fileDetailRepository.delete(fileDetail);
   }
 
   // 파일명을 난수화하기 위해 UUID 를 활용하여 난수를 돌린다.
@@ -115,33 +121,28 @@ public class S3Service {
    */
   @Async
   @Transactional
-  public CompletableFuture<List<String>> uploadFiles(List<MultipartFile> files) {
-    List<String> filePaths = new ArrayList<>();
+  public CompletableFuture<List<FileDetail>> uploadFiles(List<MultipartFile> files) {
+    List<FileDetail> fileDetails = new ArrayList<>();
     for (MultipartFile file : files) {
-      filePaths.add(uploadFile(file).getFilePath());
+      fileDetails.add(uploadFile(file));
     }
-    return CompletableFuture.completedFuture(filePaths);
+    return CompletableFuture.completedFuture(fileDetails);
   }
 
   @Transactional
-  public FileResponseDto getObjectByGameId(Long gameId) throws IOException{
-    
-    // 게임 아디디를 통해 게임파일을 가져오는 메소드
-    GameFile gameFile = gameFileRepository.findByIdOrElseThrow(gameId);
-    FileDetail fileDetail = fileDetailRepository.findByIdOrElseThrow(gameFile.getFileDetail().getId());
-    
-    // S3에서 파일을 가져오는 메소드
-    S3Object o = s3.getObject(new GetObjectRequest(bucket, fileDetail.getServerFileName()));
-    S3ObjectInputStream objectInputStream = o.getObjectContent();
-    byte[] bytes = IOUtils.toByteArray(objectInputStream);
+  public FileResponseDto getObjectByFilePath(String filePath) {
+    FileDetail fileDetail = fileDetailRepository.findByFilePathOrElseThrow(filePath);
+    String bucket = fileDetail.getBucket();
+    try {
+      // S3에서 파일을 가져오는 메소드
+      S3Object o = s3.getObject(new GetObjectRequest(bucket, fileDetail.getServerFileName()));
+      S3ObjectInputStream objectInputStream = o.getObjectContent();
+      byte[] bytes = IOUtils.toByteArray(objectInputStream);
 
-//    FileDetail attachFile = fileDetailRepository.findByFileNameOrElseThrow(storedFileName);
+      return new FileResponseDto(bytes, fileDetail.getOriginFileName());
 
-    return new FileResponseDto(bytes, fileDetail.getOriginFileName());
-  }
-
-  // URL에서 파일 이름 가져오는 함수
-  public String pathToFileName(String filePath){
-    return filePath.substring(filePath.lastIndexOf(".com/") + 5);
+    }catch (IOException e){
+      throw new InternalServerException(S3ErrorCode.NOT_FOUND_FILE);
+    }
   }
 }

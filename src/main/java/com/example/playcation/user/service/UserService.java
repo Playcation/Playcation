@@ -19,6 +19,8 @@ import com.example.playcation.user.dto.UserResponseDto;
 import com.example.playcation.user.entity.User;
 import com.example.playcation.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -49,6 +51,7 @@ public class UserService {
   }
 
   // 비밀번호 변경
+  @Transactional
   public void checkPassword(User user, String password) {
     if (!bCryptPasswordEncoder.matches(password, user.getPassword())) {
       throw new InvalidInputException(UserErrorCode.WRONG_PASSWORD);
@@ -88,6 +91,7 @@ public class UserService {
     checkPassword(user, updatedUserRequestDto.getPassword());
     FileDetail fileDetail = null;
     if(file != null) {
+      s3Service.deleteFile(user.getImageUrl());
       fileDetail = s3Service.uploadFile(file);
     }
     user.update(updatedUserRequestDto.getName(), updatedUserRequestDto.getDescription(),
@@ -112,6 +116,15 @@ public class UserService {
       throw new NoAuthorizedException(UserErrorCode.NOT_AUTHORIZED_MANAGER);
     }
     user.updateRole();
+    return UserResponseDto.toDto(user);
+  }
+
+  // 임시 실행 확인용
+  @Transactional
+  public UserResponseDto uploadFiles(Long id, List<MultipartFile> files) {
+    User user = userRepository.findByIdOrElseThrow(id);
+    List<FileDetail> urls = s3Service.uploadFiles(files).join();
+    urls.forEach(url -> {userFileRepository.save(new UserFile(user, url));});
     return UserResponseDto.toDto(user);
   }
 }
