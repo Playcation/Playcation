@@ -1,5 +1,6 @@
 package com.example.playcation.user.controller;
 
+import com.example.playcation.common.TokenSettings;
 import com.example.playcation.user.dto.LoginUserRequestDto;
 import com.example.playcation.user.dto.LoginUserResponseDto;
 import com.example.playcation.user.dto.DeletedUserRequestDto;
@@ -14,6 +15,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -51,7 +53,7 @@ public class UserController {
   // 유저 프로필 조회
   @GetMapping
   public ResponseEntity<UserResponseDto> findUser(
-      @RequestHeader("Authorization") String authorizationHeader
+      @RequestHeader(TokenSettings.ACCESS_TOKEN_CATEGORY) String authorizationHeader
   ){
     Long id = jwtUtil.findUserByToken(authorizationHeader);
 
@@ -61,7 +63,7 @@ public class UserController {
   // 유저 수정
   @PutMapping
   public ResponseEntity<UserResponseDto> updateUser(
-      @RequestHeader("Authorization") String authorizationHeader,
+      @RequestHeader(TokenSettings.ACCESS_TOKEN_CATEGORY) String authorizationHeader,
       @Valid @RequestPart(value = "json") UpdatedUserRequestDto userUpdateRequestDto,
       @RequestPart(required = false) MultipartFile file
   ){
@@ -73,7 +75,7 @@ public class UserController {
   // 비밀번호 변경
   @PatchMapping("/password")
   public ResponseEntity<UserResponseDto> changePassword(
-      @RequestHeader("Authorization") String authorizationHeader,
+      @RequestHeader(TokenSettings.ACCESS_TOKEN_CATEGORY) String authorizationHeader,
       @Valid @RequestBody UpdatedUserPasswordRequestDto userUpdatePasswordRequestDto
   ){
     Long id = jwtUtil.findUserByToken(authorizationHeader);
@@ -83,7 +85,7 @@ public class UserController {
   //회원 탈퇴
   @DeleteMapping("/delete")
   public String deleteAccount(
-      @RequestHeader("Authorization") String authorizationHeader,
+      @RequestHeader(TokenSettings.ACCESS_TOKEN_CATEGORY) String authorizationHeader,
       @Valid @RequestBody DeletedUserRequestDto userLogoutRequestDto
   ) {
     Long id = jwtUtil.findUserByToken(authorizationHeader);
@@ -99,4 +101,14 @@ public class UserController {
   ){
     return ResponseEntity.ok().body(userService.updateUserAuth(userId));
   }
+
+  @PostMapping("/upload/files")
+  public ResponseEntity<UserResponseDto> uploadFiles(
+      @RequestHeader(TokenSettings.ACCESS_TOKEN_CATEGORY) String authorizationHeader,
+      @RequestPart(value = "files") List<MultipartFile> files
+  ){
+    Long id = jwtUtil.findUserByToken(authorizationHeader);
+    return ResponseEntity.ok().body(userService.uploadFiles(id, files));
+  }
+
 }

@@ -38,18 +38,18 @@ public class S3Controller {
   }
 
   @PostMapping("/files")
-  public ResponseEntity<List<String>> uploadFiles(
+  public ResponseEntity<List<FileDetail>> uploadFiles(
       @RequestPart(value = "files") List<MultipartFile> files
   ){
-    CompletableFuture<List<String>> urls = s3Service.uploadFiles(files);
+    CompletableFuture<List<FileDetail>> urls = s3Service.uploadFiles(files);
     return ResponseEntity.ok(urls.join());
   }
 
-  @GetMapping(value = "/games/{gameId}/download/zip", produces="application/octet-stream")
+  @GetMapping(value = "/download/zip", produces="application/octet-stream")
   public ResponseEntity<byte[]> downloadGameZip(
-      @PathVariable Long gameId
-  ) throws IOException {
-    FileResponseDto fileDTO = s3Service.getObjectByGameId(gameId);
+      @RequestParam String filePath
+  ) {
+    FileResponseDto fileDTO = s3Service.getObjectByFilePath(filePath);
 
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);

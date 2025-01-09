@@ -26,4 +26,10 @@ public interface FileDetailRepository extends JpaRepository<FileDetail, Long> {
     FileDetail fileDetail = findByServerFileName(fileName).orElseThrow(() -> new NotFoundException(FileErrorCode.NOT_FOUND_FILE));
     return fileDetail;
   }
+
+  Optional<FileDetail> findByFilePath(String filePath);
+  default FileDetail findByFilePathOrElseThrow(String filePath){
+    FileDetail fileDetail = findByFilePath(filePath).orElseThrow(() -> new NotFoundException(FileErrorCode.NOT_FOUND_FILE));
+    return fileDetail;
+  }
 }
