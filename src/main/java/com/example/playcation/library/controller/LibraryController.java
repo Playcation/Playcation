@@ -1,6 +1,7 @@
 package com.example.playcation.library.controller;
 
 import com.example.playcation.gametag.dto.GameListResponseDto;
+import com.example.playcation.library.dto.LibraryGameResponseDto;
 import com.example.playcation.library.dto.LibraryRequestDto;
 import com.example.playcation.library.dto.LibraryResponseDto;
 import com.example.playcation.library.service.LibraryService;
@@ -41,4 +42,12 @@ public class LibraryController {
     return new ResponseEntity<>(responseDto, HttpStatus.OK);
   }
 
+  // 다건 조회(라이브러리)
+  @GetMapping("/my-games")
+  public ResponseEntity<List<LibraryGameResponseDto>> findLibraryList(@RequestHeader("Authorization") String authorizationHeader,
+      @RequestParam(defaultValue = "0") int page) {
+    Long userId = jwtUtil.findUserByToken(authorizationHeader);
+    List<LibraryGameResponseDto> responseDto = libraryService.findLibraryList(page, userId);
+    return new ResponseEntity<>(responseDto, HttpStatus.OK);
+  }
 }

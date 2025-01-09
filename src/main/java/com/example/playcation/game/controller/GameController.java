@@ -82,14 +82,6 @@ public class GameController {
     return new ResponseEntity<>(responseDto, HttpStatus.OK);
   }
 
-  // 다건 조회(라이브러리)
-  @GetMapping("/my-games")
-  public ResponseEntity<List<LibraryGameResponseDto>> findLibraryList(@RequestHeader("Authorization") String authorizationHeader,
-      @RequestParam(defaultValue = "0") int page) {
-    Long userId = jwtUtil.findUserByToken(authorizationHeader);
-    List<LibraryGameResponseDto> responseDto = libraryService.findLibraryList(page, userId);
-    return new ResponseEntity<>(responseDto, HttpStatus.OK);
-  }
 
   // 게임 수정 컨트롤러
   @PatchMapping("/{gameId}")
