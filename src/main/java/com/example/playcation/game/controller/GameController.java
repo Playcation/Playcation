@@ -8,10 +8,13 @@ import com.example.playcation.game.dto.UpdatedGameRequestDto;
 import com.example.playcation.game.service.GameService;
 import com.example.playcation.gametag.dto.GameListResponseDto;
 import com.example.playcation.gametag.service.GameTagService;
+import com.example.playcation.library.dto.LibraryGameResponseDto;
+import com.example.playcation.library.service.LibraryService;
 import com.example.playcation.util.JWTUtil;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -35,6 +38,7 @@ public class GameController {
 
   private final GameService gameService;
   private final GameTagService gameTagService;
+  private final LibraryService libraryService;
   private final JWTUtil jwtUtil;
 
   // 게임 생성 컨트롤러
@@ -75,6 +79,15 @@ public class GameController {
       @RequestParam(required = false) int page,
       @RequestParam Long tagId) {
     GameListResponseDto responseDto = gameTagService.findGameTagByTag(page, tagId);
+    return new ResponseEntity<>(responseDto, HttpStatus.OK);
+  }
+
+  // 다건 조회(라이브러리)
+  @GetMapping("/my-games")
+  public ResponseEntity<List<LibraryGameResponseDto>> findLibraryList(@RequestHeader("Authorization") String authorizationHeader,
+      @RequestParam(defaultValue = "0") int page) {
+    Long userId = jwtUtil.findUserByToken(authorizationHeader);
+    List<LibraryGameResponseDto> responseDto = libraryService.findLibraryList(page, userId);
     return new ResponseEntity<>(responseDto, HttpStatus.OK);
   }
 
