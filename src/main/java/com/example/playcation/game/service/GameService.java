@@ -12,6 +12,8 @@ import com.example.playcation.game.entity.Game;
 import com.example.playcation.game.repository.GameRepository;
 import com.example.playcation.gametag.entity.GameTag;
 import com.example.playcation.gametag.repository.GameTagRepository;
+import com.example.playcation.library.entity.Library;
+import com.example.playcation.library.repository.LibraryRepository;
 import com.example.playcation.user.entity.User;
 import com.example.playcation.user.repository.UserRepository;
 import java.math.BigDecimal;
@@ -29,6 +31,7 @@ public class GameService {
 
   private final UserRepository userRepository;
   private final GameRepository gameRepository;
+  private final LibraryRepository libraryRepository;
   private final GameTagRepository gameTagRepository;
 
 
@@ -99,6 +102,10 @@ public class GameService {
     // 삭제하는 게임 id를 가지고 있는 게임 태그를 hard delete
     List<GameTag> gameTagList = gameTagRepository.findGameTagsByGameId(gameId);
     gameTagRepository.deleteAll(gameTagList);
+
+    // 삭제하는 게임 id를 가지고 있는 라이브러리를 hard delete
+    List<Library> libraryList = libraryRepository.findAllByGameId(gameId);
+    libraryRepository.deleteAll(libraryList);
 
     gameRepository.save(game);
   }
