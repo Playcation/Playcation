@@ -2,6 +2,7 @@ package com.example.playcation.token.controller;
 
 import com.example.playcation.common.TokenSettings;
 import com.example.playcation.token.service.TokenService;
+import com.example.playcation.util.JWTUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class TokenController {
 
   private final TokenService tokenService;
+  private final JWTUtil jwtUtil;
 
   // 토큰이 만료되었을 때 refresh 토큰을 확인한 후 토큰을 재발급해주는 api
   @PostMapping("/refresh")
@@ -30,19 +32,8 @@ public class TokenController {
 
     //response
     response.setHeader(TokenSettings.ACCESS_TOKEN_CATEGORY, tokens[0]);
-    response.addCookie(createCookie(TokenSettings.REFRESH_TOKEN_CATEGORY, tokens[1]));
+    response.addCookie(jwtUtil.createCookie(TokenSettings.REFRESH_TOKEN_CATEGORY, tokens[1]));
 
     return new ResponseEntity<>("토큰이 발급되었습니다. : " + tokens[0], HttpStatus.OK);
-  }
-
-  private Cookie createCookie(String key, String value) {
-
-    Cookie cookie = new Cookie(key, value);
-    cookie.setMaxAge(TokenSettings.COOKIE_EXPIRATION);
-    //cookie.setSecure(true);
-    cookie.setPath("/");
-    cookie.setHttpOnly(true);
-
-    return cookie;
   }
 }

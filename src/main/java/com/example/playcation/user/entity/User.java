@@ -2,6 +2,7 @@ package com.example.playcation.user.entity;
 
 import com.example.playcation.enums.Role;
 import com.example.playcation.common.BaseEntity;
+import com.example.playcation.enums.Social;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -45,14 +46,18 @@ public class User extends BaseEntity {
   @Enumerated(value = EnumType.STRING)
   private Role role;
 
+  @Enumerated(value = EnumType.STRING)
+  private Social social;
+
   @JsonFormat(pattern = "yy:MM:dd hh:mm:ss")
   private LocalDateTime deletedAt;
 
-  public User(String email, String password, String name, Role role) {
+  public User(String email, String password, String name, Role role, Social social) {
     this.email = email;
     this.password = password;
     this.name = name;
     this.role = role;
+    this.social = social;
   }
 
   public void update(String name, String description, String imageUrl) {
@@ -71,5 +76,9 @@ public class User extends BaseEntity {
 
   public void delete(){
     this.deletedAt = LocalDateTime.now();
+  }
+
+  public void updateSocial(Social social){
+    this.social = social;
   }
 }

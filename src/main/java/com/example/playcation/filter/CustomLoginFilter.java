@@ -73,25 +73,12 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
 
     //Refresh 토큰 저장
     Date date = new Date(System.currentTimeMillis() + TokenSettings.REFRESH_TOKEN_EXPIRATION);
-    RefreshToken refreshEntity = new RefreshToken(userId, refresh, date.toString());
-    tokenRepository.save(refreshEntity);
+    RefreshToken refreshToken = new RefreshToken(userId, refresh, date.toString());
+    tokenRepository.save(refreshToken);
 
     response.setHeader(TokenSettings.ACCESS_TOKEN_CATEGORY, access);
-    response.addCookie(createCookie(TokenSettings.REFRESH_TOKEN_CATEGORY, refresh));
+    response.addCookie(jwtUtil.createCookie(TokenSettings.REFRESH_TOKEN_CATEGORY, refresh));
     response.setStatus(HttpStatus.OK.value());
-  }
-
-  // 쿠키에 리플레시 토큰을 담기위해 쿠키를 생성하는 로직
-  private Cookie createCookie(String key, String value) {
-
-    Cookie cookie = new Cookie(key, value);
-    // 쿠키 1일 유지
-    cookie.setMaxAge(TokenSettings.COOKIE_EXPIRATION);
-    //cookie.setSecure(true);
-    cookie.setPath("/");
-    cookie.setHttpOnly(true);
-
-    return cookie;
   }
 
   // 로그인이 실패 했을 때 로직 ( 토큰 / 쿠키를 생성하지 않는다. )
