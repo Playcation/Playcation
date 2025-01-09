@@ -12,8 +12,11 @@ import com.example.playcation.game.entity.Game;
 import com.example.playcation.game.repository.GameRepository;
 import com.example.playcation.gametag.entity.GameTag;
 import com.example.playcation.gametag.repository.GameTagRepository;
+import com.example.playcation.library.entity.Library;
+import com.example.playcation.library.repository.LibraryRepository;
 import com.example.playcation.user.entity.User;
 import com.example.playcation.user.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -29,10 +32,12 @@ public class GameService {
 
   private final UserRepository userRepository;
   private final GameRepository gameRepository;
+  private final LibraryRepository libraryRepository;
   private final GameTagRepository gameTagRepository;
 
 
   // 게임 생성
+  @Transactional
   public CreatedGameResponseDto createGame(Long id,
       CreatedGameRequestDto requestDto) {
 
@@ -70,6 +75,7 @@ public class GameService {
   }
 
   // 게임 수정
+  @Transactional
   public CreatedGameResponseDto updateGame(Long gameId, Long userId,
       UpdatedGameRequestDto requestDto, String imageUrl) {
 
@@ -85,6 +91,7 @@ public class GameService {
     return CreatedGameResponseDto.toDto(game);
   }
 
+  @Transactional
   public void deleteGame(Long gameId, Long userId) {
 
     Game game = gameRepository.findByIdOrElseThrow(gameId);
@@ -99,6 +106,10 @@ public class GameService {
     // 삭제하는 게임 id를 가지고 있는 게임 태그를 hard delete
     List<GameTag> gameTagList = gameTagRepository.findGameTagsByGameId(gameId);
     gameTagRepository.deleteAll(gameTagList);
+
+    // 삭제하는 게임 id를 가지고 있는 라이브러리를 hard delete
+    List<Library> libraryList = libraryRepository.findLibraryByGameId(gameId);
+    libraryRepository.deleteAll(libraryList);
 
     gameRepository.save(game);
   }

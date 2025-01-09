@@ -2,8 +2,10 @@ package com.example.playcation.library.controller;
 
 import com.example.playcation.gametag.dto.GameListResponseDto;
 import com.example.playcation.library.dto.LibraryGameResponseDto;
+import com.example.playcation.library.dto.LibraryListResponseDto;
 import com.example.playcation.library.dto.LibraryRequestDto;
 import com.example.playcation.library.dto.LibraryResponseDto;
+import com.example.playcation.library.dto.UpdatedFavouriteRequestDto;
 import com.example.playcation.library.service.LibraryService;
 import com.example.playcation.util.JWTUtil;
 import java.util.List;
@@ -11,7 +13,9 @@ import lombok.RequiredArgsConstructor;
 import nonapi.io.github.classgraph.utils.LogNode;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -49,5 +53,21 @@ public class LibraryController {
     Long userId = jwtUtil.findUserByToken(authorizationHeader);
     List<LibraryGameResponseDto> responseDto = libraryService.findLibraryList(page, userId);
     return new ResponseEntity<>(responseDto, HttpStatus.OK);
+  }
+
+  @PatchMapping("/{libraryId}")
+  public ResponseEntity<LibraryResponseDto> updateFavourite(@RequestHeader("Authorization") String authorizationHeader,
+      @PathVariable Long libraryId, @RequestBody UpdatedFavouriteRequestDto requestDto) {
+    Long userId = jwtUtil.findUserByToken(authorizationHeader);
+    LibraryResponseDto responseDto = libraryService.updateFavourite(libraryId, requestDto, userId);
+    return new ResponseEntity<>(responseDto, HttpStatus.OK);
+  }
+
+  @DeleteMapping("/{libraryId}")
+  public ResponseEntity<String> deleteLibrary(@RequestHeader("Authorization") String authorizationHeader,
+      @PathVariable Long libraryId) {
+    Long userId = jwtUtil.findUserByToken(authorizationHeader);
+    libraryService.deleteLibrary(libraryId, userId);
+    return new ResponseEntity<>("삭제되었습니다", HttpStatus.OK);
   }
 }

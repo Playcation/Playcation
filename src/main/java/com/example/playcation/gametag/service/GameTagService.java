@@ -12,6 +12,7 @@ import com.example.playcation.gametag.entity.GameTag;
 import com.example.playcation.gametag.repository.GameTagRepository;
 import com.example.playcation.tag.entity.Tag;
 import com.example.playcation.tag.repository.TagRepository;
+import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,7 @@ public class GameTagService {
   private final GameRepository gameRepository;
 
 
+  @Transactional
   public GameTagResponseDto createGameTag(GameTagRequestDto requestDto) {
 
     Tag tag = tagRepository.findByIdOrElseThrow(requestDto.getTagId());
@@ -64,7 +66,9 @@ public class GameTagService {
     return new GameListResponseDto(gameList, gameTagListDto.getCount());
   }
 
+
   // 게임 태그 수정(게임 id는 수정 불가)
+  @Transactional
   public GameTagResponseDto updateGameTag(Long userId, Long gameTagId, GameTagRequestDto requestDto) {
 
     GameTag gameTag = gameTagRepository.findByIdOrElseThrow(gameTagId);
@@ -82,6 +86,7 @@ public class GameTagService {
     return GameTagResponseDto.toDto(gameTag);
   }
 
+  @Transactional
   public void deleteGame(Long userId, Long gameTagId) {
 
     GameTag gameTag = gameTagRepository.findByIdOrElseThrow(gameTagId);

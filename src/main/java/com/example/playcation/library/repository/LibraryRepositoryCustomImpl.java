@@ -27,7 +27,7 @@ public class LibraryRepositoryCustomImpl implements LibraryRepositoryCustom{
         .selectFrom(library)
         .join(library.game, game).fetchJoin()
         .where(library.user.eq(user))
-        .orderBy(library.isFavourite.desc(), game.updatedAt.desc())
+        .orderBy(library.favourite.desc(), game.updatedAt.desc())
         .offset(pageRequest.getOffset())
         .limit(pageRequest.getPageSize())
         .fetch();

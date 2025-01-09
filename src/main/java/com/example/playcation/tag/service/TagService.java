@@ -4,6 +4,7 @@ import com.example.playcation.tag.Dto.CreatedTagRequestDto;
 import com.example.playcation.tag.Dto.CreatedTagResponseDto;
 import com.example.playcation.tag.entity.Tag;
 import com.example.playcation.tag.repository.TagRepository;
+import jakarta.transaction.Transactional;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -18,6 +19,7 @@ public class TagService {
 
   private final TagRepository tagRepository;
 
+  @Transactional
   public CreatedTagResponseDto CreateTag(CreatedTagRequestDto requestDto) {
 
     Tag tag = Tag.builder()
@@ -42,6 +44,7 @@ public class TagService {
     return tagRepository.findAll(pageRequest).stream().map(CreatedTagResponseDto::toDto).toList();
   }
 
+  @Transactional
   public CreatedTagResponseDto updateTag(Long tagId, CreatedTagRequestDto requestDto) {
     Tag tag = tagRepository.findByIdOrElseThrow(tagId);
 
@@ -52,6 +55,7 @@ public class TagService {
     return CreatedTagResponseDto.toDto(tag);
   }
 
+  @Transactional
   public void deleteTag(Long tagId) {
     Tag tag = tagRepository.findByIdOrElseThrow(tagId);
 
