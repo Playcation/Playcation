@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/librarys")
+@RequestMapping("/libraryis")
 public class LibraryController {
 
   private final LibraryService libraryService;
