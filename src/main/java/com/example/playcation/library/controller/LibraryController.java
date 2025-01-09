@@ -33,9 +33,9 @@ public class LibraryController {
   private final JWTUtil jwtUtil;
 
   @PostMapping
-  public ResponseEntity<LibraryResponseDto> createLibrary(@RequestHeader("Authorization") String authorizationHeader,
+  public ResponseEntity<LibraryResponseDto> createLibrary(@RequestHeader String ACCESS_TOKEN_CATEGORY,
       @RequestBody LibraryRequestDto requestDto) {
-    Long userId = jwtUtil.findUserByToken(authorizationHeader);
+    Long userId = jwtUtil.findUserByToken(ACCESS_TOKEN_CATEGORY);
     LibraryResponseDto responseDto = libraryService.createLibrary(requestDto, userId);
     return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
   }
@@ -48,25 +48,25 @@ public class LibraryController {
 
   // 다건 조회(라이브러리)
   @GetMapping("/my-games")
-  public ResponseEntity<List<LibraryGameResponseDto>> findLibraryList(@RequestHeader("Authorization") String authorizationHeader,
+  public ResponseEntity<List<LibraryGameResponseDto>> findLibraryList(@RequestHeader String ACCESS_TOKEN_CATEGORY,
       @RequestParam(defaultValue = "0") int page) {
-    Long userId = jwtUtil.findUserByToken(authorizationHeader);
+    Long userId = jwtUtil.findUserByToken(ACCESS_TOKEN_CATEGORY);
     List<LibraryGameResponseDto> responseDto = libraryService.findLibraryList(page, userId);
     return new ResponseEntity<>(responseDto, HttpStatus.OK);
   }
 
   @PatchMapping("/{libraryId}")
-  public ResponseEntity<LibraryResponseDto> updateFavourite(@RequestHeader("Authorization") String authorizationHeader,
+  public ResponseEntity<LibraryResponseDto> updateFavourite(@RequestHeader String ACCESS_TOKEN_CATEGORY,
       @PathVariable Long libraryId, @RequestBody UpdatedFavouriteRequestDto requestDto) {
-    Long userId = jwtUtil.findUserByToken(authorizationHeader);
+    Long userId = jwtUtil.findUserByToken(ACCESS_TOKEN_CATEGORY);
     LibraryResponseDto responseDto = libraryService.updateFavourite(libraryId, requestDto, userId);
     return new ResponseEntity<>(responseDto, HttpStatus.OK);
   }
 
   @DeleteMapping("/{libraryId}")
-  public ResponseEntity<String> deleteLibrary(@RequestHeader("Authorization") String authorizationHeader,
+  public ResponseEntity<String> deleteLibrary(@RequestHeader String ACCESS_TOKEN_CATEGORY,
       @PathVariable Long libraryId) {
-    Long userId = jwtUtil.findUserByToken(authorizationHeader);
+    Long userId = jwtUtil.findUserByToken(ACCESS_TOKEN_CATEGORY);
     libraryService.deleteLibrary(libraryId, userId);
     return new ResponseEntity<>("삭제되었습니다", HttpStatus.OK);
   }

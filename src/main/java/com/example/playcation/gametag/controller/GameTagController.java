@@ -31,15 +31,15 @@ public class GameTagController {
   }
 
   @PatchMapping("/{gameTagId}")
-  public ResponseEntity<GameTagResponseDto> updateGameTag(@RequestHeader("Authorization") String authorizationHeader, @PathVariable Long gameTagId, @RequestBody GameTagRequestDto requestDto) {
-    Long userId = jwtUtil.findUserByToken(authorizationHeader);
+  public ResponseEntity<GameTagResponseDto> updateGameTag(@RequestHeader String ACCESS_TOKEN_CATEGORY, @PathVariable Long gameTagId, @RequestBody GameTagRequestDto requestDto) {
+    Long userId = jwtUtil.findUserByToken(ACCESS_TOKEN_CATEGORY);
     GameTagResponseDto responseDto = gameTagService.updateGameTag(userId, gameTagId, requestDto);
     return new ResponseEntity<>(responseDto, HttpStatus.OK);
   }
 
   @DeleteMapping("/{gameTagId}")
-  public ResponseEntity<String> deleteGameTag(@RequestHeader("Authorization") String authorizationHeader, @PathVariable Long gameTagId) {
-    Long userId = jwtUtil.findUserByToken(authorizationHeader);
+  public ResponseEntity<String> deleteGameTag(@RequestHeader String ACCESS_TOKEN_CATEGORY, @PathVariable Long gameTagId) {
+    Long userId = jwtUtil.findUserByToken(ACCESS_TOKEN_CATEGORY);
     gameTagService.deleteGame(userId, gameTagId);
     return new ResponseEntity<>("삭제 완료되었습니다", HttpStatus.OK);
   }

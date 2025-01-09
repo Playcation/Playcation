@@ -81,12 +81,12 @@ public class LibraryService {
 
     // 접속한 유저가 수정하려는 라이브러리의 소유자가 맞는지 확인
     if (!library.getUser().getId().equals(userId)) {
-      throw new NoAuthorizedException(LibraryErrorCode.CANNOT_BE_MODIFIED_NOT_FOUND_LIBRARY);
+      throw new NoAuthorizedException(LibraryErrorCode.CANNOT_BE_MODIFIED_LIBRARY);
     }
 
     // 유저가 바꾸려는 즐겨찾기 상태와 현재 라이브러리의 즐겨찾기의 상태가 같은지 확인
     if (library.getFavourite() == requestDto.isFavourite()) {
-      throw new NoAuthorizedException(LibraryErrorCode.INVALID_INPUT_NOT_FOUND_LIBRARY);
+      throw new NoAuthorizedException(LibraryErrorCode.INVALID_INPUT_LIBRARY);
     }
 
     library.updateFavourite(requestDto.isFavourite());
@@ -101,7 +101,7 @@ public class LibraryService {
     Library library = libraryRepository.findByIdOrElseThrow(libraryId);
 
     if (!library.getUser().getId().equals(userId)) {
-      throw new NoAuthorizedException(LibraryErrorCode.CANNOT_BE_MODIFIED_NOT_FOUND_LIBRARY);
+      throw new NoAuthorizedException(LibraryErrorCode.CANNOT_BE_MODIFIED_LIBRARY);
     }
 
     libraryRepository.delete(library);
