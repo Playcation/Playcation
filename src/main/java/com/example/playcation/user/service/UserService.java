@@ -7,6 +7,9 @@ import com.example.playcation.exception.DuplicatedException;
 import com.example.playcation.exception.InvalidInputException;
 import com.example.playcation.exception.NoAuthorizedException;
 import com.example.playcation.exception.UserErrorCode;
+import com.example.playcation.s3.entity.FileDetail;
+import com.example.playcation.s3.entity.UserFile;
+import com.example.playcation.s3.repository.UserFileRepository;
 import com.example.playcation.s3.service.S3Service;
 import com.example.playcation.user.dto.DeletedUserRequestDto;
 import com.example.playcation.user.dto.SignInUserRequestDto;
@@ -26,6 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class UserService {
 
   private final UserRepository userRepository;
+  private final UserFileRepository userFileRepository;
   private final BCryptPasswordEncoder bCryptPasswordEncoder;
   private final S3Service s3Service;
 
@@ -33,6 +37,12 @@ public class UserService {
   @Transactional
   public void delete(Long id, DeletedUserRequestDto deletedUserRequestDto) {
     User user = userRepository.findByIdOrElseThrow(id);
+    // S3에서 파일 삭제
+    if(!user.getImageUrl().isEmpty()) {
+      userFileRepository.deleteByUserId(id);
+      s3Service.deleteFile(user.getImageUrl());
+    }
+
     checkPassword(user, deletedUserRequestDto.getPassword());
     user.delete();
     userRepository.save(user);
@@ -52,16 +62,17 @@ public class UserService {
       throw new DuplicatedException(UserErrorCode.EMAIL_EXIST);
     }
     String password = bCryptPasswordEncoder.encode(signInUserRequestDto.getPassword());
-    String filePath = s3Service.uploadFile(file);
+    FileDetail fileDetail = s3Service.uploadFile(file);
     User user = userRepository.save( User.builder()
         .email(signInUserRequestDto.getEmail())
         .password(password)
-        .imageUrl(filePath)
+        .imageUrl(fileDetail == null ? "": fileDetail.getFilePath())
         .name(signInUserRequestDto.getName())
         .role(Role.USER)
         .social(Social.NORMAL)
         .build()
     );
+    userFileRepository.save(new UserFile(user, fileDetail));
     return UserResponseDto.toDto(user);
   }
 
@@ -75,11 +86,12 @@ public class UserService {
   public UserResponseDto updateUser(Long id, UpdatedUserRequestDto updatedUserRequestDto, MultipartFile file) {
     User user = userRepository.findByIdOrElseThrow(id);
     checkPassword(user, updatedUserRequestDto.getPassword());
-    String filePath = "";
+    FileDetail fileDetail = null;
     if(file != null) {
-      filePath = s3Service.uploadFile(file);
+      fileDetail = s3Service.uploadFile(file);
     }
-    user.update(updatedUserRequestDto.getName(), updatedUserRequestDto.getDescription(), filePath);
+    user.update(updatedUserRequestDto.getName(), updatedUserRequestDto.getDescription(),
+        fileDetail);
     return UserResponseDto.toDto(user);
   }
 

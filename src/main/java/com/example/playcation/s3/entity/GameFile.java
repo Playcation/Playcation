@@ -26,4 +26,9 @@ public class GameFile {
   @ManyToOne(fetch = FetchType.LAZY)
   private FileDetail fileDetail;
 
+  public GameFile(Game game, FileDetail fileDetail) {
+    this.game = game;
+    this.fileDetail = fileDetail;
+  }
+
 }
