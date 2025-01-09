@@ -48,7 +48,7 @@ public class GameTagService {
 
   public GameListResponseDto findGameTagByTag(int page, Long tagId) {
 
-    PageRequest pageRequest = PageRequest.of(page, 10, Sort.by(Direction.DESC, "id"));
+    PageRequest pageRequest = PageRequest.of(page, 10);
 
     Tag tag = tagRepository.findByIdOrElseThrow(tagId);
 
