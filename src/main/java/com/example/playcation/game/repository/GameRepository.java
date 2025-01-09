@@ -4,6 +4,7 @@ import com.example.playcation.enums.GameStatus;
 import com.example.playcation.exception.GameErrorCode;
 import com.example.playcation.exception.NotFoundException;
 import com.example.playcation.game.entity.Game;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -17,4 +18,6 @@ public interface GameRepository extends JpaRepository<Game, Long>, GameRepositor
     }
     return game;
   }
+
+  List<Game> findAllByIdIn(List<Long> ids);
 }
