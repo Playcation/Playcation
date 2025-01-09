@@ -104,7 +104,7 @@ public class GameService {
     gameTagRepository.deleteAll(gameTagList);
 
     // 삭제하는 게임 id를 가지고 있는 라이브러리를 hard delete
-    List<Library> libraryList = libraryRepository.findAllByGameId(gameId);
+    List<Library> libraryList = libraryRepository.findLibraryByGameId(gameId);
     libraryRepository.deleteAll(libraryList);
 
     gameRepository.save(game);

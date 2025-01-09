@@ -13,6 +13,6 @@ public interface LibraryRepository extends JpaRepository<Library, Long>, Library
   }
 
   // 해당 게임 id를 가진 라이브러리를 불러옴
-  List<Library> findAllByGameId(Long gameId);
+  List<Library> findLibraryByGameId(Long gameId);
 
 }
