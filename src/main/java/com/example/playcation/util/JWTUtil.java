@@ -44,7 +44,7 @@ public class JWTUtil {
 
   // 토큰의 권한을 반환
   public String getAuth(String token) {
-    return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("auth", String.class);
+    return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("role", String.class);
   }
 
   // 발급자를 확인하는 메소드
