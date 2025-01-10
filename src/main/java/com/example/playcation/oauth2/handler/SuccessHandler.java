@@ -66,6 +66,6 @@ public class SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
     Cookie refreshCookie = jwtUtil.createCookie(TokenSettings.REFRESH_TOKEN_CATEGORY, refresh);
     response.addCookie(refreshCookie);
 
-    response.sendRedirect("http://localhost:8080/my");
+    response.sendRedirect("http://localhost:8080/login/oauth2/code/google");
   }
 }
