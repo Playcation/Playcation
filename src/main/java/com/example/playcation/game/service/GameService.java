@@ -112,6 +112,7 @@ public class GameService {
     List<Library> libraryList = libraryRepository.findLibraryByGameId(gameId);
     libraryRepository.deleteAll(libraryList);
 
+
     gameRepository.save(game);
   }
 }
