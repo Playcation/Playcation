@@ -11,7 +11,7 @@ import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.amazonaws.util.IOUtils;
 import com.example.playcation.exception.FileErrorCode;
 import com.example.playcation.exception.InternalServerException;
-import com.example.playcation.exception.S3ErrorCode;
+import com.example.playcation.exception.InvalidInputException;
 import com.example.playcation.s3.dto.FileResponseDto;
 import com.example.playcation.s3.entity.FileDetail;
 import com.example.playcation.s3.repository.FileDetailRepository;
@@ -53,8 +53,9 @@ public class S3Service {
   @Transactional
   public FileDetail uploadFile(MultipartFile multipartFile){
     if (multipartFile == null || multipartFile.isEmpty()) {
-      return null;
+      throw new InvalidInputException(FileErrorCode.INVALID_FILE);
     }
+
     String fileType = multipartFile.getOriginalFilename().substring(multipartFile.getOriginalFilename().lastIndexOf(".") + 1);
     String bucket;
     if("zip".equals(fileType)){
@@ -146,7 +147,7 @@ public class S3Service {
       return new FileResponseDto(bytes, fileDetail.getOriginFileName());
 
     }catch (IOException e){
-      throw new InternalServerException(S3ErrorCode.NOT_FOUND_FILE);
+      throw new InternalServerException(FileErrorCode.NOT_FOUND_FILE);
     }
   }
 }
