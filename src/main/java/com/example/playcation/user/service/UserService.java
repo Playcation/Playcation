@@ -94,22 +94,22 @@ public class UserService {
     FileDetail fileDetail = null;
 
     // 기존 파일 삭제
-    if (file ==null){
+    if (file == null){
       if(!user.getImageUrl().isEmpty()) {
+        FileDetail uploadFileDetail = s3Service.uploadFile(file);
+        userFileRepository.save(new UserFile(user, uploadFileDetail));
+        if(!user.getImageUrl().isEmpty()) {
+          fileDetail = fileDetailRepository.findByFilePathOrElseThrow(user.getImageUrl());
+          userFileRepository.deleteByUserIdAndFileDetailId(id, fileDetail.getId());
+          s3Service.deleteFile(user.getImageUrl());
+        }
+        fileDetail = uploadFileDetail;
+    }else if(!file.isEmpty()) {  // 파일 변경
         fileDetail = fileDetailRepository.findByFilePathOrElseThrow(user.getImageUrl());
-        userFileRepository.deleteByUserIdAndAndFileDetailId(id, fileDetail.getId());
+        userFileRepository.deleteByUserIdAndFileDetailId(id, fileDetail.getId());
         s3Service.deleteFile(user.getImageUrl());
       }
       fileDetail = new FileDetail();
-    }else if(!file.isEmpty()) {  // 파일 변경
-      FileDetail uploadFileDetail = s3Service.uploadFile(file);
-      userFileRepository.save(new UserFile(user, uploadFileDetail));
-      if(!user.getImageUrl().isEmpty()) {
-        fileDetail = fileDetailRepository.findByFilePathOrElseThrow(user.getImageUrl());
-        userFileRepository.deleteByUserIdAndAndFileDetailId(id, fileDetail.getId());
-        s3Service.deleteFile(user.getImageUrl());
-      }
-      fileDetail = uploadFileDetail;
     }
 
     user.update(updatedUserRequestDto.getName(), updatedUserRequestDto.getDescription(),

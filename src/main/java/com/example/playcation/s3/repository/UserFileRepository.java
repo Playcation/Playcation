@@ -15,5 +15,5 @@ public interface UserFileRepository extends JpaRepository<UserFile, Long> {
 
   void deleteByUserId(Long userId);
 
-  void deleteByUserIdAndAndFileDetailId(Long userId, Long fileDetailId);
+  void deleteByUserIdAndFileDetailId(Long userId, Long fileDetailId);
 }

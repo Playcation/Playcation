@@ -9,14 +9,13 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.redis.core.RedisHash;
 
 //@Entity
-@RedisHash("refresh_token")
 @Getter
 @NoArgsConstructor
+@RedisHash("refresh_token")
 public class RefreshToken {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+  private String id;
 
   private String userId;
 
@@ -29,5 +28,4 @@ public class RefreshToken {
     this.refresh = refresh;
     this.expiration = expiration;
   }
-
 }

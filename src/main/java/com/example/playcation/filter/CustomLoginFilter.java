@@ -11,6 +11,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
@@ -72,7 +73,7 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
 
     //Refresh 토큰 저장
     ValueOperations<String, String> ops = redisTemplate.opsForValue();
-    ops.set(userId.toString(), refresh);
+    ops.set(userId, refresh, Duration.ofMillis(TokenSettings.REFRESH_TOKEN_EXPIRATION));
 //    Date date = new Date(System.currentTimeMillis() + TokenSettings.REFRESH_TOKEN_EXPIRATION);
 //    RefreshToken refreshToken = new RefreshToken(userId, refresh, date.toString());
 //    tokenRepository.save(refreshToken);
