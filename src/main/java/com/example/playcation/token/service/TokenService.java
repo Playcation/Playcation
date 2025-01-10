@@ -73,10 +73,6 @@ public class TokenService {
 
   private void addRefreshEntity(String userId, String refresh, Long expiredMs) {
 
-//    Date date = new Date(System.currentTimeMillis() + expiredMs);
-//    RefreshToken refreshEntity = new RefreshToken(userId, refresh, date.toString());
-//    tokenRepository.save(refreshEntity);
-
     ValueOperations<String, String> ops = redisTemplate.opsForValue();
     ops.set(userId, refresh, Duration.ofMillis(expiredMs));  // Redis에 저장
   }

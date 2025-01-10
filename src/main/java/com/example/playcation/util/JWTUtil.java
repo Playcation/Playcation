@@ -30,7 +30,7 @@ public class JWTUtil {
   public String getUserId(String token) {
     return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("userId", String.class);
   }
-  
+
   // Access 토큰 / Refresh 토큰 구분
   public String getCategory(String token) {
     return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("category", String.class);
