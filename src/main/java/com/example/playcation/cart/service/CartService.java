@@ -4,8 +4,10 @@ import com.example.playcation.cart.dto.CartGameResponseDto;
 import com.example.playcation.cart.dto.UpdatedCartGameResponseDto;
 import com.example.playcation.cart.entity.Cart;
 import com.example.playcation.cart.repository.CartRepository;
+import com.example.playcation.enums.Role;
 import com.example.playcation.exception.CartErrorCode;
 import com.example.playcation.exception.DuplicatedException;
+import com.example.playcation.exception.NoAuthorizedException;
 import com.example.playcation.game.entity.Game;
 import com.example.playcation.game.repository.GameRepository;
 import com.example.playcation.user.entity.User;
@@ -50,11 +52,15 @@ public class CartService {
    * @return UpdatedCartGameResponseDto ( cart 엔티티와 필드 동일 )
    */
   @Transactional
-  public UpdatedCartGameResponseDto addGameToCart(Long userId, Long gameId) {
+  public UpdatedCartGameResponseDto addGameToCart(Long userId, Long gameId, String auth) {
     // User, game 조회 및 예외 처리
     User user = userRepository.findByIdOrElseThrow(userId);
     Game game = gameRepository.findByIdOrElseThrow(gameId);
 
+    // 유저가 MANAGER 이고 추가하려는 게임의 관리자일 시
+    if (auth.equals(Role.MANAGER.name()) && (user.isManagerOfGame(game))) {
+      throw new NoAuthorizedException(CartErrorCode.NO_AUTHORIZED_CART);
+    }
     // 이미 회원의 장바구니에 게임이 존재하는지 확인
     if (cartRepository.findByUserIdAndGameId(userId, gameId).isPresent()) {
       throw new DuplicatedException(CartErrorCode.GAME_ALREADY_IN_CART);
