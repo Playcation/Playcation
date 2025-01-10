@@ -24,7 +24,7 @@ public class FileDetail {
 
   private String serverFileName;
 
-  private String filePath;
+  private String filePath = "";
 
   private Long fileSize;
 

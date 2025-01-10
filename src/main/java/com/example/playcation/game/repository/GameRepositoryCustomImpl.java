@@ -1,5 +1,7 @@
 package com.example.playcation.game.repository;
 
+import com.example.playcation.common.PagingDto;
+import com.example.playcation.game.dto.CreatedGameResponseDto;
 import com.example.playcation.game.dto.PagingGameResponseDto;
 import com.example.playcation.game.entity.Game;
 import com.example.playcation.game.entity.QGame;
@@ -19,7 +21,7 @@ public class GameRepositoryCustomImpl implements GameRepositoryCustom {
   private final JPAQueryFactory queryFactory;
 
   @Override
-  public PagingGameResponseDto searchGames(PageRequest pageRequest, String title, String category,
+  public PagingDto<CreatedGameResponseDto> searchGames(PageRequest pageRequest, String title, String category,
       BigDecimal price, LocalDateTime createdAt) {
     QGame game = QGame.game;
 
@@ -45,7 +47,10 @@ public class GameRepositoryCustomImpl implements GameRepositoryCustom {
             afterCreatedAt(createdAt)
         )
         .fetchOne();
-    return new PagingGameResponseDto(gameList, count);
+
+    List<CreatedGameResponseDto> list = gameList.stream().map(CreatedGameResponseDto::toDto)
+        .toList();
+    return new PagingDto<>(list, count);
   }
 
   private BooleanExpression eqTitle(String title) {

@@ -45,7 +45,7 @@ public class UserController {
   @PostMapping("/sign-in")
   public ResponseEntity<UserResponseDto> signUp(
       @Valid @RequestPart(value = "json") SignInUserRequestDto userSignInRequestDto,
-      @RequestPart("file") MultipartFile file
+      @RequestPart(value = "file", required = false) MultipartFile file
   ) {
     return ResponseEntity.ok().body(userService.signUp(userSignInRequestDto, file));
   }
