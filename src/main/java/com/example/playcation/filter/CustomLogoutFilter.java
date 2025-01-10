@@ -88,6 +88,8 @@ public class CustomLogoutFilter extends GenericFilterBean {
     //Refresh 토큰 DB에서 제거
     redisTemplate.delete(userId);
 
+    response.setHeader(TokenSettings.ACCESS_TOKEN_CATEGORY, "");
+
     //Refresh 토큰 Cookie 값 0
     Cookie cookie = new Cookie(TokenSettings.REFRESH_TOKEN_CATEGORY, null);
     cookie.setMaxAge(0);
