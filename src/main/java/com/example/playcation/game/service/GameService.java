@@ -1,6 +1,7 @@
 package com.example.playcation.game.service;
 
 
+import com.example.playcation.common.PagingDto;
 import com.example.playcation.enums.GameStatus;
 import com.example.playcation.exception.GameErrorCode;
 import com.example.playcation.exception.NoAuthorizedException;
@@ -65,7 +66,7 @@ public class GameService {
   }
 
   // 게임 다건 조회
-  public PagingGameResponseDto searchGames(int page, String title, String category, BigDecimal price,
+  public PagingDto<CreatedGameResponseDto> searchGames(int page, String title, String category, BigDecimal price,
       LocalDateTime createdAt) {
 
     // 페이징시 최대 출력 갯수와 정렬조건 설정
