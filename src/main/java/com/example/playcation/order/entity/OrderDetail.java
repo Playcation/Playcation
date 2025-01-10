@@ -39,4 +39,8 @@ public class OrderDetail {
 
   private BigDecimal price;
 
+  public void assignOrder(Order order) {
+    this.order = order;
+  }
+
 }
