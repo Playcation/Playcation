@@ -80,4 +80,16 @@ public class OrderDetailService {
 //      throw new InvalidInputException(OrderErrorCode.INVALID_ITEM_INCLUDED);
 //    }
   }
+
+  /**
+   * 주문한 게임 목록을 반환
+   *
+   * @param orderId 주문 식별자
+   * @return 게임 목록
+   */
+  public List<Game> findOrderedGames(Long orderId) {
+
+    List<OrderDetail> details = orderDetailRepository.findAllByOrderId(orderId);
+    return details.stream().map(OrderDetail::getGame).toList();
+  }
 }

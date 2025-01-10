@@ -7,6 +7,8 @@ import com.example.playcation.util.JWTUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,11 +26,29 @@ public class OrderController {
    * 현재 로그인한 유저의 장바구니로 주문 생성
    */
   @PostMapping
-  public ResponseEntity<?> createOrder(
+  public ResponseEntity<OrderResponseDto> createOrder(
       @RequestHeader(TokenSettings.ACCESS_TOKEN_CATEGORY) String authorizationHeader
   ) {
-    OrderResponseDto responseDto = orderService.createOrder(jwtUtil.findUserByToken(authorizationHeader));
+    OrderResponseDto responseDto = orderService.createOrder(
+        jwtUtil.findUserByToken(authorizationHeader));
     return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
+  }
+
+  /**
+   * 주문 단건 조회
+   *
+   * @param orderId 주문 식별자
+   */
+  @GetMapping("/{orderId}")
+  public ResponseEntity<OrderResponseDto> findOrder(
+      @RequestHeader(TokenSettings.ACCESS_TOKEN_CATEGORY) String authorizationHeader,
+      @PathVariable Long orderId
+  ) {
+    OrderResponseDto responseDto = orderService.findOrder(
+        jwtUtil.findUserByToken(authorizationHeader),
+        orderId,
+        jwtUtil.findAuthByToken(authorizationHeader));
+    return new ResponseEntity<>(responseDto, HttpStatus.OK);
   }
 
 }

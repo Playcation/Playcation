@@ -3,6 +3,7 @@ package com.example.playcation.user.entity;
 import com.example.playcation.enums.Role;
 import com.example.playcation.common.BaseEntity;
 import com.example.playcation.enums.Social;
+import com.example.playcation.game.entity.Game;
 import com.example.playcation.s3.entity.FileDetail;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.Column;
@@ -14,6 +15,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -81,5 +83,20 @@ public class User extends BaseEntity {
 
   public void updateSocial(Social social){
     this.social = social;
+  }
+
+  /**
+   * 매니저인 유저가 게임 목록 중 소유한 게임이 있는지를 확인
+   *
+   * @param games 게임 목록
+   * @return 하나라도 소유자일시 true, 아닐시 false
+   */
+  public boolean isManagerOfGames(List<Game> games) {
+    for(Game g : games) {
+      if(this.equals(g.getUser())) {
+        return true;
+      }
+    }
+    return false;
   }
 }
