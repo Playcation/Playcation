@@ -1,5 +1,6 @@
 package com.example.playcation.library.service;
 
+import com.example.playcation.common.PagingDto;
 import com.example.playcation.exception.DuplicatedException;
 import com.example.playcation.exception.LibraryErrorCode;
 import com.example.playcation.exception.NoAuthorizedException;
@@ -18,10 +19,12 @@ import com.example.playcation.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.domain.jaxb.SpringDataJaxb.PageDto;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -56,7 +59,7 @@ public class LibraryService {
     return LibraryResponseDto.toDto(library);
   }
 
-  public List<LibraryGameResponseDto> findLibraryList(int page, Long userId) {
+  public PagingDto<LibraryGameResponseDto> findLibraryList(int page, Long userId) {
 
     PageRequest pageRequest = PageRequest.of(page, 10);
 
@@ -66,12 +69,10 @@ public class LibraryService {
 
     List<Library> libraryList = listDto.getLibraryList();
 
-    List<LibraryGameResponseDto> gameList = new ArrayList<>();
-    for (Library library : libraryList) {
-      gameList.add(new LibraryGameResponseDto(library.getGame(), library.getFavourite(), listDto.getCount()));
-    }
+    List<LibraryGameResponseDto> gameList = libraryList.stream()
+        .map(ld -> new LibraryGameResponseDto(ld.getGame(), ld.getFavourite())).toList();
 
-    return gameList;
+    return new PagingDto<>(gameList, listDto.getCount());
 
   }
 
@@ -81,12 +82,12 @@ public class LibraryService {
 
     // 접속한 유저가 수정하려는 라이브러리의 소유자가 맞는지 확인
     if (!library.getUser().getId().equals(userId)) {
-      throw new NoAuthorizedException(LibraryErrorCode.CANNOT_BE_MODIFIED_NOT_FOUND_LIBRARY);
+      throw new NoAuthorizedException(LibraryErrorCode.CANNOT_BE_MODIFIED_LIBRARY);
     }
 
     // 유저가 바꾸려는 즐겨찾기 상태와 현재 라이브러리의 즐겨찾기의 상태가 같은지 확인
     if (library.getFavourite() == requestDto.isFavourite()) {
-      throw new NoAuthorizedException(LibraryErrorCode.INVALID_INPUT_NOT_FOUND_LIBRARY);
+      throw new NoAuthorizedException(LibraryErrorCode.INVALID_INPUT_LIBRARY);
     }
 
     library.updateFavourite(requestDto.isFavourite());
@@ -101,7 +102,7 @@ public class LibraryService {
     Library library = libraryRepository.findByIdOrElseThrow(libraryId);
 
     if (!library.getUser().getId().equals(userId)) {
-      throw new NoAuthorizedException(LibraryErrorCode.CANNOT_BE_MODIFIED_NOT_FOUND_LIBRARY);
+      throw new NoAuthorizedException(LibraryErrorCode.CANNOT_BE_MODIFIED_LIBRARY);
     }
 
     libraryRepository.delete(library);
