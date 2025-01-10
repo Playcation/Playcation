@@ -52,9 +52,6 @@ public class CartController {
       @RequestHeader(TokenSettings.ACCESS_TOKEN_CATEGORY) String authorizationHeader) {
     Long userId = jwtUtil.findUserByToken(authorizationHeader);
     String auth = jwtUtil.findAuthByToken(authorizationHeader);
-    System.out.println("userId 는!!!" + userId);
-    System.out.println("auth는!!!" + auth);
-
     UpdatedCartGameResponseDto updatedCart = cartService.addGameToCart(userId, gameId, auth);
     return new ResponseEntity<>(updatedCart, HttpStatus.OK);
   }
