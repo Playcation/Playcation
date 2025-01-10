@@ -99,6 +99,10 @@ public class S3Service {
     fileDetailRepository.delete(fileDetail);
   }
 
+  public FileDetail getFile(String filePath){
+    return fileDetailRepository.findByFilePathOrElseThrow(filePath);
+  }
+
   // 파일명을 난수화하기 위해 UUID 를 활용하여 난수를 돌린다.
   public String createFileName(String fileName){
     return LocalDateTime.now() + "_" + UUID.randomUUID().toString().concat(getFileExtension(fileName));
