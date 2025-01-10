@@ -6,8 +6,10 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.redis.core.RedisHash;
 
-@Entity
+//@Entity
+@RedisHash("refresh_token")
 @Getter
 @NoArgsConstructor
 public class RefreshToken {

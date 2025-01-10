@@ -18,6 +18,7 @@ import java.util.Collections;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
@@ -44,6 +45,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 public class SecurityConfig {
 
   private final AuthenticationConfiguration authenticationConfiguration;
+//  private final RedisTemplate<String, String> redisTemplate;
   private final SuccessHandler successHandler;
   private final OAuth2Service oAuth2Service;
   private final JWTUtil jwtUtil;

@@ -11,6 +11,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Date;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 public class TokenService {
 
   private final TokenRepository tokenRepository;
+  private final RedisTemplate<String, String> redisTemplate;
   private final JWTUtil jwtUtil;
 
   public String[] createNewToken(HttpServletRequest request) {

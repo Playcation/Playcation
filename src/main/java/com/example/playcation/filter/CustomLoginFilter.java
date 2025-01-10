@@ -15,6 +15,9 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -23,17 +26,13 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+@RequiredArgsConstructor
 public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
 
   private final AuthenticationManager authenticationManager;
+  private final RedisTemplate<String, String> redisTemplate;
   private final TokenRepository tokenRepository;
   private final JWTUtil jwtUtil;
-
-  public CustomLoginFilter(AuthenticationManager authenticationManager, JWTUtil jwtUtil, TokenRepository tokenRepository) {
-    this.authenticationManager = authenticationManager;
-    this.tokenRepository = tokenRepository;
-    this.jwtUtil = jwtUtil;
-  }
 
   // 로그인을 진행하는 필터 ( application/json 형식으로 데이터를 받아온다. )
   @Override
@@ -72,9 +71,11 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
     String refresh = jwtUtil.createJwt(TokenSettings.REFRESH_TOKEN_CATEGORY, userId, role, TokenSettings.REFRESH_TOKEN_EXPIRATION);
 
     //Refresh 토큰 저장
-    Date date = new Date(System.currentTimeMillis() + TokenSettings.REFRESH_TOKEN_EXPIRATION);
-    RefreshToken refreshToken = new RefreshToken(userId, refresh, date.toString());
-    tokenRepository.save(refreshToken);
+    ValueOperations<String, String> ops = redisTemplate.opsForValue();
+    ops.set(userId.toString(), refresh);
+//    Date date = new Date(System.currentTimeMillis() + TokenSettings.REFRESH_TOKEN_EXPIRATION);
+//    RefreshToken refreshToken = new RefreshToken(userId, refresh, date.toString());
+//    tokenRepository.save(refreshToken);
 
     response.setHeader(TokenSettings.ACCESS_TOKEN_CATEGORY, access);
     response.addCookie(jwtUtil.createCookie(TokenSettings.REFRESH_TOKEN_CATEGORY, refresh));
