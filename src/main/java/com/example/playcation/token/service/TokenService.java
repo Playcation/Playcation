@@ -3,14 +3,11 @@ package com.example.playcation.token.service;
 import com.example.playcation.common.TokenSettings;
 import com.example.playcation.exception.NoAuthorizedException;
 import com.example.playcation.exception.TokenErrorCode;
-import com.example.playcation.token.entity.RefreshToken;
-import com.example.playcation.token.repository.TokenRepository;
 import com.example.playcation.util.JWTUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.Duration;
-import java.util.Date;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -20,7 +17,6 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class TokenService {
 
-  private final TokenRepository tokenRepository;
   private final RedisTemplate<String, String> redisTemplate;
   private final JWTUtil jwtUtil;
 
@@ -47,18 +43,12 @@ public class TokenService {
       throw new NoAuthorizedException(TokenErrorCode.NO_REFRESH_TOKEN);
     }
 
-//    // 토큰이 refresh인지 확인 (발급시 페이로드에 명시)
-//    String category = jwtUtil.getCategory(refresh);
-//
-//    if (!category.equals(TokenSettings.REFRESH_TOKEN_CATEGORY)) {
-//      // 리플레시 토큰이 아닐 때
-//      throw new NoAuthorizedException(TokenErrorCode.NO_REFRESH_TOKEN);
-//    }
-//
-//    //DB에 저장되어 있는지 확인
-//    if (!tokenRepository.existsByRefresh(refresh)) {
-//      throw new NoAuthorizedException(TokenErrorCode.NO_REFRESH_TOKEN);
-//    }
+    // 토큰이 refresh인지 확인 (발급시 페이로드에 명시)
+    String category = jwtUtil.getCategory(refresh);
+    if (!category.equals(TokenSettings.REFRESH_TOKEN_CATEGORY)) {
+      // 리플레시 토큰이 아닐 때
+      throw new NoAuthorizedException(TokenErrorCode.NO_REFRESH_TOKEN);
+    }
 
     String userId = jwtUtil.getUserId(refresh);
     String auth = jwtUtil.getAuth(refresh);
@@ -77,10 +67,6 @@ public class TokenService {
     redisTemplate.delete(userId);
     addRefreshEntity(userId, newRefresh, TokenSettings.REFRESH_TOKEN_EXPIRATION);
 
-
-//    //Refresh 토큰 저장 DB에 기존의 Refresh 토큰 삭제 후 새 Refresh 토큰 저장
-//    tokenRepository.deleteByRefresh(refresh);
-//    addRefreshEntity(userId, newRefresh, TokenSettings.REFRESH_TOKEN_EXPIRATION);
 
     return new String[] {newAccess, newRefresh};
   }

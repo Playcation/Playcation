@@ -1,19 +1,15 @@
 package com.example.playcation.filter;
 
 import com.example.playcation.common.TokenSettings;
-import com.example.playcation.token.entity.RefreshToken;
-import com.example.playcation.token.repository.TokenRepository;
 import com.example.playcation.user.entity.CustomUserDetails;
 import com.example.playcation.util.JWTUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +28,6 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
 
   private final AuthenticationManager authenticationManager;
   private final RedisTemplate<String, String> redisTemplate;
-  private final TokenRepository tokenRepository;
   private final JWTUtil jwtUtil;
 
   // 로그인을 진행하는 필터 ( application/json 형식으로 데이터를 받아온다. )
@@ -74,9 +69,6 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
     //Refresh 토큰 저장
     ValueOperations<String, String> ops = redisTemplate.opsForValue();
     ops.set(userId, refresh, Duration.ofMillis(TokenSettings.REFRESH_TOKEN_EXPIRATION));
-//    Date date = new Date(System.currentTimeMillis() + TokenSettings.REFRESH_TOKEN_EXPIRATION);
-//    RefreshToken refreshToken = new RefreshToken(userId, refresh, date.toString());
-//    tokenRepository.save(refreshToken);
 
     response.setHeader(TokenSettings.ACCESS_TOKEN_CATEGORY, access);
     response.addCookie(jwtUtil.createCookie(TokenSettings.REFRESH_TOKEN_CATEGORY, refresh));

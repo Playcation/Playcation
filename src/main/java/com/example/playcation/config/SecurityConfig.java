@@ -5,7 +5,6 @@ import com.example.playcation.filter.CustomLoginFilter;
 import com.example.playcation.filter.CustomLogoutFilter;
 import com.example.playcation.oauth2.handler.SuccessHandler;
 import com.example.playcation.oauth2.service.OAuth2Service;
-import com.example.playcation.token.repository.TokenRepository;
 import com.example.playcation.user.repository.UserRepository;
 import com.example.playcation.util.JWTUtil;
 import jakarta.servlet.http.HttpServletRequest;
@@ -51,8 +50,7 @@ public class SecurityConfig {
   @Bean
   public SecurityFilterChain filterChain(
       HttpSecurity http,
-      UserRepository userRepository,
-      TokenRepository tokenRepository) throws Exception {
+      UserRepository userRepository) throws Exception {
 
     http.cors(corsCustomizer -> corsCustomizer.configurationSource(new CorsConfigurationSource() {
 
@@ -94,8 +92,8 @@ public class SecurityConfig {
     );
 
     http.addFilterBefore(new JWTFilter(userRepository, jwtUtil), CustomLoginFilter.class);
-    http.addFilterBefore(new CustomLogoutFilter(jwtUtil, tokenRepository), LogoutFilter.class);
-    http.addFilterAt(new CustomLoginFilter(authenticationManager(authenticationConfiguration),redisTemplate, tokenRepository, jwtUtil), UsernamePasswordAuthenticationFilter.class);
+    http.addFilterBefore(new CustomLogoutFilter(redisTemplate, jwtUtil), LogoutFilter.class);
+    http.addFilterAt(new CustomLoginFilter(authenticationManager(authenticationConfiguration),redisTemplate, jwtUtil), UsernamePasswordAuthenticationFilter.class);
 
     // 세션 설정
     http.sessionManagement((session) ->

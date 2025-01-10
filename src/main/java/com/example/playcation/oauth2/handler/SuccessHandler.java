@@ -3,19 +3,20 @@ package com.example.playcation.oauth2.handler;
 import com.example.playcation.common.TokenSettings;
 import com.example.playcation.oauth2.dto.OAuth2UserDto;
 import com.example.playcation.token.entity.RefreshToken;
-import com.example.playcation.token.repository.TokenRepository;
 import com.example.playcation.user.entity.User;
 import com.example.playcation.user.repository.UserRepository;
 import com.example.playcation.util.JWTUtil;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
@@ -25,8 +26,8 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
-  private final TokenRepository tokenRepository;
   private final UserRepository userRepository;
+  private final RedisTemplate<String, String> redisTemplate;
   private final JWTUtil jwtUtil;
 
   @Override
@@ -57,7 +58,10 @@ public class SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     Date date = new Date(System.currentTimeMillis() + TokenSettings.REFRESH_TOKEN_EXPIRATION);
     RefreshToken refreshToken = new RefreshToken(user.getId().toString(), refresh, date.toString());
-    tokenRepository.save(refreshToken);
+
+    //Refresh 토큰 저장
+    ValueOperations<String, String> ops = redisTemplate.opsForValue();
+    ops.set(user.getId().toString(), refresh, Duration.ofMillis(TokenSettings.REFRESH_TOKEN_EXPIRATION));
 
     // access token set header
     response.setHeader(TokenSettings.ACCESS_TOKEN_CATEGORY, access);

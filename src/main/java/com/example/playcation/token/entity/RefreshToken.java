@@ -1,5 +1,6 @@
 package com.example.playcation.token.entity;
 
+import com.example.playcation.common.TokenSettings;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -11,7 +12,7 @@ import org.springframework.data.redis.core.RedisHash;
 //@Entity
 @Getter
 @NoArgsConstructor
-@RedisHash("refresh_token")
+@RedisHash(value = "refresh_token", timeToLive = TokenSettings.REFRESH_TOKEN_EXPIRATION)
 public class RefreshToken {
 
   @Id
