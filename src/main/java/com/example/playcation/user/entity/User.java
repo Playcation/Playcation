@@ -1,8 +1,9 @@
 package com.example.playcation.user.entity;
 
-import com.example.playcation.enums.Role;
 import com.example.playcation.common.BaseEntity;
+import com.example.playcation.enums.Role;
 import com.example.playcation.enums.Social;
+import com.example.playcation.game.entity.Game;
 import com.example.playcation.s3.entity.FileDetail;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.Column;
@@ -67,19 +68,26 @@ public class User extends BaseEntity {
     this.description = description == null ? this.description : description;
   }
 
-  public void updateRole(){
+  public void updateRole() {
     this.role = Role.MANAGER;
   }
 
-  public void updatePassword(String password){
+  public void updatePassword(String password) {
     this.password = password;
   }
 
-  public void delete(){
+  public void delete() {
     this.deletedAt = LocalDateTime.now();
   }
 
-  public void updateSocial(Social social){
+  public void updateSocial(Social social) {
     this.social = social;
+  }
+
+  public boolean isManagerOfGame(Game game) {
+    if (this.equals(game.getUser())) {
+      return true;
+    }
+    return false;
   }
 }
