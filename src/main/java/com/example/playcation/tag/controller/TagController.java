@@ -1,6 +1,7 @@
 package com.example.playcation.tag.controller;
 
 
+import com.example.playcation.common.PagingDto;
 import com.example.playcation.tag.Dto.CreatedTagRequestDto;
 import com.example.playcation.tag.Dto.CreatedTagResponseDto;
 import com.example.playcation.tag.service.TagService;
@@ -8,6 +9,7 @@ import com.example.playcation.util.JWTUtil;
 import java.util.List;
 import javax.net.ssl.HttpsURLConnection;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.jaxb.SpringDataJaxb.PageDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -27,7 +29,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class TagController {
 
   private final TagService tagService;
-  private final JWTUtil jwtUtil;
 
   @PostMapping
   public ResponseEntity<CreatedTagResponseDto> createTag(@RequestBody CreatedTagRequestDto requestDto) {
@@ -43,10 +44,10 @@ public class TagController {
 
   // TODO: 페이징 방식 통일
   @GetMapping
-  public ResponseEntity<List<CreatedTagResponseDto>> findAllTag(
+  public ResponseEntity<PagingDto<CreatedTagResponseDto>> findAllTag(
       @RequestParam(defaultValue = "0") int page
   ) {
-    List<CreatedTagResponseDto> responseDto = tagService.findAllTag(page);
+    PagingDto<CreatedTagResponseDto> responseDto = tagService.findAllTag(page);
     return new ResponseEntity<>(responseDto, HttpStatus.OK);
   }
 
