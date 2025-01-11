@@ -11,6 +11,7 @@ import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.amazonaws.util.IOUtils;
 import com.example.playcation.exception.FileErrorCode;
 import com.example.playcation.exception.InternalServerException;
+import com.example.playcation.exception.InvalidInputException;
 import com.example.playcation.exception.S3ErrorCode;
 import com.example.playcation.s3.dto.FileResponseDto;
 import com.example.playcation.s3.entity.FileDetail;
@@ -53,6 +54,7 @@ public class S3Service {
   @Transactional
   public FileDetail uploadFile(MultipartFile multipartFile){
     if (multipartFile == null || multipartFile.isEmpty()) {
+//      throw new InvalidInputException(FileErrorCode.NOT_FOUND_FILE);
       return null;
     }
     String fileType = multipartFile.getOriginalFilename().substring(multipartFile.getOriginalFilename().lastIndexOf(".") + 1);
@@ -99,12 +101,8 @@ public class S3Service {
     fileDetailRepository.delete(fileDetail);
   }
 
-  public FileDetail getFile(String filePath){
-    return fileDetailRepository.findByFilePathOrElseThrow(filePath);
-  }
-
   // 파일명을 난수화하기 위해 UUID 를 활용하여 난수를 돌린다.
-  public String createFileName(String fileName){
+  private String createFileName(String fileName){
     return LocalDateTime.now() + "_" + UUID.randomUUID().toString().concat(getFileExtension(fileName));
   }
 

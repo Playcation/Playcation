@@ -111,7 +111,8 @@ public class UserService {
       fileDetail = uploadFileDetail;
     }
 
-    user.update(updatedUserRequestDto.getName(), updatedUserRequestDto.getDescription(),
+    user.update(updatedUserRequestDto.getName(),
+        updatedUserRequestDto.getDescription(),
         fileDetail);
     return UserResponseDto.toDto(user);
   }
