@@ -3,6 +3,7 @@ package com.example.playcation.order.repository;
 import com.example.playcation.exception.NotFoundException;
 import com.example.playcation.exception.OrderErrorCode;
 import com.example.playcation.order.entity.Order;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {

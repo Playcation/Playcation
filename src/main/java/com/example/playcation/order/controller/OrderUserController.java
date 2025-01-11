@@ -2,7 +2,7 @@ package com.example.playcation.order.controller;
 
 import com.example.playcation.common.TokenSettings;
 import com.example.playcation.order.dto.OrderResponseDto;
-import com.example.playcation.order.service.OrderService;
+import com.example.playcation.order.service.OrderUserService;
 import com.example.playcation.util.JWTUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,9 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/orders")
-public class OrderController {
+public class OrderUserController {
 
-  private final OrderService orderService;
+  private final OrderUserService orderService;
   private final JWTUtil jwtUtil;
 
   /**
@@ -45,10 +45,7 @@ public class OrderController {
       @PathVariable Long orderId
   ) {
     OrderResponseDto responseDto = orderService.findOrder(
-        jwtUtil.findUserByToken(authorizationHeader),
-        orderId,
-        jwtUtil.findAuthByToken(authorizationHeader));
+        jwtUtil.findUserByToken(authorizationHeader), orderId);
     return new ResponseEntity<>(responseDto, HttpStatus.OK);
   }
-
 }

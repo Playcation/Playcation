@@ -13,6 +13,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -86,17 +87,12 @@ public class User extends BaseEntity {
   }
 
   /**
-   * 매니저인 유저가 게임 목록 중 소유한 게임이 있는지를 확인
+   * 매니저인 유저가 해당 게임의 판매자인지 확인
    *
-   * @param games 게임 목록
-   * @return 하나라도 소유자일시 true, 아닐시 false
+   * @param game 게임 목록
+   * @return 판매자일시 true, 아닐시 false
    */
-  public boolean isManagerOfGames(List<Game> games) {
-    for(Game g : games) {
-      if(this.equals(g.getUser())) {
-        return true;
-      }
-    }
-    return false;
+  public boolean isManagerOfGames(Game game) {
+    return this.equals(game.getUser());
   }
 }

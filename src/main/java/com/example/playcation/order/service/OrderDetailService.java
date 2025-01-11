@@ -6,7 +6,6 @@ import com.example.playcation.game.repository.GameRepository;
 import com.example.playcation.order.entity.Order;
 import com.example.playcation.order.entity.OrderDetail;
 import com.example.playcation.order.repository.OrderDetailRepository;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -30,9 +29,8 @@ public class OrderDetailService {
   public List<OrderDetail> createOrderDetailsInCart(List<CartGameResponseDto> items) {
 
     List<Long> ids = items.stream().map(CartGameResponseDto::getId).toList();
-    List<Game> games = gameRepository.findAllByIdIn(ids);
-    // TODO: 게임 유효성 검증
-    checkGamesValid(games);
+    List<Game> games = gameRepository.findAllByIdIn(ids)
+        .stream().filter(Game::isDeleted).toList();
 
     List<OrderDetail> orderDetails = new ArrayList<>();
     for (int i = 0; i < items.size(); i++) {
@@ -51,34 +49,14 @@ public class OrderDetailService {
    * OrderDetail 에 Order 부여
    *
    * @param orderDetails OrderDetail 목록
-   * @param order 부여할 Order
+   * @param order        부여할 Order
    */
   @Transactional
   public void assignOrder(List<OrderDetail> orderDetails, Order order) {
 
-    for(OrderDetail o : orderDetails) {
+    for (OrderDetail o : orderDetails) {
       o.assignOrder(order);
     }
-  }
-
-  /**
-   * 게임 목록의 유효성 검사. 삭제된 게임이 있을시 예외
-   *
-   * @param games 게임 목록
-   */
-  private void checkGamesValid(List<Game> games) {
-//    List<Long> invalidIds = new ArrayList<>();
-//
-//    boolean isInvalid = false;
-//    for (Game g : games) {
-//      if (g.getDeletedAt() != null) {
-//        isInvalid = true;
-//        invalidIds.add(g.getId());
-//      }
-//    }
-//    if (isInvalid) {
-//      throw new InvalidInputException(OrderErrorCode.INVALID_ITEM_INCLUDED);
-//    }
   }
 
   /**
