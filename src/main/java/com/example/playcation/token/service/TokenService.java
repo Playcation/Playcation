@@ -21,59 +21,59 @@ public class TokenService {
   private final JWTUtil jwtUtil;
 
   public String[] createNewToken(HttpServletRequest request) {
-
-    String refresh = null;
-    Cookie[] cookies = request.getCookies();
-    for (Cookie cookie : cookies) {
-      if (cookie.getName().equals(TokenSettings.REFRESH_TOKEN_CATEGORY)) {
-        refresh = cookie.getValue();
-      }
-    }
-
-    if (refresh == null) {
-      // 리플레시 토큰이 없을 때
-      throw new NoAuthorizedException(TokenErrorCode.NO_REFRESH_TOKEN);
-    }
-
-    // 토큰 만료 확인
-    try {
-      jwtUtil.isExpired(refresh);
-    } catch (ExpiredJwtException e) {
-      // 리플레시 토큰이 만료되었을 때
-      throw new NoAuthorizedException(TokenErrorCode.NO_REFRESH_TOKEN);
-    }
-
-    // 토큰이 refresh인지 확인 (발급시 페이로드에 명시)
-    String category = jwtUtil.getCategory(refresh);
-    if (!category.equals(TokenSettings.REFRESH_TOKEN_CATEGORY)) {
-      // 리플레시 토큰이 아닐 때
-      throw new NoAuthorizedException(TokenErrorCode.NO_REFRESH_TOKEN);
-    }
+    String refresh = extractRefreshToken(request);
+    validateRefreshToken(refresh);
 
     String userId = jwtUtil.getUserId(refresh);
     String auth = jwtUtil.getAuth(refresh);
 
-    // Redis에서 Refresh Token 조회
+    // Redis에서 기존 Refresh 토큰 조회 및 검증
     String storedRefresh = redisTemplate.opsForValue().get(userId);
     if (storedRefresh == null || !storedRefresh.equals(refresh)) {
       throw new NoAuthorizedException(TokenErrorCode.NO_REFRESH_TOKEN);
     }
 
-    // JWT 토큰 생성
-    String newAccess = TokenSettings.TOKEN_TYPE + jwtUtil.createJwt(TokenSettings.ACCESS_TOKEN_CATEGORY, userId, auth, TokenSettings.ACCESS_TOKEN_EXPIRATION);
-    String newRefresh = jwtUtil.createJwt(TokenSettings.REFRESH_TOKEN_CATEGORY, userId, auth, TokenSettings.REFRESH_TOKEN_EXPIRATION);
+    // 새로운 액세스 & 리프레시 토큰 생성
+    String[] tokens = generateTokens(userId, auth);
 
-    // Redis에서 기존 Refresh 토큰 삭제 후 새 토큰 저장
-    redisTemplate.delete(userId);
-    addRefreshEntity(userId, newRefresh, TokenSettings.REFRESH_TOKEN_EXPIRATION);
+    // Redis에 새 Refresh 토큰 저장
+    storeNewRefreshToken(userId, tokens[1]);
 
-
-    return new String[] {newAccess, newRefresh};
+    return tokens;
   }
 
-  private void addRefreshEntity(String userId, String refresh, Long expiredMs) {
+  // HTTP 요청에서 Refresh 토큰 추출
+  private String extractRefreshToken(HttpServletRequest request) {
+    for (Cookie cookie : request.getCookies()) {
+      if (cookie.getName().equals(TokenSettings.REFRESH_TOKEN_CATEGORY)) {
+        return cookie.getValue();
+      }
+    }
+    throw new NoAuthorizedException(TokenErrorCode.NO_REFRESH_TOKEN);
+  }
 
-    ValueOperations<String, String> ops = redisTemplate.opsForValue();
-    ops.set(userId, refresh, Duration.ofMillis(expiredMs));  // Redis에 저장
+  // Refresh 토큰 유효성 검사
+  private void validateRefreshToken(String refresh) {
+    try {
+      jwtUtil.isExpired(refresh);
+    } catch (ExpiredJwtException e) {
+      throw new NoAuthorizedException(TokenErrorCode.NO_REFRESH_TOKEN);
+    }
+    if (!jwtUtil.getCategory(refresh).equals(TokenSettings.REFRESH_TOKEN_CATEGORY)) {
+      throw new NoAuthorizedException(TokenErrorCode.NO_REFRESH_TOKEN);
+    }
+  }
+
+  // JWT 액세스/리프레시 토큰 생성
+  private String[] generateTokens(String userId, String auth) {
+    String access = TokenSettings.TOKEN_TYPE + jwtUtil.createJwt(TokenSettings.ACCESS_TOKEN_CATEGORY, userId, auth, TokenSettings.ACCESS_TOKEN_EXPIRATION);
+    String refresh = jwtUtil.createJwt(TokenSettings.REFRESH_TOKEN_CATEGORY, userId, auth, TokenSettings.REFRESH_TOKEN_EXPIRATION);
+    return new String[]{access, refresh};
+  }
+
+  // Redis에 새로운 Refresh 토큰 저장
+  private void storeNewRefreshToken(String userId, String refreshToken) {
+    redisTemplate.delete(userId);
+    redisTemplate.opsForValue().set(userId, refreshToken, Duration.ofMillis(TokenSettings.REFRESH_TOKEN_EXPIRATION));
   }
 }

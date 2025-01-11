@@ -30,55 +30,46 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
   private final RedisTemplate<String, String> redisTemplate;
   private final JWTUtil jwtUtil;
 
-  // 로그인을 진행하는 필터 ( application/json 형식으로 데이터를 받아온다. )
   @Override
   public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
-
     try {
       ObjectMapper objectMapper = new ObjectMapper();
-      Map<String, String> loginData = objectMapper.readValue(request.getInputStream(), Map.class);  // json 형식의 데이터를 Map 으로 변환
-
+      Map<String, String> loginData = objectMapper.readValue(request.getInputStream(), Map.class);
       String email = loginData.get("email");
       String password = loginData.get("password");
 
-      UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(email, password, null); // UserDetails 를 통해 로그인 확인
-
-      return authenticationManager.authenticate(authToken);
-    }catch(IOException e){
+      return authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password, null));
+    } catch (IOException e) {
       throw new RuntimeException(e);
     }
   }
 
-  // 로그인이 성공 했을 때 토큰을 발급해주는 로직
   @Override
   protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) {
-
     CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
     String userId = customUserDetails.getUserId().toString();
+    String role = authentication.getAuthorities().iterator().next().getAuthority();
 
-    Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-    Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
-    GrantedAuthority auth = iterator.next();
+    // JWT 토큰 생성
+    String[] tokens = generateTokens(userId, role);
 
-    String role = auth.getAuthority();
+    // Refresh 토큰 저장
+    storeRefreshToken(userId, tokens[1]);
 
-    String access = TokenSettings.TOKEN_TYPE +  jwtUtil.createJwt(TokenSettings.ACCESS_TOKEN_CATEGORY, userId,
-        role, TokenSettings.ACCESS_TOKEN_EXPIRATION);
-    String refresh = jwtUtil.createJwt(TokenSettings.REFRESH_TOKEN_CATEGORY, userId, role, TokenSettings.REFRESH_TOKEN_EXPIRATION);
-
-    //Refresh 토큰 저장
-    ValueOperations<String, String> ops = redisTemplate.opsForValue();
-    ops.set(userId, refresh, Duration.ofMillis(TokenSettings.REFRESH_TOKEN_EXPIRATION));
-
-    response.setHeader(TokenSettings.ACCESS_TOKEN_CATEGORY, access);
-    response.addCookie(jwtUtil.createCookie(TokenSettings.REFRESH_TOKEN_CATEGORY, refresh));
+    response.setHeader(TokenSettings.ACCESS_TOKEN_CATEGORY, tokens[0]);
+    response.addCookie(jwtUtil.createCookie(TokenSettings.REFRESH_TOKEN_CATEGORY, tokens[1]));
     response.setStatus(HttpStatus.OK.value());
   }
 
-  // 로그인이 실패 했을 때 로직 ( 토큰 / 쿠키를 생성하지 않는다. )
-  @Override
-  protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) {
+  // JWT 액세스/리프레시 토큰 생성 메서드
+  private String[] generateTokens(String userId, String role) {
+    String access = TokenSettings.TOKEN_TYPE + jwtUtil.createJwt(TokenSettings.ACCESS_TOKEN_CATEGORY, userId, role, TokenSettings.ACCESS_TOKEN_EXPIRATION);
+    String refresh = jwtUtil.createJwt(TokenSettings.REFRESH_TOKEN_CATEGORY, userId, role, TokenSettings.REFRESH_TOKEN_EXPIRATION);
+    return new String[]{access, refresh};
+  }
 
-    response.setStatus(401);
+  // Redis에 Refresh 토큰 저장 메서드
+  private void storeRefreshToken(String userId, String refreshToken) {
+    redisTemplate.opsForValue().set(userId, refreshToken, Duration.ofMillis(TokenSettings.REFRESH_TOKEN_EXPIRATION));
   }
 }

@@ -26,56 +26,48 @@ public class OAuth2Service extends DefaultOAuth2UserService {
 
   @Override
   public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-
     OAuth2User oAuth2User = super.loadUser(userRequest);
-
-    // 어떤 소셜 사이트에서 온 아이디인지 확인하는 로직
     String registrationId = userRequest.getClientRegistration().getRegistrationId();
-    BasicOAuth2Dto oAuth2Response = null;
-    if (registrationId.equals("naver")) {
-      oAuth2Response = new NaverResponseDto(oAuth2User.getAttributes());
-    }
-    else if (registrationId.equals("google")) {
-      oAuth2Response = new GoogleResponseDto(oAuth2User.getAttributes());
-    }
-    else {
-      return null;
-    }
+
+    // 소셜 로그인 응답 객체 가져오기
+    BasicOAuth2Dto oAuth2Response = getOAuth2Response(registrationId, oAuth2User);
+    if (oAuth2Response == null) return null;
+
     String email = oAuth2Response.getEmail();
-    
-    // 유저가 가입한 유저인지 조회 ( 다른 방법으로 )
     User existData = userRepository.findByEmail(email).orElse(null);
 
-    // 소셜 로그인으로 최초 가입
-    if (existData == null) {
+    return (existData == null) ? createNewSocialUser(oAuth2Response, registrationId) : updateExistingUser(existData, registrationId, oAuth2Response);
+  }
 
-      User user = User.builder()
-          .email(email)
-          .password("")
-          .name(oAuth2Response.getName())
-          .role(Role.USER)
-          .social(Social.valueOf(registrationId.toUpperCase()))
-          .build();
-
-      userRepository.save(user);
-
-      UserDto userDTO = new UserDto(email, oAuth2Response.getName(), Role.USER);
-
-      return new OAuth2UserDto(userDTO);
+  // 소셜 로그인 응답 객체 생성 메서드 (Google, Naver 구분)
+  private BasicOAuth2Dto getOAuth2Response(String registrationId, OAuth2User oAuth2User) {
+    if ("naver".equals(registrationId)) {
+      return new NaverResponseDto(oAuth2User.getAttributes());
+    } else if ("google".equals(registrationId)) {
+      return new GoogleResponseDto(oAuth2User.getAttributes());
     }
-    // 이미 있는 유저에 소셜로그인 연결
-    else {
+    return null;
+  }
 
-//      existData.setEmail(oAuth2Response.getEmail());
-//      existData.setName(oAuth2Response.getName());
+  // 새로운 소셜 로그인 유저 생성 메서드
+  private OAuth2User createNewSocialUser(BasicOAuth2Dto oAuth2Response, String registrationId) {
+    User user = User.builder()
+        .email(oAuth2Response.getEmail())
+        .password("")
+        .name(oAuth2Response.getName())
+        .role(Role.USER)
+        .social(Social.valueOf(registrationId.toUpperCase()))
+        .build();
 
-      // 제공된 플렛폼으로 소셜을 갱신하준다.
-      existData.updateSocial(Social.valueOf(registrationId.toUpperCase()));
-      userRepository.save(existData);
+    userRepository.save(user);
+    return new OAuth2UserDto(new UserDto(user.getEmail(), user.getName(), Role.USER));
+  }
 
-      UserDto userDTO = new UserDto(existData.getEmail(), oAuth2Response.getName(), existData.getRole());
+  // 기존 유저 업데이트 메서드 (소셜 플랫폼 갱신)
+  private OAuth2User updateExistingUser(User existData, String registrationId, BasicOAuth2Dto oAuth2Response) {
+    existData.updateSocial(Social.valueOf(registrationId.toUpperCase()));
+    userRepository.save(existData);
 
-      return new OAuth2UserDto(userDTO);
-    }
+    return new OAuth2UserDto(new UserDto(existData.getEmail(), existData.getName(), existData.getRole()));
   }
 }
