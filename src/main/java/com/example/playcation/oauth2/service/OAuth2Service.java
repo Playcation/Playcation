@@ -36,7 +36,7 @@ public class OAuth2Service extends DefaultOAuth2UserService {
     String email = oAuth2Response.getEmail();
     User existData = userRepository.findByEmail(email).orElse(null);
 
-    return (existData == null) ? createNewSocialUser(oAuth2Response, registrationId) : updateExistingUser(existData, registrationId, oAuth2Response);
+    return (existData == null) ? createNewSocialUser(oAuth2Response, registrationId) : updateExistingUser(existData, registrationId);
   }
 
   // 소셜 로그인 응답 객체 생성 메서드 (Google, Naver 구분)
@@ -64,7 +64,7 @@ public class OAuth2Service extends DefaultOAuth2UserService {
   }
 
   // 기존 유저 업데이트 메서드 (소셜 플랫폼 갱신)
-  private OAuth2User updateExistingUser(User existData, String registrationId, BasicOAuth2Dto oAuth2Response) {
+  private OAuth2User updateExistingUser(User existData, String registrationId) {
     existData.updateSocial(Social.valueOf(registrationId.toUpperCase()));
     userRepository.save(existData);
 
