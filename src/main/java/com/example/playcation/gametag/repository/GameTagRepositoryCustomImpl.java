@@ -2,7 +2,6 @@ package com.example.playcation.gametag.repository;
 
 import static com.example.playcation.game.entity.QGame.game;
 
-import com.example.playcation.game.dto.PagingGameResponseDto;
 import com.example.playcation.gametag.dto.GameTagListResponseDto;
 import com.example.playcation.gametag.entity.GameTag;
 import com.example.playcation.gametag.entity.QGameTag;

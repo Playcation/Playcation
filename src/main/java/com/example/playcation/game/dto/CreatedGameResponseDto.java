@@ -4,6 +4,7 @@ import com.example.playcation.enums.GameStatus;
 import com.example.playcation.game.entity.Game;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -22,7 +23,11 @@ public class CreatedGameResponseDto {
 
   private String description;
 
-  private String image;
+  private String mainImagePath;
+
+  private List<String> subImagePath;
+
+  private String gameFilePath;
 
   private GameStatus status;
 
@@ -32,7 +37,7 @@ public class CreatedGameResponseDto {
 
 
   public CreatedGameResponseDto(Long gameId, Long userId, String title, String category,
-      BigDecimal price, String description, String image, GameStatus status,
+      BigDecimal price, String description, String mainImagePath, List<String> subImagePath, String gameFilePath, GameStatus status,
       LocalDateTime createdAt, LocalDateTime updateAt) {
     this.gameId = gameId;
     this.userId = userId;
@@ -40,14 +45,16 @@ public class CreatedGameResponseDto {
     this.category = category;
     this.price = price;
     this.description = description;
-    this.image = image;
+    this.mainImagePath = mainImagePath;
+    this.subImagePath = subImagePath;
+    this.gameFilePath = gameFilePath;
     this.status = status;
     this.createdAt = createdAt;
     this.updateAt = updateAt;
   }
 
 
-  public static CreatedGameResponseDto toDto(Game game) {
+  public static CreatedGameResponseDto toDto(Game game, List<String> subImagePath) {
     return new CreatedGameResponseDto(
         game.getId(),
         game.getUser().getId(),
@@ -56,6 +63,8 @@ public class CreatedGameResponseDto {
         game.getPrice(),
         game.getDescription(),
         game.getImageUrl(),
+        subImagePath,
+        game.getFilePath(),
         game.getStatus(),
         game.getCreatedAt(),
         game.getUpdatedAt()

@@ -12,6 +12,7 @@ import com.example.playcation.library.service.LibraryService;
 import com.example.playcation.util.JWTUtil;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
@@ -41,9 +43,12 @@ public class GameController {
   @PostMapping
   public ResponseEntity<CreatedGameResponseDto> createGame(
       @RequestHeader(TokenSettings.ACCESS_TOKEN_CATEGORY) String authorizationHeader,
-      @RequestBody CreatedGameRequestDto requestDto) {
+      @RequestPart(value = "json") CreatedGameRequestDto requestDto,
+      @RequestPart(value = "main_image", required = false) MultipartFile mainImage,
+      @RequestPart(value = "sub_image", required = false) List<MultipartFile> subImageList,
+      @RequestPart(value = "game_file", required = false) MultipartFile gameFile) {
     Long id = jwtUtil.findUserByToken(authorizationHeader);
-    CreatedGameResponseDto responseDto = gameService.createGame(id, requestDto);
+    CreatedGameResponseDto responseDto = gameService.createGame(id, requestDto, mainImage, subImageList, gameFile);
     return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
   }
 
@@ -85,11 +90,13 @@ public class GameController {
   public ResponseEntity<CreatedGameResponseDto> updateGame(
       @PathVariable Long gameId,
       @RequestHeader(TokenSettings.ACCESS_TOKEN_CATEGORY) String authorizationHeader,
-      @RequestPart("dto") UpdatedGameRequestDto requestDto,
-      @RequestPart(value = "file", required = false) String imageUrl) {
+      @RequestPart("json") UpdatedGameRequestDto requestDto,
+      @RequestPart(value = "main_image", required = false) MultipartFile mainImage,
+      @RequestPart(value = "sub_image", required = false) List<MultipartFile> subImageList,
+      @RequestPart(value = "game_file", required = false) MultipartFile gameFile) {
     Long userId = jwtUtil.findUserByToken(authorizationHeader);
     CreatedGameResponseDto responseDto = gameService.updateGame(gameId, userId, requestDto,
-        imageUrl);
+        mainImage, subImageList, gameFile);
     return new ResponseEntity<>(responseDto, HttpStatus.OK);
   }
 
