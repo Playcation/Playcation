@@ -2,6 +2,7 @@ package com.example.playcation.util;
 
 import com.example.playcation.common.TokenSettings;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.Cookie;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
@@ -16,6 +17,15 @@ public class JWTUtil {
   private SecretKey secretKey;
 
   public JWTUtil(@Value("${spring.jwt.secret}") String secret) {
+//    secret = "aklenfaklaergaergsdahsefahfdgrgadaerbarghfgare";
+    System.out.println(secret);
+    System.out.println(secret);
+    System.out.println(secret);
+    System.out.println(secret);
+    System.out.println(secret);
+    System.out.println(secret);
+    System.out.println(secret);
+    System.out.println(secret);
     secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8),
         Jwts.SIG.HS256.key().build().getAlgorithm());
   }

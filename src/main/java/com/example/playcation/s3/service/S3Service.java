@@ -12,7 +12,6 @@ import com.amazonaws.util.IOUtils;
 import com.example.playcation.exception.FileErrorCode;
 import com.example.playcation.exception.InternalServerException;
 import com.example.playcation.exception.InvalidInputException;
-import com.example.playcation.exception.S3ErrorCode;
 import com.example.playcation.s3.dto.FileResponseDto;
 import com.example.playcation.s3.entity.FileDetail;
 import com.example.playcation.s3.repository.FileDetailRepository;
@@ -148,7 +147,7 @@ public class S3Service {
       return new FileResponseDto(bytes, fileDetail.getOriginFileName());
 
     }catch (IOException e){
-      throw new InternalServerException(S3ErrorCode.NOT_FOUND_FILE);
+      throw new InternalServerException(FileErrorCode.NOT_FOUND_FILE);
     }
   }
 }
