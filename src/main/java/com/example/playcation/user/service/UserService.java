@@ -47,10 +47,9 @@ public class UserService {
 
     checkPassword(user, deletedUserRequestDto.getPassword());
     user.delete();
-    userRepository.save(user);
   }
 
-  // 비밀번호 변경
+  // 비밀번호 확인
   @Transactional
   public void checkPassword(User user, String password) {
     if (!bCryptPasswordEncoder.matches(password, user.getPassword())) {
@@ -96,7 +95,8 @@ public class UserService {
       fileDetail = updateFileDetail(user, file);
     }
 
-    user.update(updatedUserRequestDto.getName(), updatedUserRequestDto.getDescription(),
+    user.update(updatedUserRequestDto.getName(),
+        updatedUserRequestDto.getDescription(),
         fileDetail);
     return UserResponseDto.toDto(user);
   }
