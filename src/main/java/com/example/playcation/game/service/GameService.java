@@ -110,35 +110,7 @@ public class GameService {
 
     List<Game> gameList = responseDto.getGameList();
 
-    // 반환할 때 사용할 dto타입 리스트
-    List<CreatedGameResponseDto> responseDtoList = new ArrayList<>();
-
-    // game 하나당 dto를 생성해야함으로 for문
-    for(Game game : gameList) {
-
-      // 해당 게임의 id와 "subImage"라는 bucket을 가진 gameFileList 생성
-      List<GameFile> gameFileList = gameFileRepository.findByGameIdAndBucket(game.getId(), "subImage");
-
-      List<FileDetail> fileDetailList = new ArrayList<>();
-
-      // gameFile을 돌려가며 fileDetail을 뽑음
-      for (GameFile gameFile : gameFileList) {
-        fileDetailList.add(gameFile.getFileDetail());
-      }
-
-      List<String> subImageUrl = new ArrayList<>();
-
-      // 뽑아둔 fileDetailList의 filePath를 돌려가며 뽑음
-      for(FileDetail fileDetail : fileDetailList) {
-        subImageUrl.add(fileDetail.getFilePath());
-      }
-
-      // 뽑아둔 filePathList와 해당 회차의 game으로 dto 생성
-      CreatedGameResponseDto dto = CreatedGameResponseDto.toDto(game, subImageUrl);
-
-      //반환에 필요한 dtoList에 저장
-      responseDtoList.add(dto);
-    }
+    List<CreatedGameResponseDto> responseDtoList = createDto(gameList);
 
     // 위에서 for문을 돌려 만든 dtoList와 dsl에서 구한 count 반환
     return new PagingDto<>(responseDtoList, responseDto.getCount());
@@ -246,6 +218,39 @@ public class GameService {
       fileDetail = uploadMainFileDetail;
     }
     return fileDetail;
+  }
+
+  // game이 가지고 있는 subImagePath를 구하여 dto를 만들어주는 메서드
+  public List<CreatedGameResponseDto> createDto(List<Game> gameList) {
+
+    List<CreatedGameResponseDto> responseDtoList = new ArrayList<>();
+
+    for(Game game : gameList) {
+
+      // 해당 게임의 id와 "subImage"라는 bucket을 가진 gameFileList 생성
+      List<GameFile> gameFileList = gameFileRepository.findByGameIdAndBucket(game.getId(), "subImage");
+
+      List<FileDetail> fileDetailList = new ArrayList<>();
+
+      // gameFile을 돌려가며 fileDetail을 뽑음
+      for (GameFile gameFile : gameFileList) {
+        fileDetailList.add(gameFile.getFileDetail());
+      }
+
+      List<String> subImageUrl = new ArrayList<>();
+
+      // 뽑아둔 fileDetailList의 filePath를 돌려가며 뽑음
+      for(FileDetail fileDetail : fileDetailList) {
+        subImageUrl.add(fileDetail.getFilePath());
+      }
+
+      // 뽑아둔 filePathList와 해당 회차의 game으로 dto 생성
+      CreatedGameResponseDto dto = CreatedGameResponseDto.toDto(game, subImageUrl);
+
+      //반환에 필요한 dtoList에 저장
+      responseDtoList.add(dto);
+    }
+    return responseDtoList;
   }
 
 

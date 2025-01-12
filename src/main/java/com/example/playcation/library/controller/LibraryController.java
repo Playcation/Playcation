@@ -2,9 +2,7 @@ package com.example.playcation.library.controller;
 
 import com.example.playcation.common.PagingDto;
 import com.example.playcation.common.TokenSettings;
-import com.example.playcation.gametag.dto.GameListResponseDto;
-import com.example.playcation.library.dto.LibraryGameResponseDto;
-import com.example.playcation.library.dto.LibraryListResponseDto;
+import com.example.playcation.game.dto.CreatedGameResponseDto;
 import com.example.playcation.library.dto.LibraryRequestDto;
 import com.example.playcation.library.dto.LibraryResponseDto;
 import com.example.playcation.library.dto.UpdatedFavouriteRequestDto;
@@ -51,10 +49,10 @@ public class LibraryController {
 
   // 다건 조회(라이브러리)
   @GetMapping("/my-games")
-  public ResponseEntity<PagingDto<LibraryGameResponseDto>> findLibraryList(@RequestHeader(TokenSettings.ACCESS_TOKEN_CATEGORY) String authorizationHeader,
+  public ResponseEntity<PagingDto<CreatedGameResponseDto>> findLibraryList(@RequestHeader(TokenSettings.ACCESS_TOKEN_CATEGORY) String authorizationHeader,
       @RequestParam(defaultValue = "0") int page) {
     Long userId = jwtUtil.findUserByToken(authorizationHeader);
-    PagingDto<LibraryGameResponseDto> responseDto = libraryService.findLibraryList(page, userId);
+    PagingDto<CreatedGameResponseDto> responseDto = libraryService.findLibraryList(page, userId);
     return new ResponseEntity<>(responseDto, HttpStatus.OK);
   }
 

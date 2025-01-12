@@ -42,7 +42,7 @@ public class TagController {
     return new ResponseEntity<>(responseDto, HttpStatus.OK);
   }
 
-  // TODO: 페이징 방식 통일
+  // TODO: 페이징 방식 통일 -> 완료
   @GetMapping
   public ResponseEntity<PagingDto<CreatedTagResponseDto>> findAllTag(
       @RequestParam(defaultValue = "0") int page

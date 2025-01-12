@@ -6,7 +6,6 @@ import com.example.playcation.game.dto.CreatedGameRequestDto;
 import com.example.playcation.game.dto.CreatedGameResponseDto;
 import com.example.playcation.game.dto.UpdatedGameRequestDto;
 import com.example.playcation.game.service.GameService;
-import com.example.playcation.gametag.dto.GameListResponseDto;
 import com.example.playcation.gametag.service.GameTagService;
 import com.example.playcation.library.service.LibraryService;
 import com.example.playcation.util.JWTUtil;
@@ -77,10 +76,10 @@ public class GameController {
 
   // 다건 조회(태그)
   @GetMapping("/tag")
-  public ResponseEntity<GameListResponseDto> findGameTag(
+  public ResponseEntity<PagingDto<CreatedGameResponseDto>> findGameTag(
       @RequestParam(required = false) int page,
       @RequestParam Long tagId) {
-    GameListResponseDto responseDto = gameTagService.findGameTagByTag(page, tagId);
+    PagingDto<CreatedGameResponseDto> responseDto = gameTagService.findGameTagByTag(page, tagId);
     return new ResponseEntity<>(responseDto, HttpStatus.OK);
   }
 

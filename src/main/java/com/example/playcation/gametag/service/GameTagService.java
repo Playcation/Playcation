@@ -1,15 +1,20 @@
 package com.example.playcation.gametag.service;
 
+import com.example.playcation.common.PagingDto;
 import com.example.playcation.exception.GameTagErrorCode;
 import com.example.playcation.exception.NotFoundException;
+import com.example.playcation.game.dto.CreatedGameResponseDto;
 import com.example.playcation.game.entity.Game;
 import com.example.playcation.game.repository.GameRepository;
-import com.example.playcation.gametag.dto.GameListResponseDto;
+import com.example.playcation.game.service.GameService;
 import com.example.playcation.gametag.dto.GameTagListResponseDto;
 import com.example.playcation.gametag.dto.GameTagRequestDto;
 import com.example.playcation.gametag.dto.GameTagResponseDto;
 import com.example.playcation.gametag.entity.GameTag;
 import com.example.playcation.gametag.repository.GameTagRepository;
+import com.example.playcation.s3.entity.FileDetail;
+import com.example.playcation.s3.entity.GameFile;
+import com.example.playcation.s3.repository.GameFileRepository;
 import com.example.playcation.tag.entity.Tag;
 import com.example.playcation.tag.repository.TagRepository;
 import jakarta.transaction.Transactional;
@@ -28,6 +33,7 @@ public class GameTagService {
   private final GameTagRepository gameTagRepository;
   private final TagRepository tagRepository;
   private final GameRepository gameRepository;
+  private final GameService gameService;
 
 
   @Transactional
@@ -48,7 +54,7 @@ public class GameTagService {
   }
 
 
-  public GameListResponseDto findGameTagByTag(int page, Long tagId) {
+  public PagingDto<CreatedGameResponseDto> findGameTagByTag(int page, Long tagId) {
 
     PageRequest pageRequest = PageRequest.of(page, 10);
 
@@ -63,7 +69,9 @@ public class GameTagService {
       gameList.add(gameTag.getGame());
     }
 
-    return new GameListResponseDto(gameList, gameTagListDto.getCount());
+    List<CreatedGameResponseDto> responseDtoList = gameService.createDto(gameList);
+
+    return new PagingDto<>(responseDtoList, gameTagListDto.getCount());
   }
 
 
@@ -97,4 +105,5 @@ public class GameTagService {
 
     gameTagRepository.delete(gameTag);
   }
+
 }
