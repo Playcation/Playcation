@@ -113,7 +113,6 @@ public class JWTFilter extends OncePerRequestFilter {
    * JWT 토큰을 기반으로 사용자 인증을 수행하는 메서드
    *
    * @param token 인증할 JWT 토큰
-   * @
    */
   private void authenticateUser(String token) {
     Long userId = Long.parseLong(jwtUtil.getUserId(token));
