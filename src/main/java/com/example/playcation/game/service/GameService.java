@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
@@ -98,9 +99,9 @@ public class GameService {
       LocalDateTime createdAt) {
 
     // 페이징시 최대 출력 갯수와 정렬조건 설정
-    PageRequest pageRequest = PageRequest.of(page, 10, Sort.by(Direction.DESC, "id"));
+    Pageable pageable = PageRequest.of(page, 10, Sort.by(Direction.DESC, "id"));
 
-    PagingGameResponseDto responseDto = gameRepository.searchGames(pageRequest, title, category, price, createdAt);
+    PagingGameResponseDto responseDto = gameRepository.searchGames(pageable, title, category, price, createdAt);
 
     List<Game> gameList = responseDto.getGameList();
 

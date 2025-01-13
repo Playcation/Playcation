@@ -11,6 +11,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.annotations.OnDelete;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -20,7 +21,7 @@ public class LibraryRepositoryCustomImpl implements LibraryRepositoryCustom{
   private final JPAQueryFactory queryFactory;
 
   @Override
-  public LibraryListResponseDto findLibraryByUserId(PageRequest pageRequest, User user) {
+  public LibraryListResponseDto findLibraryByUserId(Pageable pageable, User user) {
     QLibrary library = QLibrary.library;
 
     List<Library> libraryList = queryFactory
@@ -28,8 +29,8 @@ public class LibraryRepositoryCustomImpl implements LibraryRepositoryCustom{
         .join(library.game, game).fetchJoin()
         .where(library.user.eq(user))
         .orderBy(library.favourite.desc(), game.updatedAt.desc())
-        .offset(pageRequest.getOffset())
-        .limit(pageRequest.getPageSize())
+        .offset(pageable.getOffset())
+        .limit(pageable.getPageSize())
         .fetch();
 
     Long count = queryFactory

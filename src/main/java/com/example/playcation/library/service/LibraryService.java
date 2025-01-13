@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -57,11 +58,11 @@ public class LibraryService {
 
   public PagingDto<GameResponseDto> findLibraryList(int page, Long userId) {
 
-    PageRequest pageRequest = PageRequest.of(page, 10);
+    Pageable pageable = PageRequest.of(page, 10);
 
     User user = userRepository.findByIdOrElseThrow(userId);
 
-    LibraryListResponseDto listDto = libraryRepository.findLibraryByUserId(pageRequest, user);
+    LibraryListResponseDto listDto = libraryRepository.findLibraryByUserId(pageable, user);
 
     List<Library> libraryList = listDto.getLibraryList();
 

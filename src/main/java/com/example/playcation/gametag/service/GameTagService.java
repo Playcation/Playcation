@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -51,11 +52,11 @@ public class GameTagService {
 
   public PagingDto<GameResponseDto> findGameTagByTag(int page, Long tagId) {
 
-    PageRequest pageRequest = PageRequest.of(page, 10);
+    Pageable pageable = PageRequest.of(page, 10);
 
     Tag tag = tagRepository.findByIdOrElseThrow(tagId);
 
-    GameTagListResponseDto gameTagListDto = gameTagRepository.findGameTagByTag(pageRequest, tag);
+    GameTagListResponseDto gameTagListDto = gameTagRepository.findGameTagByTag(pageable, tag);
 
     List<GameTag> gameTagList = gameTagListDto.getGameTagList();
 

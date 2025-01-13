@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -19,7 +20,7 @@ public class GameRepositoryCustomImpl implements GameRepositoryCustom {
   private final JPAQueryFactory queryFactory;
 
   @Override
-  public PagingGameResponseDto searchGames(PageRequest pageRequest, String title, String category,
+  public PagingGameResponseDto searchGames(Pageable pageable, String title, String category,
       BigDecimal price, LocalDateTime createdAt) {
     QGame game = QGame.game;
 
@@ -31,8 +32,8 @@ public class GameRepositoryCustomImpl implements GameRepositoryCustom {
             gtPrice(price),
             afterCreatedAt(createdAt)
         )
-        .offset(pageRequest.getOffset())
-        .limit(pageRequest.getPageSize())
+        .offset(pageable.getOffset())
+        .limit(pageable.getPageSize())
         .fetch();
 
     Long count = queryFactory

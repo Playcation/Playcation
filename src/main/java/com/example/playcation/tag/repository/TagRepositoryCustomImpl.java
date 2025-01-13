@@ -8,6 +8,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -17,13 +18,13 @@ public class TagRepositoryCustomImpl implements TagRepositoryCustom{
   private final JPAQueryFactory queryFactory;
 
   @Override
-  public PagingDto<CreatedTagResponseDto> searchTags(PageRequest pageRequest) {
+  public PagingDto<CreatedTagResponseDto> searchTags(Pageable pageable) {
     QTag tag = QTag.tag;
 
     List<Tag> tagList = queryFactory
         .selectFrom(tag)
-        .offset(pageRequest.getOffset())
-        .limit(pageRequest.getPageSize())
+        .offset(pageable.getOffset())
+        .limit(pageable.getPageSize())
         .fetch();
 
     Long count = queryFactory

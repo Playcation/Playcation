@@ -9,6 +9,7 @@ import jakarta.transaction.Transactional;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
@@ -40,9 +41,9 @@ public class TagService {
 
   public PagingDto<CreatedTagResponseDto> findAllTag(int page) {
 
-    PageRequest pageRequest = PageRequest.of(page, 10, Sort.by("id"));
+    Pageable pageable = PageRequest.of(page, 10, Sort.by("id"));
 
-    return tagRepository.searchTags(pageRequest);
+    return tagRepository.searchTags(pageable);
   }
 
   @Transactional
