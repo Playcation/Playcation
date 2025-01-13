@@ -3,10 +3,14 @@ package com.example.playcation.user.repository;
 import com.example.playcation.exception.NotFoundException;
 import com.example.playcation.exception.UserErrorCode;
 import com.example.playcation.user.entity.User;
+import jakarta.transaction.Transactional;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.query.Param;
 
 public interface UserRepository extends JpaRepository<User, Long> {
+
+  @Transactional
   boolean existsByEmail(String email);
 
   default User findByIdOrElseThrow(Long id) {
