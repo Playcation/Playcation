@@ -79,7 +79,7 @@ class SuccessHandlerTest {
   }
 
   @Test
-  @DisplayName("소셜 로그인 토큰 생성")
+  @DisplayName("소셜 로그인 성공")
   void onAuthenticationSuccess() throws IOException {
     // Given
     // When
