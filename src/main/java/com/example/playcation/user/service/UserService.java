@@ -102,12 +102,15 @@ public class UserService {
   }
 
   private FileDetail updateFileDetail(User user, MultipartFile file){
+    if(!user.getImageUrl().isEmpty()) {
+      FileDetail fileDetail = fileDetailRepository.findByFilePathOrElseThrow(user.getImageUrl());
+      userFileRepository.deleteByUserIdAndFileDetailId(user.getId(), fileDetail.getId());
+      s3Service.deleteFile(user.getImageUrl());
+    }
+
     FileDetail uploadFileDetail = s3Service.uploadFile(file);
     userFileRepository.save(new UserFile(user, uploadFileDetail));
-    FileDetail  fileDetail = fileDetailRepository.findByFilePathOrElseThrow(user.getImageUrl());
-    userFileRepository.deleteByUserIdAndFileDetailId(user.getId(), fileDetail.getId());
-    s3Service.deleteFile(user.getImageUrl());
-    return fileDetail;
+    return uploadFileDetail;
   }
 
   private void deleteFileDetail(User user){

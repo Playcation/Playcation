@@ -9,6 +9,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.CannedAccessControlList;
+import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.example.playcation.enums.Role;
 import com.example.playcation.enums.Social;
 import com.example.playcation.exception.DuplicatedException;
@@ -57,11 +60,14 @@ class UserServiceIntegrationTest {
   @Autowired
   private BCryptPasswordEncoder passwordEncoder;
 
-  @MockitoBean
+  @Autowired
   private S3Service s3Service;
 
-  @MockitoBean
+  @Autowired
   private FileDetailRepository fileDetailRepository;
+
+  @MockitoBean
+  private AmazonS3 s3;
 
   @Autowired
   private UserFileRepository userFileRepository;
@@ -93,7 +99,7 @@ class UserServiceIntegrationTest {
   void signUp() {
     // Given
     SignInUserRequestDto requestDto = new SignInUserRequestDto("test@example.com", "password", "Test User");
-    when(s3Service.uploadFile(any())).thenReturn(fileDetail);
+    when(s3.putObject(any(PutObjectRequest.class))).thenReturn(null);
     // When
     UserResponseDto response = userService.signUp(requestDto, file);
 
@@ -118,7 +124,7 @@ class UserServiceIntegrationTest {
   void updateUserPassword() {
     // Given
     SignInUserRequestDto signinDto = new SignInUserRequestDto("test@example.com", "encodedPassword", "Test User");
-    when(s3Service.uploadFile(any())).thenReturn(fileDetail);
+    when(s3.putObject(any(PutObjectRequest.class))).thenReturn(null);
     userService.signUp(signinDto, file);
     entityManager.clear();
     User managedUser = userRepository.findByIdOrElseThrow(1L);
@@ -148,7 +154,7 @@ class UserServiceIntegrationTest {
   void updateUser(){
     // Given
     SignInUserRequestDto signinDto = new SignInUserRequestDto("test@example.com", "encodedPassword", "Test User");
-    when(s3Service.uploadFile(any())).thenReturn(fileDetail);
+    when(s3.putObject(any(PutObjectRequest.class))).thenReturn(null);
     userService.signUp(signinDto, file);
     UpdatedUserRequestDto requestDto = new UpdatedUserRequestDto("encodedPassword", "updateName", "update description");
     // When
