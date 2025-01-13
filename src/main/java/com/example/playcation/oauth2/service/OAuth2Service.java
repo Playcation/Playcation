@@ -3,6 +3,7 @@ package com.example.playcation.oauth2.service;
 import com.example.playcation.enums.Role;
 import com.example.playcation.enums.Social;
 import com.example.playcation.exception.DuplicatedException;
+import com.example.playcation.exception.NoAuthorizedException;
 import com.example.playcation.exception.UserErrorCode;
 import com.example.playcation.oauth2.dto.BasicOAuth2Dto;
 import com.example.playcation.oauth2.dto.GoogleResponseDto;
@@ -65,6 +66,9 @@ public class OAuth2Service extends DefaultOAuth2UserService {
 
   // 기존 유저 업데이트 메서드 (소셜 플랫폼 갱신)
   private OAuth2User updateExistingUser(User existData, String registrationId) {
+    if(!Social.NORMAL.equals(existData.getSocial())){
+      throw new NoAuthorizedException(UserErrorCode.EXIST_SOCIAL);
+    }
     existData.updateSocial(Social.valueOf(registrationId.toUpperCase()));
     userRepository.save(existData);
 

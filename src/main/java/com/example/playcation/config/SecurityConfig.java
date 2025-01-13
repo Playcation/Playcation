@@ -17,6 +17,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -48,6 +49,17 @@ public class SecurityConfig {
   }
 
   @Bean
+  public WebSecurityCustomizer webSecurityCustomizer() {
+    return (web) -> web.ignoring().requestMatchers(
+        "/login.html",       // 로그인 페이지
+        "/css/**",           // CSS 파일
+        "/js/**",            // JavaScript 파일
+        "/images/**",        // 이미지 파일
+        "/favicon.ico"       // 파비콘
+    );
+  }
+
+  @Bean
   public SecurityFilterChain filterChain(
       HttpSecurity http,
       UserRepository userRepository) throws Exception {
@@ -74,7 +86,11 @@ public class SecurityConfig {
     // csrf disable
     http.csrf(AbstractHttpConfigurer::disable);
     //form 로그인 방식 disable
-    http.formLogin(AbstractHttpConfigurer::disable);
+//    http.formLogin(AbstractHttpConfigurer::disable);
+    http.formLogin(form -> form
+        .loginPage("/login.html")  // 🔥 기본 로그인 페이지 경로 지정
+        .permitAll()
+    );
     // http basic 인증 방식 disable
     http.httpBasic(AbstractHttpConfigurer::disable);
 
@@ -85,7 +101,7 @@ public class SecurityConfig {
             .successHandler(successHandler));
 
     http.authorizeHttpRequests((auth) -> auth
-            .requestMatchers("/", "/users/sign-in", "/login/**", "/oauth2/**", "/refresh", "/error").permitAll()
+            .requestMatchers("/", "/users/sign-in", "/auth/login", "/oauth2-login", "/refresh", "/error").permitAll()
             .requestMatchers("/users/\\d/update/role").hasAuthority("ADMIN")
             .requestMatchers("/games").hasAuthority("MANAGER")
             .anyRequest().authenticated()
