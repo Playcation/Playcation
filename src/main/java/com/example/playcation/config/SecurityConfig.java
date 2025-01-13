@@ -1,40 +1,29 @@
 package com.example.playcation.config;
 
-import com.example.playcation.common.TokenSettings;
 import com.example.playcation.filter.JWTFilter;
 import com.example.playcation.filter.CustomLoginFilter;
 import com.example.playcation.filter.CustomLogoutFilter;
 import com.example.playcation.oauth2.handler.SuccessHandler;
 import com.example.playcation.oauth2.service.OAuth2Service;
-import com.example.playcation.token.repository.TokenRepository;
 import com.example.playcation.user.repository.UserRepository;
 import com.example.playcation.util.JWTUtil;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collections;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.access.AccessDeniedException;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.access.AccessDeniedHandler;
-import org.springframework.security.web.access.ExceptionTranslationFilter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
-import org.springframework.security.web.authentication.ui.DefaultLoginPageGeneratingFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
@@ -44,6 +33,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 public class SecurityConfig {
 
   private final AuthenticationConfiguration authenticationConfiguration;
+  private final RedisTemplate<String, String> redisTemplate;
   private final SuccessHandler successHandler;
   private final OAuth2Service oAuth2Service;
   private final JWTUtil jwtUtil;
@@ -59,10 +49,20 @@ public class SecurityConfig {
   }
 
   @Bean
+  public WebSecurityCustomizer webSecurityCustomizer() {
+    return (web) -> web.ignoring().requestMatchers(
+        "/login.html",       // 로그인 페이지
+        "/css/**",           // CSS 파일
+        "/js/**",            // JavaScript 파일
+        "/images/**",        // 이미지 파일
+        "/favicon.ico"       // 파비콘
+    );
+  }
+
+  @Bean
   public SecurityFilterChain filterChain(
       HttpSecurity http,
-      UserRepository userRepository,
-      TokenRepository tokenRepository) throws Exception {
+      UserRepository userRepository) throws Exception {
 
     http.cors(corsCustomizer -> corsCustomizer.configurationSource(new CorsConfigurationSource() {
 
@@ -86,7 +86,11 @@ public class SecurityConfig {
     // csrf disable
     http.csrf(AbstractHttpConfigurer::disable);
     //form 로그인 방식 disable
-    http.formLogin(AbstractHttpConfigurer::disable);
+//    http.formLogin(AbstractHttpConfigurer::disable);
+    http.formLogin(form -> form
+        .loginPage("/login.html")  // 🔥 기본 로그인 페이지 경로 지정
+        .permitAll()
+    );
     // http basic 인증 방식 disable
     http.httpBasic(AbstractHttpConfigurer::disable);
 
@@ -97,15 +101,15 @@ public class SecurityConfig {
             .successHandler(successHandler));
 
     http.authorizeHttpRequests((auth) -> auth
-            .requestMatchers("/", "/users/sign-in", "/login/**", "/oauth2/**", "/refresh", "/error").permitAll()
+            .requestMatchers("/", "/users/sign-in", "/auth/login", "/oauth2-login", "/refresh", "/error").permitAll()
             .requestMatchers("/users/\\d/update/role").hasAuthority("ADMIN")
             .requestMatchers("/games").hasAuthority("MANAGER")
             .anyRequest().authenticated()
     );
 
     http.addFilterBefore(new JWTFilter(userRepository, jwtUtil), CustomLoginFilter.class);
-    http.addFilterBefore(new CustomLogoutFilter(jwtUtil, tokenRepository), LogoutFilter.class);
-    http.addFilterAt(new CustomLoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, tokenRepository), UsernamePasswordAuthenticationFilter.class);
+    http.addFilterBefore(new CustomLogoutFilter(redisTemplate, jwtUtil), LogoutFilter.class);
+    http.addFilterAt(new CustomLoginFilter(authenticationManager(authenticationConfiguration),redisTemplate, jwtUtil), UsernamePasswordAuthenticationFilter.class);
 
     // 세션 설정
     http.sessionManagement((session) ->

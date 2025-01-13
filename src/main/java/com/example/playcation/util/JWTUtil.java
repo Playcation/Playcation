@@ -2,6 +2,7 @@ package com.example.playcation.util;
 
 import com.example.playcation.common.TokenSettings;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.Cookie;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;

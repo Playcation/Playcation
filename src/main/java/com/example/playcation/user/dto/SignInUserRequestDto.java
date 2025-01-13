@@ -3,9 +3,11 @@ package com.example.playcation.user.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
+@AllArgsConstructor
 public class SignInUserRequestDto {
 
   @NotBlank(message = "이메일은 필수값입니다.")

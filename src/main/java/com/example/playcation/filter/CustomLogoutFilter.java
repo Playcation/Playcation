@@ -1,7 +1,8 @@
 package com.example.playcation.filter;
 
 import com.example.playcation.common.TokenSettings;
-import com.example.playcation.token.repository.TokenRepository;
+import com.example.playcation.exception.NoAuthorizedException;
+import com.example.playcation.exception.TokenErrorCode;
 import com.example.playcation.util.JWTUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
@@ -12,89 +13,94 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.filter.GenericFilterBean;
 
+@RequiredArgsConstructor
 public class CustomLogoutFilter extends GenericFilterBean {
 
-  private final TokenRepository tokenRepository;
+  private final RedisTemplate<String, String> redisTemplate;
   private final JWTUtil jwtUtil;
-
-  public CustomLogoutFilter(JWTUtil jwtUtil, TokenRepository tokenRepository) {
-    this.jwtUtil = jwtUtil;
-    this.tokenRepository = tokenRepository;
-  }
 
   @Override
   public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-    doFilter((HttpServletRequest) request, (HttpServletResponse) response, chain);
+    if (request instanceof HttpServletRequest && response instanceof HttpServletResponse) {
+      doLogoutFilter((HttpServletRequest) request, (HttpServletResponse) response, chain);
+    } else {
+      chain.doFilter(request, response);
+    }
   }
 
-  private void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
-
-    // 엔드포인트가 logout 인지 확인
-    String requestUri = request.getRequestURI();
-    if (!requestUri.matches("^\\/logout$")) {
-      filterChain.doFilter(request, response);
-      return;
-    }
-    // POST 요청인지 확인
-    String requestMethod = request.getMethod();
-    if (!requestMethod.equals("POST")) {
+  private void doLogoutFilter(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
+    if (!isLogoutRequest(request)) {
       filterChain.doFilter(request, response);
       return;
     }
 
-    // 쿠키에서 refresh 토큰 가져오기
-    String refresh = null;
+    String refreshToken = extractRefreshToken(request);
+    if (refreshToken == null) {
+      response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+      return;
+    }
+
+    if (!validateToken(refreshToken, response)) {
+      return;
+    }
+
+    performLogout(refreshToken, response);
+  }
+
+  private boolean isLogoutRequest(HttpServletRequest request) {
+    return "/logout".equals(request.getRequestURI()) && "POST".equalsIgnoreCase(request.getMethod());
+  }
+
+  private String extractRefreshToken(HttpServletRequest request) {
     Cookie[] cookies = request.getCookies();
+    if (cookies == null) return null;
+
     for (Cookie cookie : cookies) {
-      if (cookie.getName().equals(TokenSettings.REFRESH_TOKEN_CATEGORY)) {
-        refresh = cookie.getValue();
+      if (TokenSettings.REFRESH_TOKEN_CATEGORY.equals(cookie.getName())) {
+        return cookie.getValue();
       }
     }
+    return null;
+  }
 
-    // Refresh 토큰이 null인지 확인
-    if (refresh == null) {
-      response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-      return;
-    }
-
-    // 만료 확인 / 토큰 발급자 확인
+  private boolean validateToken(String token, HttpServletResponse response) throws IOException {
     try {
-      jwtUtil.isExpired(refresh);
-      jwtUtil.isIssuer(refresh);
+      jwtUtil.isExpired(token);
+      jwtUtil.isIssuer(token);
     } catch (ExpiredJwtException e) {
-      //response status code
+      response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+      return false;
+    }
+
+    if (!TokenSettings.REFRESH_TOKEN_CATEGORY.equals(jwtUtil.getCategory(token))) {
+      response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+      return false;
+    }
+    return true;
+  }
+
+  private void performLogout(String refreshToken, HttpServletResponse response) {
+    String userId = jwtUtil.getUserId(refreshToken);
+    String storedRefresh = redisTemplate.opsForValue().get(userId);
+
+    if (storedRefresh == null || !storedRefresh.equals(refreshToken)) {
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
       return;
     }
 
-    // 토큰이 refresh인지 확인 (발급시 페이로드에 명시)
-    String category = jwtUtil.getCategory(refresh);
-    if (!category.equals(TokenSettings.REFRESH_TOKEN_CATEGORY)) {
-      //response status code
-      response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-      return;
-    }
+    redisTemplate.delete(userId);
+    clearCookies(response);
+    response.setStatus(HttpServletResponse.SC_OK);
+  }
 
-    //DB에 저장되어 있는지 확인
-    Boolean isExist = tokenRepository.existsByRefresh(refresh);
-    if (!isExist) {
-      //response status code
-      response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-      return;
-    }
-
-    //로그아웃 진행
-    //Refresh 토큰 DB에서 제거
-    tokenRepository.deleteByRefresh(refresh);
-
-    //Refresh 토큰 Cookie 값 0
+  private void clearCookies(HttpServletResponse response) {
     Cookie cookie = new Cookie(TokenSettings.REFRESH_TOKEN_CATEGORY, null);
     cookie.setMaxAge(0);
     cookie.setPath("/");
-
     response.addCookie(cookie);
-    response.setStatus(HttpServletResponse.SC_OK);
   }
 }
