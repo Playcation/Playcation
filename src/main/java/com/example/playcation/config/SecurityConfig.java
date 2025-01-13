@@ -85,12 +85,12 @@ public class SecurityConfig {
 
     // csrf disable
     http.csrf(AbstractHttpConfigurer::disable);
-    //form 로그인 방식 disable
-//    http.formLogin(AbstractHttpConfigurer::disable);
-    http.formLogin(form -> form
-        .loginPage("/login.html")  // 🔥 기본 로그인 페이지 경로 지정
-        .permitAll()
-    );
+    // form 로그인 방식 disable
+    http.formLogin(AbstractHttpConfigurer::disable);
+//    http.formLogin(form -> form
+//        .loginPage("/login.html")  // 기본 로그인 페이지 경로 지정
+//        .permitAll()
+//    );
     // http basic 인증 방식 disable
     http.httpBasic(AbstractHttpConfigurer::disable);
 
@@ -108,8 +108,8 @@ public class SecurityConfig {
     );
 
     http.addFilterBefore(new JWTFilter(userRepository, jwtUtil), CustomLoginFilter.class);
-    http.addFilterBefore(new CustomLogoutFilter(redisTemplate, jwtUtil), LogoutFilter.class);
-    http.addFilterAt(new CustomLoginFilter(authenticationManager(authenticationConfiguration),redisTemplate, jwtUtil), UsernamePasswordAuthenticationFilter.class);
+    http.addFilterBefore(new CustomLogoutFilter(jwtUtil), LogoutFilter.class);
+    http.addFilterAt(new CustomLoginFilter(authenticationManager(authenticationConfiguration), jwtUtil), UsernamePasswordAuthenticationFilter.class);
 
     // 세션 설정
     http.sessionManagement((session) ->

@@ -101,16 +101,19 @@ public class UserService {
     return UserResponseDto.toDto(user);
   }
 
+  // 사진 변경
   private FileDetail updateFileDetail(User user, MultipartFile file){
     if(!user.getImageUrl().isEmpty()) {
       FileDetail fileDetail = fileDetailRepository.findByFilePathOrElseThrow(user.getImageUrl());
       userFileRepository.deleteByUserIdAndFileDetailId(user.getId(), fileDetail.getId());
       s3Service.deleteFile(user.getImageUrl());
     }
-
-    FileDetail uploadFileDetail = s3Service.uploadFile(file);
-    userFileRepository.save(new UserFile(user, uploadFileDetail));
-    return uploadFileDetail;
+    if(!file.getOriginalFilename().isEmpty()) {
+      FileDetail uploadFileDetail = s3Service.uploadFile(file);
+      userFileRepository.save(new UserFile(user, uploadFileDetail));
+      return uploadFileDetail;
+    }
+    return new FileDetail();
   }
 
   private void deleteFileDetail(User user){
