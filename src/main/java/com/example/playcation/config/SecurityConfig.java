@@ -85,12 +85,12 @@ public class SecurityConfig {
 
     // csrf disable
     http.csrf(AbstractHttpConfigurer::disable);
-    //form 로그인 방식 disable
-//    http.formLogin(AbstractHttpConfigurer::disable);
-    http.formLogin(form -> form
-        .loginPage("/login.html")  // 기본 로그인 페이지 경로 지정
-        .permitAll()
-    );
+    // form 로그인 방식 disable
+    http.formLogin(AbstractHttpConfigurer::disable);
+//    http.formLogin(form -> form
+//        .loginPage("/login.html")  // 기본 로그인 페이지 경로 지정
+//        .permitAll()
+//    );
     // http basic 인증 방식 disable
     http.httpBasic(AbstractHttpConfigurer::disable);
 
