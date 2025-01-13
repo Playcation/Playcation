@@ -1,20 +1,15 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login</title>
+  <title>로그인</title>
 </head>
 <body>
-<h1>Login Page</h1>
+<h2>기본 로그인</h2>
 <form action="/login" method="post">
-  <label for="username">Username:</label>
-  <input type="text" id="username" name="username">
-  <br>
-  <label for="password">Password:</label>
-  <input type="password" id="password" name="password">
-  <br>
-  <button type="submit">Login</button>
+  <input type="text" name="username" placeholder="아이디">
+  <input type="password" name="password" placeholder="비밀번호">
+  <button type="submit">로그인</button>
 </form>
+<a href="/oauth2-login">소셜 로그인 하기</a>
 </body>
 </html>
