@@ -3,7 +3,7 @@ package com.example.playcation.library.service;
 import com.example.playcation.common.PagingDto;
 import com.example.playcation.exception.LibraryErrorCode;
 import com.example.playcation.exception.NoAuthorizedException;
-import com.example.playcation.game.dto.CreatedGameResponseDto;
+import com.example.playcation.game.dto.GameResponseDto;
 import com.example.playcation.game.entity.Game;
 import com.example.playcation.game.repository.GameRepository;
 import com.example.playcation.game.service.GameService;
@@ -55,7 +55,7 @@ public class LibraryService {
     return LibraryResponseDto.toDto(library);
   }
 
-  public PagingDto<CreatedGameResponseDto> findLibraryList(int page, Long userId) {
+  public PagingDto<GameResponseDto> findLibraryList(int page, Long userId) {
 
     PageRequest pageRequest = PageRequest.of(page, 10);
 
@@ -71,7 +71,7 @@ public class LibraryService {
       gameList.add(library.getGame());
     }
 
-    List<CreatedGameResponseDto> responseDtoList = gameService.createDto(gameList);
+    List<GameResponseDto> responseDtoList = gameService.createDto(gameList);
 
     return new PagingDto<>(responseDtoList, listDto.getCount());
   }

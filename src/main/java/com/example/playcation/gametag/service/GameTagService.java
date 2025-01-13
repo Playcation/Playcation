@@ -3,7 +3,7 @@ package com.example.playcation.gametag.service;
 import com.example.playcation.common.PagingDto;
 import com.example.playcation.exception.GameTagErrorCode;
 import com.example.playcation.exception.NotFoundException;
-import com.example.playcation.game.dto.CreatedGameResponseDto;
+import com.example.playcation.game.dto.GameResponseDto;
 import com.example.playcation.game.entity.Game;
 import com.example.playcation.game.repository.GameRepository;
 import com.example.playcation.game.service.GameService;
@@ -12,9 +12,6 @@ import com.example.playcation.gametag.dto.GameTagRequestDto;
 import com.example.playcation.gametag.dto.GameTagResponseDto;
 import com.example.playcation.gametag.entity.GameTag;
 import com.example.playcation.gametag.repository.GameTagRepository;
-import com.example.playcation.s3.entity.FileDetail;
-import com.example.playcation.s3.entity.GameFile;
-import com.example.playcation.s3.repository.GameFileRepository;
 import com.example.playcation.tag.entity.Tag;
 import com.example.playcation.tag.repository.TagRepository;
 import jakarta.transaction.Transactional;
@@ -22,8 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -54,7 +49,7 @@ public class GameTagService {
   }
 
 
-  public PagingDto<CreatedGameResponseDto> findGameTagByTag(int page, Long tagId) {
+  public PagingDto<GameResponseDto> findGameTagByTag(int page, Long tagId) {
 
     PageRequest pageRequest = PageRequest.of(page, 10);
 
@@ -69,7 +64,7 @@ public class GameTagService {
       gameList.add(gameTag.getGame());
     }
 
-    List<CreatedGameResponseDto> responseDtoList = gameService.createDto(gameList);
+    List<GameResponseDto> responseDtoList = gameService.createDto(gameList);
 
     return new PagingDto<>(responseDtoList, gameTagListDto.getCount());
   }

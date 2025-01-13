@@ -1,12 +1,8 @@
 package com.example.playcation.game.repository;
 
-import com.example.playcation.common.PagingDto;
-import com.example.playcation.game.dto.CreatedGameResponseDto;
 import com.example.playcation.game.dto.PagingGameResponseDto;
 import com.example.playcation.game.entity.Game;
 import com.example.playcation.game.entity.QGame;
-import com.example.playcation.s3.entity.GameFile;
-import com.example.playcation.s3.entity.QGameFile;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.math.BigDecimal;

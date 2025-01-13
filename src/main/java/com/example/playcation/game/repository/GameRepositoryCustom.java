@@ -1,7 +1,5 @@
 package com.example.playcation.game.repository;
 
-import com.example.playcation.common.PagingDto;
-import com.example.playcation.game.dto.CreatedGameResponseDto;
 import com.example.playcation.game.dto.PagingGameResponseDto;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

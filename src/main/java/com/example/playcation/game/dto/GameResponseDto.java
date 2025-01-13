@@ -5,11 +5,10 @@ import com.example.playcation.game.entity.Game;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
-import lombok.Builder;
 import lombok.Getter;
 
 @Getter
-public class CreatedGameResponseDto {
+public class GameResponseDto {
 
   private Long gameId;
 
@@ -36,7 +35,7 @@ public class CreatedGameResponseDto {
   private LocalDateTime updateAt;
 
 
-  public CreatedGameResponseDto(Long gameId, Long userId, String title, String category,
+  public GameResponseDto(Long gameId, Long userId, String title, String category,
       BigDecimal price, String description, String mainImagePath, List<String> subImagePath, String gameFilePath, GameStatus status,
       LocalDateTime createdAt, LocalDateTime updateAt) {
     this.gameId = gameId;
@@ -54,8 +53,8 @@ public class CreatedGameResponseDto {
   }
 
 
-  public static CreatedGameResponseDto toDto(Game game, List<String> subImagePath) {
-    return new CreatedGameResponseDto(
+  public static GameResponseDto toDto(Game game, List<String> subImagePath) {
+    return new GameResponseDto(
         game.getId(),
         game.getUser().getId(),
         game.getTitle(),

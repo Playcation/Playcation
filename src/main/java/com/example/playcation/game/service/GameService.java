@@ -6,29 +6,23 @@ import com.example.playcation.enums.GameStatus;
 import com.example.playcation.exception.GameErrorCode;
 import com.example.playcation.exception.NoAuthorizedException;
 import com.example.playcation.game.dto.CreatedGameRequestDto;
-import com.example.playcation.game.dto.CreatedGameResponseDto;
+import com.example.playcation.game.dto.GameResponseDto;
 import com.example.playcation.game.dto.PagingGameResponseDto;
 import com.example.playcation.game.dto.UpdatedGameRequestDto;
 import com.example.playcation.game.entity.Game;
-import com.example.playcation.game.entity.QGame;
 import com.example.playcation.game.repository.GameRepository;
 import com.example.playcation.gametag.entity.GameTag;
 import com.example.playcation.gametag.repository.GameTagRepository;
 import com.example.playcation.library.entity.Library;
 import com.example.playcation.library.repository.LibraryRepository;
-import com.example.playcation.review.entity.Review;
-import com.example.playcation.review.repository.ReviewRepository;
-import com.example.playcation.s3.controller.S3Controller;
 import com.example.playcation.s3.entity.FileDetail;
 import com.example.playcation.s3.entity.GameFile;
-import com.example.playcation.s3.entity.UserFile;
 import com.example.playcation.s3.repository.FileDetailRepository;
 import com.example.playcation.s3.repository.GameFileRepository;
 import com.example.playcation.s3.service.S3Service;
 import com.example.playcation.user.entity.User;
 import com.example.playcation.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -55,7 +49,7 @@ public class GameService {
 
   // 게임 생성
   @Transactional
-  public CreatedGameResponseDto createGame(Long id,
+  public GameResponseDto createGame(Long id,
       CreatedGameRequestDto requestDto, MultipartFile mainImage, List<MultipartFile> subImageList, MultipartFile gameFile) {
 
     User user = userRepository.findByIdOrElseThrow(id);
@@ -85,22 +79,22 @@ public class GameService {
       gameFileRepository.save(new GameFile(game, gameFileDetail, "game"));
       gameFileRepository.saveAll(gameFileList);
 
-    return CreatedGameResponseDto.toDto(game, subImagePathList);
+    return GameResponseDto.toDto(game, subImagePathList);
   }
 
   // 게임 단건 조회
-  public CreatedGameResponseDto findGameById(Long gameId) {
+  public GameResponseDto findGameById(Long gameId) {
     Game game = gameRepository.findByIdOrElseThrow(gameId);
     List<GameFile> subImageList = gameFileRepository.findByGameIdAndBucket(gameId, "subImage");
     List<String> subImagePathList = new ArrayList<>();
     for (GameFile subImage : subImageList) {
       subImagePathList.add(subImage.getFileDetail().getFilePath());
     }
-    return CreatedGameResponseDto.toDto(game, subImagePathList);
+    return GameResponseDto.toDto(game, subImagePathList);
   }
 
   // 게임 다건 조회
-  public PagingDto<CreatedGameResponseDto> searchGames(int page, String title, String category, BigDecimal price,
+  public PagingDto<GameResponseDto> searchGames(int page, String title, String category, BigDecimal price,
       LocalDateTime createdAt) {
 
     // 페이징시 최대 출력 갯수와 정렬조건 설정
@@ -110,7 +104,7 @@ public class GameService {
 
     List<Game> gameList = responseDto.getGameList();
 
-    List<CreatedGameResponseDto> responseDtoList = createDto(gameList);
+    List<GameResponseDto> responseDtoList = createDto(gameList);
 
     // 위에서 for문을 돌려 만든 dtoList와 dsl에서 구한 count 반환
     return new PagingDto<>(responseDtoList, responseDto.getCount());
@@ -118,7 +112,7 @@ public class GameService {
 
   // 게임 수정
   @Transactional
-  public CreatedGameResponseDto updateGame(Long gameId, Long userId,
+  public GameResponseDto updateGame(Long gameId, Long userId,
       UpdatedGameRequestDto requestDto, MultipartFile mainImage, List<MultipartFile> subImageList,
       MultipartFile gameFile) {
 
@@ -169,7 +163,7 @@ public class GameService {
     fileDetailRepository.saveAll(subFileDetailList);
     game.updateGame(requestDto, mainFileDetail.getFilePath(), gameFileDetail.getFilePath());
     gameRepository.save(game);
-    return CreatedGameResponseDto.toDto(game, pathList);
+    return GameResponseDto.toDto(game, pathList);
   }
 
   @Transactional
@@ -221,9 +215,9 @@ public class GameService {
   }
 
   // game이 가지고 있는 subImagePath를 구하여 dto를 만들어주는 메서드
-  public List<CreatedGameResponseDto> createDto(List<Game> gameList) {
+  public List<GameResponseDto> createDto(List<Game> gameList) {
 
-    List<CreatedGameResponseDto> responseDtoList = new ArrayList<>();
+    List<GameResponseDto> responseDtoList = new ArrayList<>();
 
     for(Game game : gameList) {
 
@@ -245,7 +239,7 @@ public class GameService {
       }
 
       // 뽑아둔 filePathList와 해당 회차의 game으로 dto 생성
-      CreatedGameResponseDto dto = CreatedGameResponseDto.toDto(game, subImageUrl);
+      GameResponseDto dto = GameResponseDto.toDto(game, subImageUrl);
 
       //반환에 필요한 dtoList에 저장
       responseDtoList.add(dto);
