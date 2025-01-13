@@ -7,10 +7,8 @@ import com.example.playcation.util.JWTUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
-import java.time.Duration;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -27,17 +25,12 @@ public class TokenService {
     String userId = jwtUtil.getUserId(refresh);
     String auth = jwtUtil.getAuth(refresh);
 
-    // Redis에서 기존 Refresh 토큰 조회 및 검증
-    String storedRefresh = redisTemplate.opsForValue().get(userId);
-    if (storedRefresh == null || !storedRefresh.equals(refresh)) {
+    if (!jwtUtil.checkRefreshTokenMatch(userId, refresh)) {
       throw new NoAuthorizedException(TokenErrorCode.NO_REFRESH_TOKEN);
     }
 
     // 새로운 액세스 & 리프레시 토큰 생성
-    String[] tokens = generateTokens(userId, auth);
-
-    // Redis에 새 Refresh 토큰 저장
-    storeNewRefreshToken(userId, tokens[1]);
+    String[] tokens = jwtUtil.generateTokens(userId, auth);
 
     return tokens;
   }
@@ -62,18 +55,5 @@ public class TokenService {
     if (!jwtUtil.getCategory(refresh).equals(TokenSettings.REFRESH_TOKEN_CATEGORY)) {
       throw new NoAuthorizedException(TokenErrorCode.NO_REFRESH_TOKEN);
     }
-  }
-
-  // JWT 액세스/리프레시 토큰 생성
-  private String[] generateTokens(String userId, String auth) {
-    String access = TokenSettings.TOKEN_TYPE + jwtUtil.createJwt(TokenSettings.ACCESS_TOKEN_CATEGORY, userId, auth, TokenSettings.ACCESS_TOKEN_EXPIRATION);
-    String refresh = jwtUtil.createJwt(TokenSettings.REFRESH_TOKEN_CATEGORY, userId, auth, TokenSettings.REFRESH_TOKEN_EXPIRATION);
-    return new String[]{access, refresh};
-  }
-
-  // Redis에 새로운 Refresh 토큰 저장
-  private void storeNewRefreshToken(String userId, String refreshToken) {
-    redisTemplate.delete(userId);
-    redisTemplate.opsForValue().set(userId, refreshToken, Duration.ofMillis(TokenSettings.REFRESH_TOKEN_EXPIRATION));
   }
 }
