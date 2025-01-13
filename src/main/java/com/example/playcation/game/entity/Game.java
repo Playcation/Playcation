@@ -49,9 +49,11 @@ public class Game extends BaseEntity {
 
   private String imageUrl;
 
+  private String filePath;
+
 
   public Game(User user, String title, String category, BigDecimal price, String description,
-      GameStatus status, String imageUrl) {
+      GameStatus status, String imageUrl, String filePath) {
     this.user = user;
     this.title = title;
     this.category = category;
@@ -59,14 +61,16 @@ public class Game extends BaseEntity {
     this.description = description;
     this.status = status;
     this.imageUrl = imageUrl;
+    this.filePath = filePath;
   }
 
-  public void updateGame(UpdatedGameRequestDto requestDto, String imageUrl) {
+  public void updateGame(UpdatedGameRequestDto requestDto, String imageUrl, String filePath) {
     this.title = requestDto.getTitle();
     this.category = requestDto.getCategory();
     this.price = requestDto.getPrice();
     this.description = requestDto.getDescription();
     this.imageUrl = imageUrl;
+    this.filePath = filePath;
   }
 
   public void deleteGame() {
