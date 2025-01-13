@@ -4,11 +4,11 @@ import com.example.playcation.enums.GameStatus;
 import com.example.playcation.game.entity.Game;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import lombok.Builder;
+import java.util.List;
 import lombok.Getter;
 
 @Getter
-public class CreatedGameResponseDto {
+public class GameResponseDto {
 
   private Long gameId;
 
@@ -22,7 +22,11 @@ public class CreatedGameResponseDto {
 
   private String description;
 
-  private String image;
+  private String mainImagePath;
+
+  private List<String> subImagePath;
+
+  private String gameFilePath;
 
   private GameStatus status;
 
@@ -31,8 +35,8 @@ public class CreatedGameResponseDto {
   private LocalDateTime updateAt;
 
 
-  public CreatedGameResponseDto(Long gameId, Long userId, String title, String category,
-      BigDecimal price, String description, String image, GameStatus status,
+  public GameResponseDto(Long gameId, Long userId, String title, String category,
+      BigDecimal price, String description, String mainImagePath, List<String> subImagePath, String gameFilePath, GameStatus status,
       LocalDateTime createdAt, LocalDateTime updateAt) {
     this.gameId = gameId;
     this.userId = userId;
@@ -40,15 +44,17 @@ public class CreatedGameResponseDto {
     this.category = category;
     this.price = price;
     this.description = description;
-    this.image = image;
+    this.mainImagePath = mainImagePath;
+    this.subImagePath = subImagePath;
+    this.gameFilePath = gameFilePath;
     this.status = status;
     this.createdAt = createdAt;
     this.updateAt = updateAt;
   }
 
 
-  public static CreatedGameResponseDto toDto(Game game) {
-    return new CreatedGameResponseDto(
+  public static GameResponseDto toDto(Game game, List<String> subImagePath) {
+    return new GameResponseDto(
         game.getId(),
         game.getUser().getId(),
         game.getTitle(),
@@ -56,6 +62,8 @@ public class CreatedGameResponseDto {
         game.getPrice(),
         game.getDescription(),
         game.getImageUrl(),
+        subImagePath,
+        game.getFilePath(),
         game.getStatus(),
         game.getCreatedAt(),
         game.getUpdatedAt()
