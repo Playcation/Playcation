@@ -46,20 +46,6 @@ public class OrderDetailService {
   }
 
   /**
-   * OrderDetail 에 Order 부여
-   *
-   * @param orderDetails OrderDetail 목록
-   * @param order        부여할 Order
-   */
-  @Transactional
-  public void assignOrder(List<OrderDetail> orderDetails, Order order) {
-
-    for (OrderDetail o : orderDetails) {
-      o.assignOrder(order);
-    }
-  }
-
-  /**
    * 주문한 게임 목록을 반환
    *
    * @param orderId 주문 식별자

@@ -1,10 +1,13 @@
 package com.example.playcation.order.controller;
 
+import com.example.playcation.common.PagingDto;
 import com.example.playcation.common.TokenSettings;
 import com.example.playcation.order.dto.OrderResponseDto;
 import com.example.playcation.order.service.OrderUserService;
 import com.example.playcation.util.JWTUtil;
+import java.awt.print.Pageable;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -47,5 +51,22 @@ public class OrderUserController {
     OrderResponseDto responseDto = orderService.findOrder(
         jwtUtil.findUserByToken(authorizationHeader), orderId);
     return new ResponseEntity<>(responseDto, HttpStatus.OK);
+  }
+
+  /**
+   * 주문 다건 조회 페이징(최대 10, 기본 페이지 번호는 0)
+   *
+   * @param page 페이지 번호 (기본 0)
+   */
+  @GetMapping
+  public ResponseEntity<PagingDto<OrderResponseDto>> findAllOrders(
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "10") int size,
+      @RequestHeader(TokenSettings.ACCESS_TOKEN_CATEGORY) String authorizationHeader
+  ) {
+    PagingDto<OrderResponseDto> pagingDto = orderService.findAllOrders(page, size,
+        jwtUtil.findUserByToken(authorizationHeader));
+
+    return new ResponseEntity<>(pagingDto, HttpStatus.OK);
   }
 }

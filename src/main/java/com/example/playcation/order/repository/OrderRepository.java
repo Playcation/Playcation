@@ -4,6 +4,8 @@ import com.example.playcation.exception.NotFoundException;
 import com.example.playcation.exception.OrderErrorCode;
 import com.example.playcation.order.entity.Order;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
@@ -17,4 +19,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
   default Order findByIdOrElseThrow(Long id) {
     return findById(id).orElseThrow(() -> new NotFoundException(OrderErrorCode.NOT_FOUND_ORDER));
   }
+
+  Page<Order> findAllByUserId(Long userId, Pageable pageable);
 }
