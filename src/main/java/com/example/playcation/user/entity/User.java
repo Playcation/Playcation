@@ -1,7 +1,7 @@
 package com.example.playcation.user.entity;
 
-import com.example.playcation.enums.Role;
 import com.example.playcation.common.BaseEntity;
+import com.example.playcation.enums.Role;
 import com.example.playcation.enums.Social;
 import com.example.playcation.game.entity.Game;
 import com.example.playcation.s3.entity.FileDetail;
@@ -13,10 +13,8 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -70,29 +68,26 @@ public class User extends BaseEntity {
     this.description = description == null ? this.description : description;
   }
 
-  public void updateRole(){
+  public void updateRole() {
     this.role = Role.MANAGER;
   }
 
-  public void updatePassword(String password){
+  public void updatePassword(String password) {
     this.password = password;
   }
 
-  public void delete(){
+  public void delete() {
     this.deletedAt = LocalDateTime.now();
   }
 
-  public void updateSocial(Social social){
+  public void updateSocial(Social social) {
     this.social = social;
   }
 
-  /**
-   * 매니저인 유저가 해당 게임의 판매자인지 확인
-   *
-   * @param game 게임 목록
-   * @return 판매자일시 true, 아닐시 false
-   */
-  public boolean isManagerOfGames(Game game) {
-    return this.equals(game.getUser());
+  public boolean isManagerOfGame(Game game) {
+    if (this.equals(game.getUser())) {
+      return true;
+    }
+    return false;
   }
 }

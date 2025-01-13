@@ -1,7 +1,6 @@
 package com.example.playcation.user.service;
 
 import com.example.playcation.enums.Role;
-import com.example.playcation.enums.Role;
 import com.example.playcation.enums.Social;
 import com.example.playcation.exception.DuplicatedException;
 import com.example.playcation.exception.InvalidInputException;
@@ -21,7 +20,6 @@ import com.example.playcation.user.entity.User;
 import com.example.playcation.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -49,10 +47,9 @@ public class UserService {
 
     checkPassword(user, deletedUserRequestDto.getPassword());
     user.delete();
-    userRepository.save(user);
   }
 
-  // 비밀번호 변경
+  // 비밀번호 확인
   @Transactional
   public void checkPassword(User user, String password) {
     if (!bCryptPasswordEncoder.matches(password, user.getPassword())) {
@@ -93,28 +90,36 @@ public class UserService {
     checkPassword(user, updatedUserRequestDto.getPassword());
     FileDetail fileDetail = null;
 
-    // 기존 파일 삭제
-    if (file ==null){
-      if(!user.getImageUrl().isEmpty()) {
-        fileDetail = fileDetailRepository.findByFilePathOrElseThrow(user.getImageUrl());
-        userFileRepository.deleteByUserIdAndAndFileDetailId(id, fileDetail.getId());
-        s3Service.deleteFile(user.getImageUrl());
-      }
-      fileDetail = new FileDetail();
-    }else if(!file.isEmpty()) {  // 파일 변경
-      FileDetail uploadFileDetail = s3Service.uploadFile(file);
-      userFileRepository.save(new UserFile(user, uploadFileDetail));
-      if(!user.getImageUrl().isEmpty()) {
-        fileDetail = fileDetailRepository.findByFilePathOrElseThrow(user.getImageUrl());
-        userFileRepository.deleteByUserIdAndAndFileDetailId(id, fileDetail.getId());
-        s3Service.deleteFile(user.getImageUrl());
-      }
-      fileDetail = uploadFileDetail;
+    // 사진 변경
+    if (file != null){
+      fileDetail = updateFileDetail(user, file);
     }
 
-    user.update(updatedUserRequestDto.getName(), updatedUserRequestDto.getDescription(),
+    user.update(updatedUserRequestDto.getName(),
+        updatedUserRequestDto.getDescription(),
         fileDetail);
     return UserResponseDto.toDto(user);
+  }
+
+  // 사진 변경
+  private FileDetail updateFileDetail(User user, MultipartFile file){
+    if(!user.getImageUrl().isEmpty()) {
+      FileDetail fileDetail = fileDetailRepository.findByFilePathOrElseThrow(user.getImageUrl());
+      userFileRepository.deleteByUserIdAndFileDetailId(user.getId(), fileDetail.getId());
+      s3Service.deleteFile(user.getImageUrl());
+    }
+    if(!file.getOriginalFilename().isEmpty()) {
+      FileDetail uploadFileDetail = s3Service.uploadFile(file);
+      userFileRepository.save(new UserFile(user, uploadFileDetail));
+      return uploadFileDetail;
+    }
+    return new FileDetail();
+  }
+
+  private void deleteFileDetail(User user){
+    FileDetail fileDetail = fileDetailRepository.findByFilePathOrElseThrow(user.getImageUrl());
+    userFileRepository.deleteByUserIdAndFileDetailId(user.getId(), fileDetail.getId());
+    s3Service.deleteFile(user.getImageUrl());
   }
 
   // 비밀번호 변경

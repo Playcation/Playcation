@@ -7,7 +7,6 @@ import com.example.playcation.common.TokenSettings;
 import com.example.playcation.util.JWTUtil;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.antlr.v4.runtime.Token;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -52,7 +51,8 @@ public class CartController {
   public ResponseEntity<UpdatedCartGameResponseDto> addGameToCart(@PathVariable Long gameId,
       @RequestHeader(TokenSettings.ACCESS_TOKEN_CATEGORY) String authorizationHeader) {
     Long userId = jwtUtil.findUserByToken(authorizationHeader);
-    UpdatedCartGameResponseDto updatedCart = cartService.addGameToCart(userId, gameId);
+    String auth = jwtUtil.findAuthByToken(authorizationHeader);
+    UpdatedCartGameResponseDto updatedCart = cartService.addGameToCart(userId, gameId, auth);
     return new ResponseEntity<>(updatedCart, HttpStatus.OK);
   }
 
