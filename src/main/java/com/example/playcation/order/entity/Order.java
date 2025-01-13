@@ -3,6 +3,7 @@ package com.example.playcation.order.entity;
 import com.example.playcation.common.BaseEntity;
 import com.example.playcation.enums.OrderStatus;
 import com.example.playcation.user.entity.User;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -41,6 +42,7 @@ public class Order extends BaseEntity {
 
   private BigDecimal totalPrice;
 
+  @Column(name = "`status`")
   @Enumerated(value = EnumType.STRING)
   private OrderStatus status;
 }

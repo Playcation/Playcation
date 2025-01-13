@@ -6,6 +6,7 @@ import com.example.playcation.cart.dto.CartGameResponseDto;
 import com.example.playcation.cart.service.CartService;
 import com.example.playcation.common.PagingDto;
 import com.example.playcation.enums.OrderStatus;
+import com.example.playcation.exception.InvalidInputException;
 import com.example.playcation.exception.NoAuthorizedException;
 import com.example.playcation.exception.OrderErrorCode;
 import com.example.playcation.order.dto.OrderResponseDto;
@@ -48,6 +49,10 @@ public class OrderUserService {
   public OrderResponseDto createOrder(Long userId) {
 
     List<CartGameResponseDto> cartItems = cartService.findCartItems(userId);
+    if(cartItems.isEmpty()) {
+      throw new InvalidInputException(OrderErrorCode.EMPTY_CART);
+    }
+
     User findUser = userRepository.findByIdOrElseThrow(userId);
 
     // 주문 상세 내역 생성 및 장바구니 내 게임 유효성 검사
@@ -71,6 +76,8 @@ public class OrderUserService {
     for (OrderDetail o : details) {
       o.assignOrder(savedOrder);
     }
+
+    cartService.removeCart(userId);
 
     return OrderResponseDto.toDto(savedOrder, details);
   }
