@@ -37,6 +37,9 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     implementation 'at.favre.lib:bcrypt:0.10.2'
 
+    implementation 'jakarta.xml.bind:jakarta.xml.bind-api:3.0.1'
+    implementation 'org.glassfish.jaxb:jaxb-runtime:3.0.1'
+
     // jwt
     implementation 'io.jsonwebtoken:jjwt-api:0.12.3'
     implementation 'io.jsonwebtoken:jjwt-impl:0.12.3'
@@ -55,6 +58,11 @@ dependencies {
 
     // OAuth2.0
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+
+    // 레디스
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    testImplementation 'org.testcontainers:testcontainers:1.19.4'
+    testImplementation 'org.testcontainers:junit-jupiter:1.19.4'
 }
 
 tasks.named('test') {

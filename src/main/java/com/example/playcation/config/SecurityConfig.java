@@ -1,11 +1,10 @@
 package com.example.playcation.config;
 
+import com.example.playcation.filter.JWTFilter;
 import com.example.playcation.filter.CustomLoginFilter;
 import com.example.playcation.filter.CustomLogoutFilter;
-import com.example.playcation.filter.JWTFilter;
 import com.example.playcation.oauth2.handler.SuccessHandler;
 import com.example.playcation.oauth2.service.OAuth2Service;
-import com.example.playcation.token.repository.TokenRepository;
 import com.example.playcation.user.repository.UserRepository;
 import com.example.playcation.util.JWTUtil;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,6 +12,7 @@ import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -32,13 +32,13 @@ import org.springframework.web.cors.CorsConfigurationSource;
 public class SecurityConfig {
 
   private final AuthenticationConfiguration authenticationConfiguration;
+  private final RedisTemplate<String, String> redisTemplate;
   private final SuccessHandler successHandler;
   private final OAuth2Service oAuth2Service;
   private final JWTUtil jwtUtil;
 
   @Bean
-  public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration)
-      throws Exception {
+  public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
     return configuration.getAuthenticationManager();
   }
 
@@ -50,60 +50,50 @@ public class SecurityConfig {
   @Bean
   public SecurityFilterChain filterChain(
       HttpSecurity http,
-      UserRepository userRepository,
-      TokenRepository tokenRepository) throws Exception {
+      UserRepository userRepository) throws Exception {
 
     http.cors(corsCustomizer -> corsCustomizer.configurationSource(new CorsConfigurationSource() {
 
-      @Override
-      public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
+          @Override
+          public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
 
-        CorsConfiguration configuration = new CorsConfiguration();
+            CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowCredentials(true);
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:8080"));
-        configuration.setAllowedMethods(Arrays.asList("*"));
-        configuration.setAllowedHeaders(Arrays.asList("*"));
-        configuration.setMaxAge(3600L);
+            configuration.setAllowCredentials(true);
+            configuration.setAllowedOrigins(Arrays.asList("http://localhost:8080"));
+            configuration.setAllowedMethods(Arrays.asList("*"));
+            configuration.setAllowedHeaders(Arrays.asList("*"));
+            configuration.setMaxAge(3600L);
 
-        configuration.setExposedHeaders(Arrays.asList("Set-Cookie", "Authorization"));
+            configuration.setExposedHeaders(Arrays.asList("Set-Cookie", "Authorization"));
 
-        return configuration;
-      }
-    }));
+            return configuration;
+          }
+        }));
 
     // csrf disable
     http.csrf(AbstractHttpConfigurer::disable);
     //form 로그인 방식 disable
-//    http.formLogin(AbstractHttpConfigurer::disable);
-    http.formLogin(form -> form
-        .loginPage("/login") // 기본 로그인 페이지 경로
-        .defaultSuccessUrl("/home") // 로그인 성공 시 리다이렉트
-        .permitAll()
-    );
+    http.formLogin(AbstractHttpConfigurer::disable);
     // http basic 인증 방식 disable
     http.httpBasic(AbstractHttpConfigurer::disable);
 
     // oauth2
     http.oauth2Login((oauth2) -> oauth2
-        .userInfoEndpoint((userInfoEndpointConfig) ->
-            userInfoEndpointConfig.userService(oAuth2Service))
-        .successHandler(successHandler)
-        .loginPage("/oauth2/login"));
+            .userInfoEndpoint((userInfoEndpointConfig) ->
+                userInfoEndpointConfig.userService(oAuth2Service))
+            .successHandler(successHandler));
 
     http.authorizeHttpRequests((auth) -> auth
-        .requestMatchers("/", "/users/sign-in", "/login/**", "/oauth2/**", "/refresh", "/error")
-        .permitAll()
-        .requestMatchers("/users/\\d/update/role").hasAuthority("ADMIN")
-        .requestMatchers("/games").hasAuthority("MANAGER")
-        .anyRequest().authenticated()
+            .requestMatchers("/", "/users/sign-in", "/login/**", "/oauth2/**", "/refresh", "/error").permitAll()
+            .requestMatchers("/users/\\d/update/role").hasAuthority("ADMIN")
+            .requestMatchers("/games").hasAuthority("MANAGER")
+            .anyRequest().authenticated()
     );
 
     http.addFilterBefore(new JWTFilter(userRepository, jwtUtil), CustomLoginFilter.class);
-    http.addFilterBefore(new CustomLogoutFilter(jwtUtil, tokenRepository), LogoutFilter.class);
-    http.addFilterAt(
-        new CustomLoginFilter(authenticationManager(authenticationConfiguration), jwtUtil,
-            tokenRepository), UsernamePasswordAuthenticationFilter.class);
+    http.addFilterBefore(new CustomLogoutFilter(redisTemplate, jwtUtil), LogoutFilter.class);
+    http.addFilterAt(new CustomLoginFilter(authenticationManager(authenticationConfiguration),redisTemplate, jwtUtil), UsernamePasswordAuthenticationFilter.class);
 
     // 세션 설정
     http.sessionManagement((session) ->

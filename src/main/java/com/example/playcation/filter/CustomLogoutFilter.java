@@ -1,7 +1,8 @@
 package com.example.playcation.filter;
 
 import com.example.playcation.common.TokenSettings;
-import com.example.playcation.token.repository.TokenRepository;
+import com.example.playcation.exception.NoAuthorizedException;
+import com.example.playcation.exception.TokenErrorCode;
 import com.example.playcation.util.JWTUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
@@ -12,17 +13,15 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.filter.GenericFilterBean;
 
+@RequiredArgsConstructor
 public class CustomLogoutFilter extends GenericFilterBean {
 
-  private final TokenRepository tokenRepository;
+  private final RedisTemplate<String, String> redisTemplate;
   private final JWTUtil jwtUtil;
-
-  public CustomLogoutFilter(JWTUtil jwtUtil, TokenRepository tokenRepository) {
-    this.jwtUtil = jwtUtil;
-    this.tokenRepository = tokenRepository;
-  }
 
   @Override
   public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
@@ -77,17 +76,19 @@ public class CustomLogoutFilter extends GenericFilterBean {
       return;
     }
 
-    //DB에 저장되어 있는지 확인
-    Boolean isExist = tokenRepository.existsByRefresh(refresh);
-    if (!isExist) {
-      //response status code
-      response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-      return;
+    String userId = jwtUtil.getUserId(refresh);
+
+    // Redis에서 Refresh Token 조회
+    String storedRefresh = redisTemplate.opsForValue().get(userId);
+    if (storedRefresh == null || !storedRefresh.equals(refresh)) {
+      throw new NoAuthorizedException(TokenErrorCode.NO_REFRESH_TOKEN);
     }
 
     //로그아웃 진행
     //Refresh 토큰 DB에서 제거
-    tokenRepository.deleteByRefresh(refresh);
+    redisTemplate.delete(userId);
+
+    response.setHeader(TokenSettings.ACCESS_TOKEN_CATEGORY, "");
 
     //Refresh 토큰 Cookie 값 0
     Cookie cookie = new Cookie(TokenSettings.REFRESH_TOKEN_CATEGORY, null);
