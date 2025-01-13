@@ -4,6 +4,7 @@ import com.example.playcation.exception.FileErrorCode;
 import com.example.playcation.exception.NotFoundException;
 import com.example.playcation.exception.UserErrorCode;
 import com.example.playcation.s3.entity.GameFile;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -15,4 +16,9 @@ public interface GameFileRepository extends JpaRepository<GameFile, Long> {
     return gameFile;
   }
 
+  void deleteByGameIdAndFileDetailId(Long game_id, Long fileDetail_id);
+
+  GameFile findByGameId(Long gameId);
+
+  List<GameFile> findByGameIdAndBucket(Long gameId, String bucket);
 }

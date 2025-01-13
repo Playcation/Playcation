@@ -2,18 +2,13 @@ package com.example.playcation.library.controller;
 
 import com.example.playcation.common.PagingDto;
 import com.example.playcation.common.TokenSettings;
-import com.example.playcation.gametag.dto.GameListResponseDto;
-import com.example.playcation.library.dto.LibraryGameResponseDto;
-import com.example.playcation.library.dto.LibraryListResponseDto;
+import com.example.playcation.game.dto.GameResponseDto;
 import com.example.playcation.library.dto.LibraryRequestDto;
 import com.example.playcation.library.dto.LibraryResponseDto;
 import com.example.playcation.library.dto.UpdatedFavouriteRequestDto;
 import com.example.playcation.library.service.LibraryService;
 import com.example.playcation.util.JWTUtil;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
-import nonapi.io.github.classgraph.utils.LogNode;
-import org.springframework.data.domain.jaxb.SpringDataJaxb.PageDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -51,10 +46,10 @@ public class LibraryController {
 
   // 다건 조회(라이브러리)
   @GetMapping("/my-games")
-  public ResponseEntity<PagingDto<LibraryGameResponseDto>> findLibraryList(@RequestHeader(TokenSettings.ACCESS_TOKEN_CATEGORY) String authorizationHeader,
+  public ResponseEntity<PagingDto<GameResponseDto>> findLibraryList(@RequestHeader(TokenSettings.ACCESS_TOKEN_CATEGORY) String authorizationHeader,
       @RequestParam(defaultValue = "0") int page) {
     Long userId = jwtUtil.findUserByToken(authorizationHeader);
-    PagingDto<LibraryGameResponseDto> responseDto = libraryService.findLibraryList(page, userId);
+    PagingDto<GameResponseDto> responseDto = libraryService.findLibraryList(page, userId);
     return new ResponseEntity<>(responseDto, HttpStatus.OK);
   }
 
