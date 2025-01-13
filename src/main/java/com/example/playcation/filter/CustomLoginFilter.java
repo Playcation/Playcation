@@ -23,13 +23,28 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+/**
+ * CustomLoginFilter: 사용자 로그인 시 JWT 기반 인증을 수행하는 필터
+ *
+ * <p>- 사용자가 로그인하면 이메일과 비밀번호를 검증</p>
+ * <p>- JWT 액세스 및 리프레시 토큰을 생성하여 클라이언트에게 전달</p>
+ * <p>- Redis에 리프레시 토큰을 저장하여 보안 강화</p>
+ */
 @RequiredArgsConstructor
 public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
 
   private final AuthenticationManager authenticationManager;
-  private final RedisTemplate<String, String> redisTemplate;
   private final JWTUtil jwtUtil;
 
+  /**
+   * 사용자 로그인 요청을 처리하는 메서드
+   * <p>- HTTP 요청에서 이메일 및 비밀번호를 추출하여 인증 요청</p>
+   *
+   * @param request  HTTP 요청 객체
+   * @param response HTTP 응답 객체
+   * @return 인증 정보 (Authentication)
+   * @throws AuthenticationException 인증 실패 시 예외 발생
+   */
   @Override
   public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
     try {
@@ -44,6 +59,16 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
     }
   }
 
+  /**
+   * 인증 성공 시 실행되는 메서드
+   * <p>- JWT 액세스 및 리프레시 토큰을 생성하여 응답 헤더 및 쿠키에 저장</p>
+   * <p>- Redis에 리프레시 토큰 저장</p>
+   *
+   * @param request  HTTP 요청 객체
+   * @param response HTTP 응답 객체
+   * @param chain 필터 체인
+   * @param authentication 인증 정보 (사용자 ID 및 권한 포함)
+   */
   @Override
   protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) {
     CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
@@ -51,25 +76,10 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
     String role = authentication.getAuthorities().iterator().next().getAuthority();
 
     // JWT 토큰 생성
-    String[] tokens = generateTokens(userId, role);
-
-    // Refresh 토큰 저장
-    storeRefreshToken(userId, tokens[1]);
+    String[] tokens = jwtUtil.generateTokens(userId, role);
 
     response.setHeader(TokenSettings.ACCESS_TOKEN_CATEGORY, tokens[0]);
     response.addCookie(jwtUtil.createCookie(TokenSettings.REFRESH_TOKEN_CATEGORY, tokens[1]));
     response.setStatus(HttpStatus.OK.value());
-  }
-
-  // JWT 액세스/리프레시 토큰 생성 메서드
-  private String[] generateTokens(String userId, String role) {
-    String access = TokenSettings.TOKEN_TYPE + jwtUtil.createJwt(TokenSettings.ACCESS_TOKEN_CATEGORY, userId, role, TokenSettings.ACCESS_TOKEN_EXPIRATION);
-    String refresh = jwtUtil.createJwt(TokenSettings.REFRESH_TOKEN_CATEGORY, userId, role, TokenSettings.REFRESH_TOKEN_EXPIRATION);
-    return new String[]{access, refresh};
-  }
-
-  // Redis에 Refresh 토큰 저장 메서드
-  private void storeRefreshToken(String userId, String refreshToken) {
-    redisTemplate.opsForValue().set(userId, refreshToken, Duration.ofMillis(TokenSettings.REFRESH_TOKEN_EXPIRATION));
   }
 }

@@ -46,32 +46,15 @@ public class SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
         .orElse("USER");
 
     // 액세스 & 리프레시 토큰 생성
-    String accessToken = generateToken(user.getId().toString(), role, TokenSettings.ACCESS_TOKEN_CATEGORY, TokenSettings.ACCESS_TOKEN_EXPIRATION);
-    String refreshToken = generateToken(user.getId().toString(), role, TokenSettings.REFRESH_TOKEN_CATEGORY, TokenSettings.REFRESH_TOKEN_EXPIRATION);
-
-    // 리프레시 토큰 저장 (Redis)
-    storeRefreshToken(user.getId().toString(), refreshToken);
+    String[] tokens = jwtUtil.generateTokens(user.getId().toString(), role);
+    String accessToken = tokens[0];
+    String refreshToken = tokens[1];
 
     // 응답 설정 (헤더 & 쿠키)
     setTokenResponse(response, accessToken, refreshToken);
 
     // 리디렉트 처리
     response.sendRedirect("http://localhost:8080/my");
-  }
-
-  /**
-   * 토큰 생성 메서드 (중복 제거)
-   */
-  private String generateToken(String userId, String role, String category, long expiration) {
-    return TokenSettings.TOKEN_TYPE + jwtUtil.createJwt(category, userId, role, expiration);
-  }
-
-  /**
-   * Redis에 리프레시 토큰 저장
-   */
-  private void storeRefreshToken(String userId, String refreshToken) {
-    ValueOperations<String, String> ops = redisTemplate.opsForValue();
-    ops.set(userId, refreshToken, Duration.ofMillis(TokenSettings.REFRESH_TOKEN_EXPIRATION));
   }
 
   /**

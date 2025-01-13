@@ -1,23 +1,31 @@
 package com.example.playcation.util;
 
 import com.example.playcation.common.TokenSettings;
+import com.example.playcation.exception.NoAuthorizedException;
+import com.example.playcation.exception.TokenErrorCode;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Date;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Component;
 
 @Component
 public class JWTUtil {
 
+  private final RedisTemplate<String, String> redisTemplate;
   private SecretKey secretKey;
 
-  public JWTUtil(@Value("${spring.jwt.secret}") String secret) {
-    secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8),
+  public JWTUtil(RedisTemplate<String, String> redisTemplate, @Value("${spring.jwt.secret}") String secret) {
+    this.redisTemplate = redisTemplate;
+    this.secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8),
         Jwts.SIG.HS256.key().build().getAlgorithm());
   }
 
@@ -63,6 +71,22 @@ public class JWTUtil {
         .getExpiration().before(new Date());
   }
 
+  /**
+   * 사용자 ID와 권한을 이용하여 Access Token 및 Refresh Token 생성
+   *
+   * @param userId 사용자 ID
+   * @param role 사용자 권한
+   * @return [0] -> 액세스 토큰, [1] -> 리프레시 토큰
+   */
+  public String[] generateTokens(String userId, String role) {
+    String access = TokenSettings.TOKEN_TYPE + createJwt(TokenSettings.ACCESS_TOKEN_CATEGORY, userId, role, TokenSettings.ACCESS_TOKEN_EXPIRATION);
+    String refresh = createJwt(TokenSettings.REFRESH_TOKEN_CATEGORY, userId, role, TokenSettings.REFRESH_TOKEN_EXPIRATION);
+
+    storeRefreshToken(userId, refresh);
+
+    return new String[]{access, refresh};
+  }
+
   // 토큰을 생성하는 메소드
   public String createJwt(String category, String userId, String role, Long expiredMs) {
 
@@ -75,6 +99,73 @@ public class JWTUtil {
         .expiration(new Date(System.currentTimeMillis() + expiredMs)) // 토큰 만료시간
         .signWith(secretKey)  // secretKey를 통한 토큰 암호화
         .compact();
+  }
+
+  /**
+   * Redis에 Refresh Token을 저장
+   *
+   * @param userId 사용자 ID
+   * @param refreshToken 저장할 리프레시 토큰
+   */
+  public void storeRefreshToken(String userId, String refreshToken) {
+    ValueOperations<String, String> ops = redisTemplate.opsForValue();
+    ops.set(userId, refreshToken, Duration.ofMillis(TokenSettings.REFRESH_TOKEN_EXPIRATION));
+  }
+
+  /**
+   * Redis에서 Refresh Token을 가져오는 메서드
+   *
+   * @param userId 사용자 ID
+   * @return 저장된 Refresh Token
+   */
+  public String fetchRefreshTokenFromRedis(String userId) {
+    return redisTemplate.opsForValue().get(userId);
+  }
+
+  /**
+   * Redis에서 Refresh Token 삭제 (로그아웃 시 사용)
+   */
+  public void deleteRefreshTokenFromRedis(String userId) {
+    redisTemplate.delete(userId);
+  }
+
+  /**
+   * Refresh Token의 유효성 검증
+   *
+   * @param refreshToken 클라이언트가 제공한 Refresh Token
+   */
+  public void verifyRefreshTokenFormat(String refreshToken) {
+    try {
+      isExpired(refreshToken);
+      isIssuer(refreshToken);
+    } catch (ExpiredJwtException e) {
+      throw new NoAuthorizedException(TokenErrorCode.NO_REFRESH_TOKEN);
+    }
+
+    if (!getCategory(refreshToken).equals(TokenSettings.REFRESH_TOKEN_CATEGORY)) {
+      throw new NoAuthorizedException(TokenErrorCode.NO_REFRESH_TOKEN);
+    }
+  }
+
+  /**
+   * Redis에 저장된 Refresh Token과 요청된 Refresh Token을 비교하여 검증
+   *
+   * @param userId 사용자 ID
+   * @param refreshToken 요청된 Refresh Token
+   */
+  public boolean checkRefreshTokenMatch(String userId, String refreshToken) {
+    String storedToken = redisTemplate.opsForValue().get(userId);
+    return storedToken != null && storedToken.equals(refreshToken);
+  }
+
+  /**
+   * Refresh Token을 가져오는 메서드 (Redis에서 가져오기)
+   *
+   * @param userId 사용자 ID
+   * @return 저장된 Refresh Token
+   */
+  public String getStoredRefreshToken(String userId) {
+    return redisTemplate.opsForValue().get(userId);
   }
 
   // 쿠키에 리플레시 토큰을 담기위해 쿠키를 생성하는 로직
