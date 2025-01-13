@@ -1,9 +1,10 @@
 package com.example.playcation.review.repository;
 
+import com.example.playcation.common.PagingDto;
 import com.example.playcation.enums.ReviewStatus;
 import com.example.playcation.game.entity.QGame;
 import com.example.playcation.library.entity.QLibrary;
-import com.example.playcation.review.dto.PagingReviewResponseDto;
+import com.example.playcation.review.dto.CreatedReviewResponseDto;
 import com.example.playcation.review.entity.QReview;
 import com.example.playcation.review.entity.Review;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -20,7 +21,7 @@ public class ReviewRepositoryCustomImpl implements ReviewRepositoryCustom {
   private final JPAQueryFactory queryFactory;
 
   @Override
-  public PagingReviewResponseDto searchReviews(PageRequest pageRequest, Long gameId, Long userId,
+  public PagingDto<CreatedReviewResponseDto> searchReviews(PageRequest pageRequest, Long gameId, Long userId,
       ReviewStatus rating){
 
     QReview review = QReview.review;
@@ -34,7 +35,6 @@ public class ReviewRepositoryCustomImpl implements ReviewRepositoryCustom {
         .join(review.library, library) // userId를 라이브러리에서 가져오기 위해
         .where(
             eqGame(gameId), // 게임 id가 주어진 값과 일치하는지 체크(특정 게임에 대해 리뷰 조회)
-            eqUser(userId), // 유저 id 필터링(로그인한 유저만 조회)
             eqRating(rating) // 긍정적,부정적 필터링
         )
         .offset(pageRequest.getOffset())
@@ -44,17 +44,20 @@ public class ReviewRepositoryCustomImpl implements ReviewRepositoryCustom {
 
     // 게임의 전체 리뷰의 개수
     Long count = queryFactory
-        .select(game.count())
+        .select(review.count())
         .from(review)
         .join(review.game, game)
         .join(review.library, library)
         .where(
             eqGame(gameId),
-            eqUser(userId),
             eqRating(rating)
         )
         .fetchOne();
-    return new PagingReviewResponseDto(reviewList, count);
+
+    List<CreatedReviewResponseDto> list = reviewList.stream()
+        .map(CreatedReviewResponseDto::toDto)
+        .toList();
+    return new PagingDto<>(list, count);
   }
 
   // 라이브러리에서 유저 ID를 필터링

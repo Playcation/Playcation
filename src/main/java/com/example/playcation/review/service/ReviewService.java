@@ -1,5 +1,6 @@
 package com.example.playcation.review.service;
 
+import com.example.playcation.common.PagingDto;
 import com.example.playcation.enums.ReviewStatus;
 import com.example.playcation.exception.DuplicatedException;
 import com.example.playcation.exception.NoAuthorizedException;
@@ -11,7 +12,6 @@ import com.example.playcation.library.entity.Library;
 import com.example.playcation.library.repository.LibraryRepository;
 import com.example.playcation.review.dto.CreatedReviewRequestDto;
 import com.example.playcation.review.dto.CreatedReviewResponseDto;
-import com.example.playcation.review.dto.PagingReviewResponseDto;
 import com.example.playcation.review.dto.UpdatedReviewRequestDto;
 import com.example.playcation.review.entity.Review;
 import com.example.playcation.review.repository.ReviewRepository;
@@ -59,13 +59,14 @@ public class ReviewService {
 
 
   // 리뷰 조회
-  public PagingReviewResponseDto searchReviews(int page,int size ,Long gameId,Long userId,
+  public PagingDto<CreatedReviewResponseDto> searchReviews(int page,int size ,Long gameId,Long userId,
       ReviewStatus rating){
     // 게임 조회 및 예외처리
-    Game game = gameRepository.findByIdOrElseThrow(gameId);
+    gameRepository.existsByIdOrElseThrow(gameId);
 
     // 페이징시 최대 출력 갯수와 정렬조건 설정 ( 한 페이지당 리뷰 개수는 5개 )
     PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Direction.DESC,"createdAt"));
+
     return reviewRepository.searchReviews(pageRequest,gameId, userId,rating);
   }
 
@@ -74,8 +75,7 @@ public class ReviewService {
   @Transactional
   public CreatedReviewResponseDto updateReview(Long userId,Long gameId, Long reviewId, UpdatedReviewRequestDto updateRequest){
     // 게임이 존재하는지, 리뷰가 있는지
-    // boolean exists = gameRepository.existsById(gameId);
-    Game game = gameRepository.findByIdOrElseThrow(gameId);
+    gameRepository.existsByIdOrElseThrow(gameId);
     Review review = reviewRepository.findByIdOrElseThrow(reviewId);
 
     // 본인이 작성한 리뷰인지 확인
@@ -93,13 +93,12 @@ public class ReviewService {
   @Transactional
   public void deleteReview(Long userId, Long gameId, Long reviewId){
     // 게임이 존재하는지, 리뷰가 있는지
-//    boolean exists = gameRepository.existsById(gameId);
-    Game game = gameRepository.findByIdOrElseThrow(gameId);
+    gameRepository.existsByIdOrElseThrow(gameId);
     Review review = reviewRepository.findByIdOrElseThrow(reviewId);
 
     // 본인이 작성한 리뷰인지 확인
     if (!(review.getLibrary().getUser().getId().equals(userId))) {
-      throw new NoAuthorizedException(ReviewErrorCode.NOT_AUTHOR_OF_REVIEW);
+      throw new NoAuthorizedException(ReviewErrorCode.NOT_AUTHOR_OF_REVIEW_GAME);
     }
     reviewRepository.delete(review);
   }

@@ -1,15 +1,12 @@
 package com.example.playcation.review.controller;
 
+import com.example.playcation.common.PagingDto;
 import com.example.playcation.enums.ReviewStatus;
-import com.example.playcation.exception.NoAuthorizedException;
-import com.example.playcation.exception.UserErrorCode;
 import com.example.playcation.review.dto.CreatedReviewRequestDto;
 import com.example.playcation.review.dto.CreatedReviewResponseDto;
-import com.example.playcation.review.dto.PagingReviewResponseDto;
 import com.example.playcation.review.dto.UpdatedReviewRequestDto;
 import com.example.playcation.review.service.ReviewService;
 import com.example.playcation.util.JWTUtil;
-import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -47,7 +44,7 @@ public class ReviewController {
 
   // 리뷰 조회
   @GetMapping
-  public ResponseEntity<PagingReviewResponseDto> findReviewsAndPaging(
+  public ResponseEntity<PagingDto<CreatedReviewResponseDto>> findReviewsAndPaging(
       @RequestHeader("Authorization") String authorizationHeader,
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "5") int size,
@@ -55,7 +52,7 @@ public class ReviewController {
       @RequestParam(required = false) ReviewStatus rating // 필터링할 상태(긍정적/부정적)
   ) {
     Long userId = jwtUtil.findUserByToken(authorizationHeader);
-    PagingReviewResponseDto reviews = reviewService.searchReviews(page,size,gameId,userId,rating);
+    PagingDto<CreatedReviewResponseDto> reviews = reviewService.searchReviews(page,size,gameId,userId,rating);
     return new ResponseEntity<>(reviews, HttpStatus.OK);
   }
 
