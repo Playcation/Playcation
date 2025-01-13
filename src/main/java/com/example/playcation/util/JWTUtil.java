@@ -142,7 +142,7 @@ public class JWTUtil {
       throw new NoAuthorizedException(TokenErrorCode.NO_REFRESH_TOKEN);
     }
 
-    if (!getCategory(refreshToken).equals(TokenSettings.REFRESH_TOKEN_CATEGORY)) {
+    if (!TokenSettings.REFRESH_TOKEN_CATEGORY.equals(getCategory(refreshToken))) {
       throw new NoAuthorizedException(TokenErrorCode.NO_REFRESH_TOKEN);
     }
   }
