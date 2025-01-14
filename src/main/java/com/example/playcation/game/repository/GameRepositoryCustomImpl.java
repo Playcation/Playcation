@@ -1,7 +1,5 @@
 package com.example.playcation.game.repository;
 
-import com.example.playcation.common.PagingDto;
-import com.example.playcation.game.dto.CreatedGameResponseDto;
 import com.example.playcation.game.dto.PagingGameResponseDto;
 import com.example.playcation.game.entity.Game;
 import com.example.playcation.game.entity.QGame;
@@ -11,7 +9,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -21,7 +19,7 @@ public class GameRepositoryCustomImpl implements GameRepositoryCustom {
   private final JPAQueryFactory queryFactory;
 
   @Override
-  public PagingDto<CreatedGameResponseDto> searchGames(PageRequest pageRequest, String title, String category,
+  public PagingGameResponseDto searchGames(Pageable pageable, String title, String category,
       BigDecimal price, LocalDateTime createdAt) {
     QGame game = QGame.game;
 
@@ -33,8 +31,8 @@ public class GameRepositoryCustomImpl implements GameRepositoryCustom {
             gtPrice(price),
             afterCreatedAt(createdAt)
         )
-        .offset(pageRequest.getOffset())
-        .limit(pageRequest.getPageSize())
+        .offset(pageable.getOffset())
+        .limit(pageable.getPageSize())
         .fetch();
 
     Long count = queryFactory
@@ -48,9 +46,7 @@ public class GameRepositoryCustomImpl implements GameRepositoryCustom {
         )
         .fetchOne();
 
-    List<CreatedGameResponseDto> list = gameList.stream().map(CreatedGameResponseDto::toDto)
-        .toList();
-    return new PagingDto<>(list, count);
+    return new PagingGameResponseDto(gameList, count);
   }
 
   private BooleanExpression eqTitle(String title) {

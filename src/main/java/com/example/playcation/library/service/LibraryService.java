@@ -1,13 +1,12 @@
 package com.example.playcation.library.service;
 
 import com.example.playcation.common.PagingDto;
-import com.example.playcation.exception.DuplicatedException;
 import com.example.playcation.exception.LibraryErrorCode;
 import com.example.playcation.exception.NoAuthorizedException;
+import com.example.playcation.game.dto.GameResponseDto;
 import com.example.playcation.game.entity.Game;
 import com.example.playcation.game.repository.GameRepository;
-import com.example.playcation.gametag.dto.GameListResponseDto;
-import com.example.playcation.library.dto.LibraryGameResponseDto;
+import com.example.playcation.game.service.GameService;
 import com.example.playcation.library.dto.LibraryListResponseDto;
 import com.example.playcation.library.dto.LibraryRequestDto;
 import com.example.playcation.library.dto.LibraryResponseDto;
@@ -19,12 +18,9 @@ import com.example.playcation.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
-import org.springframework.data.domain.jaxb.SpringDataJaxb.PageDto;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -34,6 +30,7 @@ public class LibraryService {
   private final GameRepository gameRepository;
   private final UserRepository userRepository;
   private final LibraryRepository libraryRepository;
+  private final GameService gameService;
 
   // library 생성(중복되는 게임의 추가에 대한 에외처리는 앞서 카드에서 하였기 때문에 생략)
   @Transactional
@@ -59,21 +56,25 @@ public class LibraryService {
     return LibraryResponseDto.toDto(library);
   }
 
-  public PagingDto<LibraryGameResponseDto> findLibraryList(int page, Long userId) {
+  public PagingDto<GameResponseDto> findLibraryList(int page, Long userId) {
 
-    PageRequest pageRequest = PageRequest.of(page, 10);
+    Pageable pageable = PageRequest.of(page, 10);
 
     User user = userRepository.findByIdOrElseThrow(userId);
 
-    LibraryListResponseDto listDto = libraryRepository.findLibraryByUserId(pageRequest, user);
+    LibraryListResponseDto listDto = libraryRepository.findLibraryByUserId(pageable, user);
 
     List<Library> libraryList = listDto.getLibraryList();
 
-    List<LibraryGameResponseDto> gameList = libraryList.stream()
-        .map(ld -> new LibraryGameResponseDto(ld.getGame(), ld.getFavourite())).toList();
+    List<Game> gameList = new ArrayList<>();
 
-    return new PagingDto<>(gameList, listDto.getCount());
+    for(Library library : libraryList) {
+      gameList.add(library.getGame());
+    }
 
+    List<GameResponseDto> responseDtoList = gameService.createDto(gameList);
+
+    return new PagingDto<>(responseDtoList, listDto.getCount());
   }
 
   @Transactional

@@ -1,5 +1,6 @@
 package com.example.playcation.tag.service;
 
+import com.example.playcation.common.PagingDto;
 import com.example.playcation.tag.Dto.CreatedTagRequestDto;
 import com.example.playcation.tag.Dto.CreatedTagResponseDto;
 import com.example.playcation.tag.entity.Tag;
@@ -8,6 +9,7 @@ import jakarta.transaction.Transactional;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
@@ -37,11 +39,11 @@ public class TagService {
     return CreatedTagResponseDto.toDto(tag);
   }
 
-  public List<CreatedTagResponseDto> findAllTag(int page) {
+  public PagingDto<CreatedTagResponseDto> findAllTag(int page) {
 
-    PageRequest pageRequest = PageRequest.of(page, 10);
+    Pageable pageable = PageRequest.of(page, 10, Sort.by("id"));
 
-    return tagRepository.findAll(pageRequest).stream().map(CreatedTagResponseDto::toDto).toList();
+    return tagRepository.searchTags(pageable);
   }
 
   @Transactional

@@ -2,7 +2,6 @@ package com.example.playcation.gametag.repository;
 
 import static com.example.playcation.game.entity.QGame.game;
 
-import com.example.playcation.game.dto.PagingGameResponseDto;
 import com.example.playcation.gametag.dto.GameTagListResponseDto;
 import com.example.playcation.gametag.entity.GameTag;
 import com.example.playcation.gametag.entity.QGameTag;
@@ -11,6 +10,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -20,7 +20,7 @@ public class GameTagRepositoryCustomImpl implements GameTagRepositoryCustom{
   private final JPAQueryFactory queryFactory;
 
   @Override
-  public GameTagListResponseDto findGameTagByTag(PageRequest pageRequest, Tag tag) {
+  public GameTagListResponseDto findGameTagByTag(Pageable pageable, Tag tag) {
     QGameTag gameTag = QGameTag.gameTag;
 
     List<GameTag> gameTagList = queryFactory
@@ -28,8 +28,8 @@ public class GameTagRepositoryCustomImpl implements GameTagRepositoryCustom{
         .join(gameTag.game, game).fetchJoin()
         .where(gameTag.tag.eq(tag))
         .orderBy(game.updatedAt.desc())
-        .offset(pageRequest.getOffset())
-        .limit(pageRequest.getPageSize())
+        .offset(pageable.getOffset())
+        .limit(pageable.getPageSize())
         .fetch();
 
     Long count = queryFactory
