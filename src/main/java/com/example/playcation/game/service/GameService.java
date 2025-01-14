@@ -1,6 +1,8 @@
 package com.example.playcation.game.service;
 
 
+import com.example.playcation.category.entity.Category;
+import com.example.playcation.category.repository.CategoryRepository;
 import com.example.playcation.common.PagingDto;
 import com.example.playcation.config.S3Config;
 import com.example.playcation.enums.GameStatus;
@@ -50,6 +52,7 @@ public class GameService {
   private final GameFileRepository gameFileRepository;
   private final FileDetailRepository fileDetailRepository;
   private final S3Config s3Config;
+  private final CategoryRepository categoryRepository;
 //  private final ReviewRepository reviewRepository;
 
   // 게임 생성
@@ -57,13 +60,15 @@ public class GameService {
   public GameResponseDto createGame(Long id,
       CreatedGameRequestDto requestDto, MultipartFile mainImage, List<MultipartFile> subImageList, MultipartFile gameFile) {
 
+    Category category = categoryRepository.findByIdOrElseThrow(requestDto.getCategoryId());
+
     User user = userRepository.findByIdOrElseThrow(id);
     FileDetail mainFileDetail = s3Service.uploadFile(mainImage);
     FileDetail gameFileDetail = s3Service.uploadFile(gameFile);
     Game game = Game.builder()
         .user(user)
         .title(requestDto.getTitle())
-        .category(requestDto.getCategory())
+        .category(category)
         .price(requestDto.getPrice())
         .description(requestDto.getDescription())
         .status(GameStatus.ON_SAL)
@@ -99,11 +104,13 @@ public class GameService {
   }
 
   // 게임 다건 조회
-  public PagingDto<GameResponseDto> searchGames(int page, String title, String category, BigDecimal price,
+  public PagingDto<GameResponseDto> searchGames(int page, String title, Long categoryId, BigDecimal price,
       LocalDateTime createdAt) {
 
     // 페이징시 최대 출력 갯수와 정렬조건 설정
     Pageable pageable = PageRequest.of(page, 10, Sort.by(Direction.DESC, "id"));
+
+    Category category = categoryRepository.findByIdOrElseThrow(categoryId);
 
     PagingGameResponseDto responseDto = gameRepository.searchGames(pageable, title, category, price, createdAt);
 
