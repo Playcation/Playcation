@@ -15,6 +15,8 @@ public class CategoryService {
   private final CategoryRepository categoryRepository;
 
   public CategoryResponseDto createCategory(CategoryRequestDto requestDto) {
+
+
     Category category = Category.builder()
         .categoryName(requestDto.getCategoryName())
         .build();

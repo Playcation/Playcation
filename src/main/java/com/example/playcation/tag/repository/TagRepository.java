@@ -10,4 +10,7 @@ public interface TagRepository extends JpaRepository<Tag, Long>, TagRepositoryCu
   default Tag findByIdOrElseThrow(Long id) {
     return findById(id).orElseThrow(() -> new NotFoundException(TagErrorCode.TAG_NOT_FOUND));
   }
+
+
+  boolean existsByTagName(String  tagId);
 }

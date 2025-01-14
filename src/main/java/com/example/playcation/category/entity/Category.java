@@ -1,6 +1,7 @@
 package com.example.playcation.category.entity;
 
 import com.example.playcation.category.dto.CategoryRequestDto;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -25,6 +26,7 @@ public class Category {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
+  @Column(unique = true)
   private String categoryName;
 
   public void categoryUpdate(CategoryRequestDto requestDto) {

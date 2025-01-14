@@ -1,6 +1,7 @@
 package com.example.playcation.library.entity;
 
 
+import com.example.playcation.common.BaseEntity;
 import com.example.playcation.game.entity.Game;
 import com.example.playcation.user.entity.User;
 import jakarta.persistence.Entity;
@@ -21,7 +22,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Library{
+public class Library extends BaseEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
