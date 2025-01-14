@@ -3,16 +3,18 @@ package com.example.playcation.order.controller;
 import com.example.playcation.common.PagingDto;
 import com.example.playcation.common.TokenSettings;
 import com.example.playcation.order.dto.OrderResponseDto;
+import com.example.playcation.order.dto.RefundRequestDto;
+import com.example.playcation.order.dto.RefundResponseDto;
 import com.example.playcation.order.service.OrderUserService;
 import com.example.playcation.util.JWTUtil;
-import java.awt.print.Pageable;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -68,5 +70,17 @@ public class OrderUserController {
         jwtUtil.findUserByToken(authorizationHeader));
 
     return new ResponseEntity<>(pagingDto, HttpStatus.OK);
+  }
+
+  @PostMapping("/{orderId}/refund")
+  public ResponseEntity<RefundResponseDto> refundOrder(
+      @Valid @RequestBody RefundRequestDto requestDto,
+      @PathVariable Long orderId,
+      @RequestHeader(TokenSettings.ACCESS_TOKEN_CATEGORY) String authorizationHeader
+  ) {
+    RefundResponseDto responseDto = orderService.refundOrder(
+        jwtUtil.findUserByToken(authorizationHeader), orderId, requestDto);
+
+    return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
   }
 }

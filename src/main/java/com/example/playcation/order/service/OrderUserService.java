@@ -10,13 +10,19 @@ import com.example.playcation.exception.InvalidInputException;
 import com.example.playcation.exception.NoAuthorizedException;
 import com.example.playcation.exception.OrderErrorCode;
 import com.example.playcation.order.dto.OrderResponseDto;
+import com.example.playcation.order.dto.RefundRequestDto;
+import com.example.playcation.order.dto.RefundResponseDto;
 import com.example.playcation.order.entity.Order;
 import com.example.playcation.order.entity.OrderDetail;
+import com.example.playcation.order.entity.Refund;
 import com.example.playcation.order.repository.OrderDetailRepository;
 import com.example.playcation.order.repository.OrderRepository;
+import com.example.playcation.order.repository.RefundRepository;
 import com.example.playcation.user.entity.User;
 import com.example.playcation.user.repository.UserRepository;
+import com.example.playcation.user.service.UserService;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -36,9 +42,11 @@ public class OrderUserService {
   private final OrderRepository orderRepository;
   private final UserRepository userRepository;
   private final OrderDetailRepository orderDetailRepository;
+  private final RefundRepository refundRepository;
 
   private final CartService cartService;
   private final OrderDetailService orderDetailService;
+  private final UserService userService;
 
   /**
    * 주문 생성(결제)
@@ -49,7 +57,7 @@ public class OrderUserService {
   public OrderResponseDto createOrder(Long userId) {
 
     List<CartGameResponseDto> cartItems = cartService.findCartItems(userId);
-    if(cartItems.isEmpty()) {
+    if (cartItems.isEmpty()) {
       throw new InvalidInputException(OrderErrorCode.EMPTY_CART);
     }
 
@@ -64,12 +72,9 @@ public class OrderUserService {
     // TODO: 결제 요청
     // ************************
 
-    OrderStatus status = OrderStatus.SUCCESS;
-
     Order order = Order.builder()
         .user(findUser)
         .totalPrice(total)
-        .status(status)
         .build();
 
     Order savedOrder = orderRepository.save(order);
@@ -123,5 +128,38 @@ public class OrderUserService {
     }
 
     return new PagingDto<>(dtos, orders.getTotalElements());
+  }
+
+  /**
+   * 환불 요청
+   *
+   * @apiNote 주문일로부터 2일 이내인 주문만 환불 가능, 비밀번호 체크.<br> 라이브러리 화면에서 환불 진행 -> 라이브러리 id 받음.
+   */
+  @Transactional
+  public RefundResponseDto refundOrder(Long userId, Long orderId, RefundRequestDto dto) {
+
+    Order findOrder = orderRepository.findByIdOrElseThrow(orderId);
+    if (findOrder.getCreatedAt().isBefore(LocalDateTime.now().minusDays(2))) {
+      throw new InvalidInputException(OrderErrorCode.REFUND_PERIOD_EXPIRED);
+    }
+
+    User findUser = userRepository.findByIdOrElseThrow(userId);
+    userService.checkPassword(findUser, dto.getPassword());
+
+    OrderDetail findOrderDetail = orderDetailRepository.findByIdOrElseThrow(dto.getOrderDetailId());
+    Refund refund = Refund.builder()
+        .orderDetail(findOrderDetail)
+        .refundMessage(dto.getRefundMessage())
+        .build();
+
+    Refund savedRefund = refundRepository.save(refund);
+    findOrderDetail.updateStatus(OrderStatus.EXPIRED);
+    findOrderDetail.updateRefund(savedRefund);
+
+    // ************************
+    // TODO: 환불 진행
+    // ************************
+
+    return RefundResponseDto.toDto(savedRefund, OrderStatus.EXPIRED);
   }
 }

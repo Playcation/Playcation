@@ -1,9 +1,9 @@
 package com.example.playcation.order.service;
 
 import com.example.playcation.cart.dto.CartGameResponseDto;
+import com.example.playcation.enums.OrderStatus;
 import com.example.playcation.game.entity.Game;
 import com.example.playcation.game.repository.GameRepository;
-import com.example.playcation.order.entity.Order;
 import com.example.playcation.order.entity.OrderDetail;
 import com.example.playcation.order.repository.OrderDetailRepository;
 import java.util.ArrayList;
@@ -38,22 +38,11 @@ public class OrderDetailService {
           OrderDetail.builder()
               .game(games.get(i))
               .price(items.get(i).getPrice())
+              .status(OrderStatus.SUCCESS)
               .build()
       );
     }
 
     return orderDetailRepository.saveAll(orderDetails);
-  }
-
-  /**
-   * 주문한 게임 목록을 반환
-   *
-   * @param orderId 주문 식별자
-   * @return 게임 목록
-   */
-  public List<Game> findOrderedGames(Long orderId) {
-
-    List<OrderDetail> details = orderDetailRepository.findAllByOrderId(orderId);
-    return details.stream().map(OrderDetail::getGame).toList();
   }
 }
