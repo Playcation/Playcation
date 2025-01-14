@@ -14,6 +14,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -51,6 +52,8 @@ public class Game extends BaseEntity {
 
   private String filePath;
 
+  private LocalDateTime deletedAt;
+
 
   public Game(User user, String title, String category, BigDecimal price, String description,
       GameStatus status, String imageUrl, String filePath) {
@@ -75,5 +78,12 @@ public class Game extends BaseEntity {
 
   public void deleteGame() {
     this.status = GameStatus.OFF_SAL;
+  }
+
+  /**
+   * 게임이 삭제되었는지 여부를 반환
+   */
+  public boolean isDeleted() {
+    return (this.deletedAt == null);
   }
 }
