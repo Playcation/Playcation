@@ -53,7 +53,7 @@ public class AdminController {
   }
 
   // ADMIN
-  @PutMapping("/users/{userId}/update/role")
+  @PutMapping("/users/{userId}/role")
   public ResponseEntity<UserResponseDto> updateUserRole(
       @PathVariable() Long userId
   ){

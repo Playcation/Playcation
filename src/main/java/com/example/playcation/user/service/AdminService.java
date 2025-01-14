@@ -27,18 +27,20 @@ public class AdminService {
   private final UserRepository userRepository;
   private final BCryptPasswordEncoder bCryptPasswordEncoder;
   private final GameService gameService;
+  private final String ADMIN_ID = "admin";
+  private final String ADMIN_PW = "admin";
 
   // ADMIN 생성
   @Transactional
   public UserResponseDto signUp() {
-    if(userRepository.existsByEmail("admin")){
+    if(userRepository.existsByEmail(ADMIN_ID)){
       throw new DuplicatedException(UserErrorCode.EXIST_ADMIN);
     }
-    String password = bCryptPasswordEncoder.encode("admin");
+    String password = bCryptPasswordEncoder.encode(ADMIN_PW);
     User admin = User.builder()
-        .email("admin")
+        .email(ADMIN_ID)
         .password(password)
-        .name("admin")
+        .name(ADMIN_ID)
         .role(Role.ADMIN)
         .build();
     userRepository.save(admin);
