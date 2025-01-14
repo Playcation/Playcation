@@ -133,12 +133,15 @@ public class OrderUserService {
   /**
    * 환불 요청
    *
-   * @apiNote 주문일로부터 2일 이내인 주문만 환불 가능, 비밀번호 체크.<br> 라이브러리 화면에서 환불 진행 -> 라이브러리 id 받음.
+   * @apiNote 주문일로부터 2일 이내인 주문만 환불 가능, 비밀번호 체크.<br>주문 내역 페이지에서 환불 진행.
    */
   @Transactional
   public RefundResponseDto refundOrder(Long userId, Long orderId, RefundRequestDto dto) {
 
     Order findOrder = orderRepository.findByIdOrElseThrow(orderId);
+    if(!orderDetailRepository.existsByIdAndOrderId(dto.getOrderDetailId(), orderId)) {
+      throw new InvalidInputException(OrderErrorCode.NO_EXIST_ORDER_DETAIL);
+    }
     if (findOrder.getCreatedAt().isBefore(LocalDateTime.now().minusDays(2))) {
       throw new InvalidInputException(OrderErrorCode.REFUND_PERIOD_EXPIRED);
     }

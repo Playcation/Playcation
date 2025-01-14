@@ -30,4 +30,5 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Long> 
         new NotFoundException(OrderErrorCode.NOT_FOUND_ORDER_DETAIL));
   }
 
+  boolean existsByIdAndOrderId(Long id, Long orderId);
 }

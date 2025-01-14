@@ -52,7 +52,6 @@ public class Game extends BaseEntity {
 
   private String filePath;
 
-  // TODO: push 전에 지우기
   private LocalDateTime deletedAt;
 
 
