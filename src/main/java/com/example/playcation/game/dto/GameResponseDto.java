@@ -16,7 +16,7 @@ public class GameResponseDto {
 
   private String title;
 
-  private String category;
+  private Long categoryId;
 
   private BigDecimal price;
 
@@ -35,13 +35,13 @@ public class GameResponseDto {
   private LocalDateTime updateAt;
 
 
-  public GameResponseDto(Long gameId, Long userId, String title, String category,
+  public GameResponseDto(Long gameId, Long userId, String title, Long categoryId,
       BigDecimal price, String description, String mainImagePath, List<String> subImagePath, String gameFilePath, GameStatus status,
       LocalDateTime createdAt, LocalDateTime updateAt) {
     this.gameId = gameId;
     this.userId = userId;
     this.title = title;
-    this.category = category;
+    this.categoryId = categoryId;
     this.price = price;
     this.description = description;
     this.mainImagePath = mainImagePath;
@@ -58,7 +58,7 @@ public class GameResponseDto {
         game.getId(),
         game.getUser().getId(),
         game.getTitle(),
-        game.getCategory(),
+        game.getCategory().getId(),
         game.getPrice(),
         game.getDescription(),
         game.getImageUrl(),

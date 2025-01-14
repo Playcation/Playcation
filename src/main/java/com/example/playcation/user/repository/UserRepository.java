@@ -1,12 +1,14 @@
 package com.example.playcation.user.repository;
 
+import com.example.playcation.enums.Role;
 import com.example.playcation.exception.NotFoundException;
 import com.example.playcation.exception.UserErrorCode;
 import com.example.playcation.user.entity.User;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.repository.query.Param;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
@@ -30,4 +32,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     return user;
   }
 
+  boolean existsByRole(Role admin);
+
+  Page<User> findAll(Pageable pageable);
 }

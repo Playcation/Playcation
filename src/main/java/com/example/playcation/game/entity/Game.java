@@ -1,5 +1,6 @@
 package com.example.playcation.game.entity;
 
+import com.example.playcation.category.entity.Category;
 import com.example.playcation.common.BaseEntity;
 import com.example.playcation.enums.GameStatus;
 import com.example.playcation.game.dto.UpdatedGameRequestDto;
@@ -11,6 +12,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
@@ -35,11 +37,14 @@ public class Game extends BaseEntity {
   private Long id;
 
   @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "user_id")
   private User user;
 
   private String title;
 
-  private String category;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "category_id")
+  private Category category;
 
   private BigDecimal price;
 
@@ -55,7 +60,7 @@ public class Game extends BaseEntity {
   private LocalDateTime deletedAt;
 
 
-  public Game(User user, String title, String category, BigDecimal price, String description,
+  public Game(User user, String title, Category category, BigDecimal price, String description,
       GameStatus status, String imageUrl, String filePath) {
     this.user = user;
     this.title = title;

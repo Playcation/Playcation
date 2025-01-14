@@ -1,6 +1,7 @@
 package com.example.playcation.oauth2.handler;
 
 import com.example.playcation.common.TokenSettings;
+import com.example.playcation.enums.Role;
 import com.example.playcation.oauth2.dto.OAuth2UserDto;
 import com.example.playcation.token.entity.RefreshToken;
 import com.example.playcation.user.entity.User;
@@ -43,7 +44,7 @@ public class SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
         .stream()
         .findFirst()
         .map(GrantedAuthority::getAuthority)
-        .orElse("USER");
+        .orElse(Role.USER.name());
 
     // 액세스 & 리프레시 토큰 생성
     String[] tokens = jwtUtil.generateTokens(user.getId().toString(), role);
