@@ -50,14 +50,19 @@ public class S3Service {
    */
   @Transactional
   public FileDetail uploadFile(MultipartFile file) {
-    validateFile(file);
+    if (file == null || file.isEmpty()) {
+      return null;
+    }
     String bucket = determineBucket(file);
     String fileName = generateUniqueFileName(file.getOriginalFilename());
     String filePath = uploadToS3(bucket, file, fileName);
 
     // 파일 정보 저장
     FileDetail fileDetail = new FileDetail(
-        bucket, file.getOriginalFilename(), fileName, filePath,
+        bucket,
+        file.getOriginalFilename(),
+        fileName,
+        filePath,
         file.getSize(), file.getContentType()
     );
     return fileDetailRepository.save(fileDetail);
@@ -115,20 +120,11 @@ public class S3Service {
   }
 
   /**
-   * 파일 유효성 검사
-   */
-  private void validateFile(MultipartFile file) {
-    if (file == null || file.isEmpty()) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "파일이 비어 있습니다.");
-    }
-  }
-
-  /**
    * 파일의 버킷 결정 (이미지 vs 게임 파일)
    */
   private String determineBucket(MultipartFile file) {
     String fileType = getFileExtension(file.getOriginalFilename());
-    return "zip".equals(fileType) ? gameBucket : imageBucket;
+    return ".zip".equals(fileType) ? gameBucket : imageBucket;
   }
 
   /**
