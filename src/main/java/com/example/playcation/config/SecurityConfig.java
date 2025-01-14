@@ -108,10 +108,8 @@ public class SecurityConfig {
         .requestMatchers("/", "*/sign-in", "/oauth2-login", "/refresh", "/error").permitAll()
 
         // ADMIN 전용 API
-        .requestMatchers("/tags/**", "/categories/**").hasAuthority(Role.ADMIN.name()) // "ADMIN"
         .requestMatchers("/users/{id}/update-role").hasAuthority(Role.ADMIN.name()) // "ADMIN"
-        .requestMatchers("/coupons/**").hasAuthority(Role.ADMIN.name()) // "ADMIN"
-        .requestMatchers("/users/**").hasAuthority(Role.ADMIN.name()) // "ADMIN"
+        .requestMatchers("/admin/**").hasAuthority(Role.ADMIN.name()) // "ADMIN"
 
         // MANAGER 전용 API
         .requestMatchers("/manager/**").hasAuthority(Role.MANAGER.name()) // "MANAGER"
