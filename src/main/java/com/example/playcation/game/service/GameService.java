@@ -220,6 +220,7 @@ public class GameService {
     return null;
   }
 
+  @Transactional
   public List<FileDetail> updateSubFile(Long gameId, List<MultipartFile> subImageList) {
     Game game = gameRepository.findByIdOrElseThrow(gameId);
     List<GameFile> existingSubImages = gameFileRepository.findGameFileByGameIdAndImageRole(gameId, ImageRole.SUB_IMAGE);
