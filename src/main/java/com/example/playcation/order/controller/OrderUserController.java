@@ -72,6 +72,12 @@ public class OrderUserController {
     return new ResponseEntity<>(pagingDto, HttpStatus.OK);
   }
 
+  /**
+   * 주문 내 게임 단건 환불
+   *
+   * @param requestDto 주문 상세 id, 비밀번호, 환불 메세지
+   * @param orderId    주문 식별자
+   */
   @PostMapping("/{orderId}/refund")
   public ResponseEntity<RefundResponseDto> refundOrder(
       @Valid @RequestBody RefundRequestDto requestDto,
