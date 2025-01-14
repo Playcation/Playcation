@@ -2,6 +2,7 @@ package com.example.playcation.game.service;
 
 
 import com.example.playcation.common.PagingDto;
+import com.example.playcation.config.S3Config;
 import com.example.playcation.enums.GameStatus;
 import com.example.playcation.exception.GameErrorCode;
 import com.example.playcation.exception.NoAuthorizedException;
@@ -22,21 +23,23 @@ import com.example.playcation.s3.repository.GameFileRepository;
 import com.example.playcation.s3.service.S3Service;
 import com.example.playcation.user.entity.User;
 import com.example.playcation.user.repository.UserRepository;
-import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString.Exclude;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class GameService {
 
   private final UserRepository userRepository;
@@ -46,6 +49,7 @@ public class GameService {
   private final S3Service s3Service;
   private final GameFileRepository gameFileRepository;
   private final FileDetailRepository fileDetailRepository;
+  private final S3Config s3Config;
 //  private final ReviewRepository reviewRepository;
 
   // 게임 생성
@@ -86,7 +90,7 @@ public class GameService {
   // 게임 단건 조회
   public GameResponseDto findGameById(Long gameId) {
     Game game = gameRepository.findByIdOrElseThrow(gameId);
-    List<GameFile> subImageList = gameFileRepository.findByGameIdAndBucket(gameId, "subImage");
+    List<GameFile> subImageList = gameFileRepository.findGameFileByGameIdAndBucket(gameId, "subImage");
     List<String> subImagePathList = new ArrayList<>();
     for (GameFile subImage : subImageList) {
       subImagePathList.add(subImage.getFileDetail().getFilePath());
@@ -119,37 +123,10 @@ public class GameService {
 
     Game game = gameRepository.findByIdOrElseThrow(gameId);
 
-    FileDetail mainFileDetail = uploadFile(game, "image", mainImage);
-    List<FileDetail> subFileDetailList = null;
-    FileDetail gameFileDetail = uploadFile(game, "file", gameFile);
+    FileDetail mainFileDetail = uploadFile(game, "mainImage", mainImage);
+    FileDetail gameFileDetail = uploadFile(game, "game", gameFile);
+    List<FileDetail> subFileDetailList = updateSubFile(gameId, subImageList);
 
-    List<GameFile> gameFileList = gameFileRepository.findByGameIdAndBucket(gameId, "subImage");
-
-    for (MultipartFile subFile : subImageList) {
-
-      if (gameFileList != null) {
-
-        FileDetail uploadFileDetail = s3Service.uploadFile(subFile);
-
-        subFileDetailList.add(uploadFileDetail);
-
-        gameFileRepository.save(new GameFile(game, uploadFileDetail, "subImage"));
-
-      }
-    }
-
-    List<FileDetail> files = new ArrayList<>();
-
-    for (GameFile ordGameFile : gameFileList) {
-      files.add(ordGameFile.getFileDetail());
-    }
-
-    for (FileDetail file : files) {
-      s3Service.deleteFile(file.getFilePath());
-    }
-
-    gameFileRepository.deleteAll(gameFileList);
-    fileDetailRepository.deleteAll(files);
 
   List<String> pathList = new ArrayList<>();
   for (FileDetail subFileDetail : subFileDetailList) {
@@ -196,21 +173,21 @@ public class GameService {
   public FileDetail uploadFile(Game game, String bucket, MultipartFile file) {
     FileDetail fileDetail = null;
     if (file ==null) {
-      if (game.getFilePath().isEmpty()) {
-        fileDetail = fileDetailRepository.findByFilePathOrElseThrow(game.getFilePath());
-        gameFileRepository.deleteByGameIdAndFileDetailId(game.getId(), fileDetail.getId());
-        s3Service.deleteFile(game.getFilePath());
-      }
-      fileDetail = new FileDetail();
-    } else if (!file.isEmpty()) {
-      FileDetail uploadMainFileDetail = s3Service.uploadFile(file);
-      gameFileRepository.save(new GameFile(game, uploadMainFileDetail, bucket));
       if (!game.getFilePath().isEmpty()) {
         fileDetail = fileDetailRepository.findByFilePathOrElseThrow(game.getFilePath());
         gameFileRepository.deleteByGameIdAndFileDetailId(game.getId(), fileDetail.getId());
         s3Service.deleteFile(game.getFilePath());
       }
-      fileDetail = uploadMainFileDetail;
+      if (game.getFilePath().isEmpty()) {
+        fileDetail = fileDetailRepository.findByFilePathOrElseThrow(game.getFilePath());
+        gameFileRepository.deleteByGameIdAndFileDetailId(game.getId(), fileDetail.getId());
+        s3Service.deleteFile(game.getFilePath());
+        fileDetail = new FileDetail();
+      } else if (!file.isEmpty()) {
+        FileDetail uploadMainFileDetail = s3Service.uploadFile(file);
+        gameFileRepository.save(new GameFile(game, uploadMainFileDetail, bucket));
+        fileDetail = uploadMainFileDetail;
+      }
     }
     return fileDetail;
   }
@@ -223,7 +200,7 @@ public class GameService {
     for(Game game : gameList) {
 
       // 해당 게임의 id와 "subImage"라는 bucket을 가진 gameFileList 생성
-      List<GameFile> gameFileList = gameFileRepository.findByGameIdAndBucket(game.getId(), "subImage");
+      List<GameFile> gameFileList = gameFileRepository.findGameFileByGameIdAndBucket(game.getId(), "subImage");
 
       List<FileDetail> fileDetailList = new ArrayList<>();
 
@@ -247,6 +224,39 @@ public class GameService {
     }
     return responseDtoList;
   }
+
+  public List<FileDetail> updateSubFile(Long gameId, List<MultipartFile> subImageList) {
+    List<FileDetail> subFileDetailList = new ArrayList<>();
+
+    Game game = gameRepository.findByIdOrElseThrow(gameId);
+
+    List<GameFile> gameFileList = gameFileRepository.findGameFileByGameIdAndBucket(gameId, "subImage");
+
+    for (MultipartFile subFile : subImageList) {
+
+      if (gameFileList != null) {
+
+        FileDetail uploadFileDetail = s3Service.uploadFile(subFile);
+
+        subFileDetailList.add(uploadFileDetail);
+
+        gameFileRepository.save(new GameFile(game, uploadFileDetail, "subImage"));
+
+      }
+    }
+
+    List<FileDetail> files = new ArrayList<>();
+
+    for (GameFile ordGameFile : gameFileList) {
+      files.add(ordGameFile.getFileDetail());
+      s3Service.deleteFile(ordGameFile.getFileDetail().getFilePath());
+    }
+
+    fileDetailRepository.deleteAll(files);
+    gameFileRepository.deleteAll(gameFileList);
+    return files;
+  }
+
 
 
 }

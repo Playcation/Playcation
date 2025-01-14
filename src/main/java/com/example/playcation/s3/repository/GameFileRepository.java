@@ -20,5 +20,5 @@ public interface GameFileRepository extends JpaRepository<GameFile, Long> {
 
   GameFile findByGameId(Long gameId);
 
-  List<GameFile> findByGameIdAndBucket(Long gameId, String bucket);
+  List<GameFile> findGameFileByGameIdAndBucket(Long gameId, String bucket);
 }
