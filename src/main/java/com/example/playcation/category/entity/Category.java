@@ -1,6 +1,6 @@
-package com.example.playcation.tag.entity;
+package com.example.playcation.category.entity;
 
-import com.example.playcation.tag.Dto.CreatedTagRequestDto;
+import com.example.playcation.category.dto.CategoryRequestDto;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -11,23 +11,24 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.DynamicInsert;
 
 @Entity
+@Table(name = "'category'")
 @Getter
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
-@Table(name = "tag")
-public class Tag {
+public class Category {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(nullable = false, unique = true)
-  private String tagName;
+  @Column(unique = true)
+  private String categoryName;
 
-  public void updateTag(CreatedTagRequestDto requestDto) {
-    this.tagName = requestDto.getTagName();
+  public void categoryUpdate(CategoryRequestDto requestDto) {
+    this.categoryName = requestDto.getCategoryName();
   }
 }
