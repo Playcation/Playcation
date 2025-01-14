@@ -22,6 +22,8 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Long> 
 
   List<OrderDetail> findAllByGameId(Long gameId);
 
+  Long countByGameId(Long gameId);
+
   /**
    * OrderDetail id로 주문 상세 정보 단건을 찾음
    *
