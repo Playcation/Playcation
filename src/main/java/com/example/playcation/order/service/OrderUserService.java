@@ -139,6 +139,9 @@ public class OrderUserService {
   public RefundResponseDto refundOrder(Long userId, Long orderId, RefundRequestDto dto) {
 
     Order findOrder = orderRepository.findByIdOrElseThrow(orderId);
+    if(!orderRepository.existsByIdAndUserId(orderId, userId)) {
+      throw new InvalidInputException(OrderErrorCode.NO_AUTHORIZED_ORDER);
+    }
     if(!orderDetailRepository.existsByIdAndOrderId(dto.getOrderDetailId(), orderId)) {
       throw new InvalidInputException(OrderErrorCode.NO_EXIST_ORDER_DETAIL);
     }
