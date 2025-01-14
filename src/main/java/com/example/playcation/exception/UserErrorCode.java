@@ -22,7 +22,8 @@ public enum UserErrorCode implements ExceptionType {
 
   // DuplicatedException
   //중복된 이메일로 가일 할 때 출력하는 오류 메시지
-  EMAIL_EXIST(HttpStatus.BAD_REQUEST, "중복된 아이디 입니다.");
+  EMAIL_EXIST(HttpStatus.BAD_REQUEST, "중복된 아이디 입니다."),
+  EXIST_ADMIN(HttpStatus.BAD_REQUEST, "관리자가 이미 존재합니다.");
 
   private final HttpStatus httpStatus;
   private final String message;

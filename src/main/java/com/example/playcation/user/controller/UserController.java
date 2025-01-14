@@ -94,14 +94,6 @@ public class UserController {
     return "회원 탈퇴가 완료되었습니다.";
   }
 
-  // ADMIN
-  @PutMapping("/{userId}/update/role")
-  public ResponseEntity<UserResponseDto> updateUserRole(
-      @PathVariable Long userId
-  ){
-    return ResponseEntity.ok().body(userService.updateUserAuth(userId));
-  }
-
   @PostMapping("/upload/files")
   public ResponseEntity<UserResponseDto> uploadFiles(
       @RequestHeader(TokenSettings.ACCESS_TOKEN_CATEGORY) String authorizationHeader,
