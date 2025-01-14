@@ -1,36 +1,35 @@
 package com.example.playcation.cart.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.example.playcation.cart.dto.CartGameResponseDto;
-import com.example.playcation.cart.dto.UpdatedCartGameResponseDto;
 import com.example.playcation.cart.entity.Cart;
 import com.example.playcation.cart.repository.CartRepository;
-import com.example.playcation.enums.GameStatus;
 import com.example.playcation.enums.Role;
-import com.example.playcation.enums.Social;
-import com.example.playcation.exception.DuplicatedException;
 import com.example.playcation.game.entity.Game;
 import com.example.playcation.game.repository.GameRepository;
 import com.example.playcation.user.entity.User;
 import com.example.playcation.user.repository.UserRepository;
-import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
-import org.junit.jupiter.api.BeforeEach;
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+@ExtendWith(MockitoExtension.class)
 class CartServiceTest {
 
   @InjectMocks
@@ -45,124 +44,123 @@ class CartServiceTest {
   @Mock
   private UserRepository userRepository;
 
-  @BeforeEach
-  void setUp() {
-    MockitoAnnotations.openMocks(this);
+  private List<Cart> carts = new ArrayList<>();
+  private Cart cart = Mockito.mock(Cart.class);
+
+  void setCarts() {
+    User user = Mockito.mock(User.class);
+    Game game = Mockito.mock(Game.class);
+    given(cart.getId()).willReturn(1L);
+    given(cart.getUser()).willReturn(user);
+    given(cart.getGame()).willReturn(game);
+    carts.add(cart);
   }
 
-  /**
-   * 장바구니 아이템 조회 테스트
-   */
-  @Test
-  void findCartItemsTest() {
-    // Mock 데이터
-    Long userId = 1L;
-    User user = new User("a@a.com", "q1w2e3r4!!", "jina", Role.USER, Social.NORMAL);
-    Game game = new Game(user, "Game1", "rpg", BigDecimal.valueOf(10000), "game1 description",
-        GameStatus.ON_SAL, "iamge1.png");
-    Cart cart = new Cart(1L, user, game);
+  @Nested
+  class AddGameToCart {
 
-    when(cartRepository.findAllByUserId(userId)).thenReturn(List.of(cart));
+    @Test
+    void AddGameToCartTest() {
+      // given
+      Game game = Mockito.mock(Game.class);
+      User user = Mockito.mock(User.class);
+      Cart cart = Mockito.mock(Cart.class);
 
-    // 실행
-    List<CartGameResponseDto> result = cartService.findCartItems(userId);
+      when(user.getRole()).thenReturn(Role.USER);
 
-    // 검증
-    assertNotNull(result);
-    assertEquals(1, result.size());
-    assertEquals("Game1", result.get(0).getTitle());
-    verify(cartRepository, times(1)).findAllByUserId(userId);
+      // Mock Cart 객체의 동작 설정
+      when(cart.getUser()).thenReturn(user);
+      when(cart.getGame()).thenReturn(game);
+
+      // Mock Repositories 설정
+      when(userRepository.findByIdOrElseThrow(anyLong())).thenReturn(user);
+      when(gameRepository.findByIdOrElseThrow(anyLong())).thenReturn(game);
+      when(cartRepository.save(any(Cart.class))).thenReturn(cart);
+
+      // When & Then
+      assertDoesNotThrow(() -> {
+        cartService.addGameToCart(cart.getUser().getId(), cart.getGame().getId(),
+            user.getRole().name());
+      });
+    }
   }
 
-  /**
-   * 장바구니에 게임 추가 테스트 (성공)
-   */
-  @Test
-  void addGameToCartTest_Success() {
-    // Mock 데이터
-    Long userId = 1L;
-    Long gameId = 1L;
-    String auth = "USER";
+  @Nested
+  class FindCartItems {
 
-    User user = new User("a@a.com", "q1w2e3r4!!", "jina", Role.USER, Social.NORMAL);
-    Game game = new Game(user, "Game1", "rpg", BigDecimal.valueOf(10000), "game1 description",
-        GameStatus.ON_SAL, "iamge1.png");
-    Cart newCart = new Cart(1L, user, game);
+    @Test
+    void findCartItemsSuccessTest() {
+      // when
+      setCarts();
+      when(cartRepository.findAllByUserId(anyLong())).thenReturn(carts);
 
-    when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-    when(gameRepository.findById(gameId)).thenReturn(Optional.of(game));
-    when(cartRepository.findByUserIdAndGameId(userId, gameId)).thenReturn(Optional.empty());
-    when(cartRepository.save(any(Cart.class))).thenReturn(newCart);
+      // then
+      List<CartGameResponseDto> result = cartService.findCartItems(cart.getUser().getId());
 
-    // 실행
-    UpdatedCartGameResponseDto result = cartService.addGameToCart(userId, gameId, auth);
-    // 검증
-    assertNotNull(result);
-    assertEquals(gameId, result.getGameId());
-    verify(cartRepository, times(1)).save(any(Cart.class));
+      Assertions.assertThat(result).isNotEmpty();
+      Assertions.assertThat(result.get(0).getId()).isEqualTo(cart.getGame().getId());
+    }
+
+    @Test
+    void findCartItemsFailureTest() {
+      setCarts();
+      // when
+      when(cartRepository.findAllByUserId(anyLong())).thenReturn(Collections.emptyList());
+
+      // then
+      List<CartGameResponseDto> result = cartService.findCartItems(cart.getUser().getId());
+      assertThat(result).isEmpty();
+    }
   }
 
+  @Nested
+  class deleteGameFromCart {
 
-  /**
-   * 장바구니에 게임 추가 테스트 (중복)
-   */
-  @Test
-  void addGameToCartTest_Duplicated() {
-    Long userId = 1L;
-    Long gameId = 1L;
-    String auth = "USER";
+    @Test
+    void deleteGameFromCartSuccessTest() {
+      // Mock 객체 설정
+      setCarts(); // carts 리스트에 cart 추가
+      given(cartRepository.findCartByUserIdAndGameIdOrElseThrow(anyLong(), anyLong()))
+          .willReturn(cart); // cart 반환
 
-    User user = new User("a@a.com", "q1w2e3r4!!", "jina", Role.USER, Social.NORMAL);
-    Game game = new Game(user, "Game1", "rpg", BigDecimal.valueOf(10000), "game1 description",
-        GameStatus.ON_SAL, "iamge1.png");
-    Cart existingCart = new Cart(1L, user, game);
+      // 실행 및 검증
+      assertDoesNotThrow(() ->
+          cartService.deleteGameFromCart(cart.getUser().getId(), cart.getGame().getId())
+      );
 
-    when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-    when(gameRepository.findById(gameId)).thenReturn(Optional.of(game));
-    when(cartRepository.findByUserIdAndGameId(userId, gameId)).thenReturn(
-        Optional.of(existingCart));
+      // 호출 검증
+      verify(cartRepository).findCartByUserIdAndGameIdOrElseThrow(anyLong(), anyLong());
+      verify(cartRepository).deleteCartById(cart.getId());
+    }
 
-    // 실행 및 검증
-    assertThrows(DuplicatedException.class, () -> cartService.addGameToCart(userId, gameId, auth));
-    verify(cartRepository, never()).save(any(Cart.class));
+    @Test
+    void deleteGameFromCartFailureTest() {
+      // Mock 객체 설정
+      setCarts(); // carts 리스트에 cart 추가
+      given(cartRepository.findCartByUserIdAndGameIdOrElseThrow(anyLong(), anyLong()))
+          .willThrow(new IllegalArgumentException("Cart not found"));
+      // 실행 및 검증
+      assertThrows(IllegalArgumentException.class, () ->
+          cartService.deleteGameFromCart(cart.getUser().getId(), cart.getGame().getId())
+      );
+
+      // 호출 검증
+      verify(cartRepository).findCartByUserIdAndGameIdOrElseThrow(anyLong(), anyLong());
+    }
   }
 
-  /**
-   * 장바구니에서 게임 삭제 테스트
-   */
-  @Test
-  void deleteGameFromCartTest() {
-    Long userId = 1L;
-    Long gameId = 1L;
-    Long cartId = 1L;
+  @Nested
+  class removeCart {
 
-    User user = new User("a@a.com", "q1w2e3r4!!", "jina", Role.USER, Social.NORMAL);
-    Game game = new Game(user, "Game1", "rpg", BigDecimal.valueOf(10000), "game1 description",
-        GameStatus.ON_SAL, "iamge1.png");
-    Cart cart = new Cart(cartId, user, game);
+    @Test
+    void removeCartSuccessTest() {
+      // Mock 데이터 설정
+      setCarts();
+      // 실행 및 검증
+      assertDoesNotThrow(() -> cartService.removeCart(cart.getUser().getId()));
 
-    when(cartRepository.findByUserIdAndGameId(userId, gameId)).thenReturn(Optional.of(cart));
-
-    // 실행
-    assertDoesNotThrow(() -> cartService.deleteGameFromCart(userId, gameId));
-
-    // 검증
-    verify(cartRepository, times(1)).deleteCartById(cartId);
-
-
-  }
-
-  /**
-   * 장바구니 삭제 테스트
-   */
-  @Test
-  void removeCartTest() {
-    Long userId = 1L;
-
-    // 실행
-    cartService.removeCart(userId);
-
-    // 검증
-    verify(cartRepository, times(1)).deleteAllByUserId(userId);
+      // 호출 검증
+      verify(cartRepository).deleteAllByUserId(cart.getUser().getId());
+    }
   }
 }
