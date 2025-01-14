@@ -20,5 +20,7 @@ public interface GameRepository extends JpaRepository<Game, Long>, GameRepositor
 
   List<Game> findAllByIdIn(List<Long> ids);
 
+  List<Game> findAllByUserId(Long userId);
+
   boolean existsByIdAndUserId(Long id, Long userId);
 }
