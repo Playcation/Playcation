@@ -37,11 +37,12 @@ public class Game extends BaseEntity {
   private Long id;
 
   @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "user_id")
   private User user;
 
   private String title;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "category_id")
   private Category category;
 
@@ -57,10 +58,6 @@ public class Game extends BaseEntity {
   private String filePath;
 
   private LocalDateTime deletedAt;
-
-  public void setCategory(Category category) {
-    this.category = category;
-  }
 
 
   public Game(User user, String title, Category category, BigDecimal price, String description,

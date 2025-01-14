@@ -4,6 +4,8 @@ import com.example.playcation.category.dto.CategoryRequestDto;
 import com.example.playcation.category.dto.CategoryResponseDto;
 import com.example.playcation.category.entity.Category;
 import com.example.playcation.category.repository.CategoryRepository;
+import com.example.playcation.exception.CategoryErrorCode;
+import com.example.playcation.exception.DuplicatedException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,14 +17,13 @@ public class CategoryService {
   private final CategoryRepository categoryRepository;
 
   public CategoryResponseDto createCategory(CategoryRequestDto requestDto) {
-
-
+    if(categoryRepository.existsCategoryByCategoryName(requestDto.getCategoryName())) {
+      throw new DuplicatedException(CategoryErrorCode.DUPLICATE_CATEGORY);
+    }
     Category category = Category.builder()
         .categoryName(requestDto.getCategoryName())
         .build();
-
     categoryRepository.save(category);
-
     return CategoryResponseDto.toDto(category);
   }
 

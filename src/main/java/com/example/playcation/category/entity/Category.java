@@ -14,9 +14,8 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.DynamicInsert;
 
 @Entity
-@Table(name = "category")
+@Table(name = "'category'")
 @Getter
-@DynamicInsert
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
