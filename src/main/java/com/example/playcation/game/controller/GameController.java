@@ -64,11 +64,11 @@ public class GameController {
       @RequestParam(defaultValue = "0") int page,
       // 검색 조건(tag는 게임에서 찾을 수 없음으로 따로 제작)
       @RequestParam(required = false) String title,
-      @RequestParam(required = false) String category,
+      @RequestParam(required = false) Long categoryId,
       @RequestParam(required = false) BigDecimal price,
       @RequestParam(required = false) LocalDate createdAt
   ) {
-    PagingDto<GameResponseDto> games = gameService.searchGames(page, title, category, price,
+    PagingDto<GameResponseDto> games = gameService.searchGames(page, title, categoryId, price,
         createdAt.atStartOfDay());
     return new ResponseEntity<>(games, HttpStatus.OK);
   }

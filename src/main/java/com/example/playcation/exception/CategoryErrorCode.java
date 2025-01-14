@@ -6,10 +6,10 @@ import org.springframework.http.HttpStatus;
 
 @Getter
 @RequiredArgsConstructor
-public enum TagErrorCode implements ExceptionType{
+public enum CategoryErrorCode implements ExceptionType {
 
-  TAG_NOT_FOUND("태그를 찾을 수 없습니다", HttpStatus.NOT_FOUND),
-  DUPLICATE_TAG("이미 존재하는 태그입니다", HttpStatus.BAD_REQUEST);
+  NOT_FOUND_CATEGORY("카테고리를 찾을 수 없습니다", HttpStatus.NOT_FOUND),
+  DUPLICATE_CATEGORY("중복된 카테고리입니다", HttpStatus.BAD_REQUEST);
 
   private final String message;
   private final HttpStatus httpStatus;

@@ -8,7 +8,7 @@ public class CreatedGameRequestDto {
 
   private String title;
 
-  private String category;
+  private Long categoryId;
 
   private BigDecimal price;
 
@@ -16,10 +16,10 @@ public class CreatedGameRequestDto {
 
   private String image;
 
-  public CreatedGameRequestDto(String title, String category, BigDecimal price, String description,
+  public CreatedGameRequestDto(String title, Long categoryId, BigDecimal price, String description,
       String image) {
     this.title = title;
-    this.category = category;
+    this.categoryId = categoryId;
     this.price = price;
     this.description = description;
     this.image = image;

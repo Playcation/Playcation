@@ -1,8 +1,7 @@
 package com.example.playcation.order.entity;
 
-import com.example.playcation.common.BaseEntity;
 import com.example.playcation.enums.OrderStatus;
-import com.example.playcation.user.entity.User;
+import com.example.playcation.game.entity.Game;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -13,33 +12,55 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 
 @Getter
-@Entity
-@Table(name = "`order`")
 @Builder
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
-public class Order extends BaseEntity {
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Entity
+@Table(name = "`order_detail`")
+public class OrderDetail {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  private User user;
+  @JoinColumn(name = "`game_id`")
+  private Game game;
 
-  private BigDecimal totalPrice;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "`order_id`")
+  private Order order;
 
+  @Column(name = "`price`")
+  private BigDecimal price;
+
+  @Column(name = "`status`")
+  @Enumerated(value = EnumType.STRING)
+  private OrderStatus status;
+
+  @OneToOne
+  @JoinColumn(name = "`refund_id`")
+  private Refund refund;
+
+  public void assignOrder(Order order) {
+    this.order = order;
+  }
+
+  public void updateStatus(OrderStatus status) {
+    this.status = status;
+  }
+
+  public void updateRefund(Refund refund) {
+    this.refund = refund;
+  }
 }

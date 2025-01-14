@@ -1,5 +1,7 @@
 package com.example.playcation.game.repository;
 
+import com.example.playcation.category.entity.Category;
+import com.example.playcation.category.entity.QCategory;
 import com.example.playcation.game.dto.PagingGameResponseDto;
 import com.example.playcation.game.entity.Game;
 import com.example.playcation.game.entity.QGame;
@@ -9,7 +11,6 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
@@ -20,7 +21,7 @@ public class GameRepositoryCustomImpl implements GameRepositoryCustom {
   private final JPAQueryFactory queryFactory;
 
   @Override
-  public PagingGameResponseDto searchGames(Pageable pageable, String title, String category,
+  public PagingGameResponseDto searchGames(Pageable pageable, String title, Category category,
       BigDecimal price, LocalDateTime createdAt) {
     QGame game = QGame.game;
 
@@ -54,7 +55,7 @@ public class GameRepositoryCustomImpl implements GameRepositoryCustom {
     return title != null ? QGame.game.title.eq(title) : null;
   }
 
-  private BooleanExpression eqCategory(String category) {
+  private BooleanExpression eqCategory(Category category) {
     return category != null ? QGame.game.category.eq(category) : null;
   }
 

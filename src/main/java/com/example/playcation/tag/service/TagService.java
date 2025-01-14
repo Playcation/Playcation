@@ -1,6 +1,9 @@
 package com.example.playcation.tag.service;
 
+import com.amazonaws.services.kms.model.TagException;
 import com.example.playcation.common.PagingDto;
+import com.example.playcation.exception.DuplicatedException;
+import com.example.playcation.exception.TagErrorCode;
 import com.example.playcation.tag.Dto.CreatedTagRequestDto;
 import com.example.playcation.tag.Dto.CreatedTagResponseDto;
 import com.example.playcation.tag.entity.Tag;
@@ -24,6 +27,9 @@ public class TagService {
   @Transactional
   public CreatedTagResponseDto CreateTag(CreatedTagRequestDto requestDto) {
 
+    if (tagRepository.existsByTagName(requestDto.getTagName())) {
+      throw new DuplicatedException(TagErrorCode.DUPLICATE_TAG);
+    }
     Tag tag = Tag.builder()
         .tagName(requestDto.getTagName())
         .build();

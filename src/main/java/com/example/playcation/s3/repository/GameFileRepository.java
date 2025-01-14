@@ -1,5 +1,6 @@
 package com.example.playcation.s3.repository;
 
+import com.example.playcation.enums.ImageRole;
 import com.example.playcation.exception.FileErrorCode;
 import com.example.playcation.exception.NotFoundException;
 import com.example.playcation.exception.UserErrorCode;
@@ -20,5 +21,5 @@ public interface GameFileRepository extends JpaRepository<GameFile, Long> {
 
   GameFile findByGameId(Long gameId);
 
-  List<GameFile> findByGameIdAndBucket(Long gameId, String bucket);
+  List<GameFile> findGameFileByGameIdAndImageRole(Long gameId, ImageRole imageRole);
 }
