@@ -6,6 +6,8 @@ import com.example.playcation.exception.OrderErrorCode;
 import com.example.playcation.order.entity.Order;
 import com.example.playcation.order.entity.OrderDetail;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface OrderDetailRepository extends JpaRepository<OrderDetail, Long> {
@@ -19,6 +21,8 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Long> 
    * 주문 id 목록에 해당하는 모든 주문 상세를 찾음
    */
   List<OrderDetail> findAllByOrderIn(List<Order> orderIds);
+
+  Page<OrderDetail> findAllByGameId(Long gameId, Pageable pageable);
 
   /**
    * OrderDetail id로 주문 상세 정보 단건을 찾음
