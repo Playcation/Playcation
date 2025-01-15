@@ -1,5 +1,6 @@
 package com.example.playcation.game.dto;
 
+import com.example.playcation.common.PagingDto;
 import com.example.playcation.order.dto.OrderDetailResponseDto;
 import com.example.playcation.order.entity.OrderDetail;
 import com.example.playcation.user.entity.User;
@@ -10,13 +11,14 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.parameters.P;
 
 @Getter
 @RequiredArgsConstructor
 public class ManagerGameDetailResponseDto {
 
   private final Long totalSoldQuantity;
-  private final List<GameOrderDetail> salesHistory;
+  private final PagingDto<GameOrderDetail> salesHistory;
 
   public static ManagerGameDetailResponseDto toDto(List<OrderDetail> details,
       long totalSoldQuantity) {
@@ -33,7 +35,7 @@ public class ManagerGameDetailResponseDto {
       ));
     }
 
-    return new ManagerGameDetailResponseDto(totalSoldQuantity, list);
+    return new ManagerGameDetailResponseDto(totalSoldQuantity, new PagingDto<>(list, totalSoldQuantity));
   }
 
   @Getter
