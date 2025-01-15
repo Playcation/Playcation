@@ -1,6 +1,6 @@
 package com.example.playcation.coupon.entity;
 
-import com.example.playcation.enums.CuponType;
+import com.example.playcation.enums.CouponType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -25,5 +25,5 @@ public class Coupon {
   private BigDecimal rate;
 
   @Enumerated(value = EnumType.STRING)
-  private CuponType cuponType;
+  private CouponType couponType;
 }
