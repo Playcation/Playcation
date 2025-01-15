@@ -3,7 +3,7 @@ package com.example.playcation.common;
 import lombok.Getter;
 
 @Getter
-public class TokenSettings {
+public final class TokenSettings {
 
   // 토큰 만료 시간 (밀리초 단위)
   public static final long ACCESS_TOKEN_EXPIRATION = 10 * 60 * 100000000000000L; // 10분
