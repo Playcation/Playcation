@@ -1,6 +1,6 @@
 package com.example.playcation.coupon.entity;
 
-import com.example.playcation.enums.CuponType;
+import com.example.playcation.enums.CouponType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -9,9 +9,18 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+@Getter
 @Entity
 @Table(name = "`coupon`")
+@Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class Coupon {
 
   @Id
@@ -25,5 +34,5 @@ public class Coupon {
   private BigDecimal rate;
 
   @Enumerated(value = EnumType.STRING)
-  private CuponType cuponType;
+  private CouponType couponType;
 }
