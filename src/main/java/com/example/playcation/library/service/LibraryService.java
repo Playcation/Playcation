@@ -34,21 +34,22 @@ public class LibraryService {
 
   // library 생성(중복되는 게임의 추가에 대한 에외처리는 앞서 카드에서 하였기 때문에 생략)
   @Transactional
-  public LibraryResponseDto createLibrary(LibraryRequestDto requestDto, Long userId) {
+  public void createLibrary(List<Long> gameIds, User user) {
 
-    Game game = gameRepository.findByIdOrElseThrow(requestDto.getGameId());
+    List<Game> games = gameRepository.findAllByIdIn(gameIds);
 
-    User user = userRepository.findByIdOrElseThrow(userId);
+    List<Library> libraries = new ArrayList<>();
 
-    Library library = Library.builder()
-        .user(user)
-        .game(game)
-        .favourite(false)
-        .build();
+    for (Game game : games) {
+      Library library = Library.builder()
+          .user(user)
+          .game(game)
+          .favourite(false)
+          .build();
+      libraries.add(library);
+    }
 
-    libraryRepository.save(library);
-
-    return LibraryResponseDto.toDto(library);
+    libraryRepository.saveAll(libraries);
   }
 
   public LibraryResponseDto findLibrary(Long libraryId) {

@@ -9,6 +9,7 @@ import com.example.playcation.enums.OrderStatus;
 import com.example.playcation.exception.InvalidInputException;
 import com.example.playcation.exception.NoAuthorizedException;
 import com.example.playcation.exception.OrderErrorCode;
+import com.example.playcation.library.service.LibraryService;
 import com.example.playcation.order.dto.OrderResponseDto;
 import com.example.playcation.order.dto.RefundRequestDto;
 import com.example.playcation.order.dto.RefundResponseDto;
@@ -46,6 +47,7 @@ public class OrderUserService {
 
   private final CartService cartService;
   private final OrderDetailService orderDetailService;
+  private final LibraryService libraryService;
   private final UserService userService;
 
   /**
@@ -83,7 +85,8 @@ public class OrderUserService {
     }
 
     cartService.removeCart(userId);
-
+    List<Long> gameIds = cartItems.stream().map(CartGameResponseDto::getId).toList();
+    libraryService.createLibrary(gameIds, findUser);
     return OrderResponseDto.toDto(savedOrder, details);
   }
 
