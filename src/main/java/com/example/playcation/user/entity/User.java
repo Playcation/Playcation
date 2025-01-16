@@ -86,9 +86,6 @@ public class User extends BaseEntity {
   }
 
   public boolean isManagerOfGame(Game game) {
-    if (this.equals(game.getUser())) {
-      return true;
-    }
-    return false;
+    return this.equals(game.getUser());
   }
 }
