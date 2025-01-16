@@ -12,6 +12,7 @@ import com.example.playcation.s3.repository.FileDetailRepository;
 import com.example.playcation.s3.repository.UserFileRepository;
 import com.example.playcation.s3.service.S3Service;
 import com.example.playcation.user.dto.DeletedUserRequestDto;
+import com.example.playcation.user.dto.RestoreUserRequestDto;
 import com.example.playcation.user.dto.SignInUserRequestDto;
 import com.example.playcation.user.dto.UpdatedUserPasswordRequestDto;
 import com.example.playcation.user.dto.UpdatedUserRequestDto;
@@ -19,11 +20,13 @@ import com.example.playcation.user.dto.UserResponseDto;
 import com.example.playcation.user.entity.User;
 import com.example.playcation.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.jaxb.SpringDataJaxb.PageDto;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -149,5 +152,20 @@ public class UserService {
     Page<User> userList = userRepository.findAll(pageable);
     return new PagingDto<>(userList.stream().map(UserResponseDto::toDto).toList(),
         userList.getTotalElements());
+  }
+
+  public UserResponseDto restoreUser(@Valid RestoreUserRequestDto requestDto) {
+    return null;
+  }
+
+  public User authenticateUser(SignInUserRequestDto signInUserRequestDto) {
+    User user = userRepository.findByEmail(signInUserRequestDto.getEmail())
+        .orElseThrow(() -> new IllegalArgumentException("Invalid email or password"));
+
+    if (!bCryptPasswordEncoder.matches(signInUserRequestDto.getPassword(), user.getPassword())) {
+      throw new IllegalArgumentException("Invalid email or password");
+    }
+
+    return user;
   }
 }

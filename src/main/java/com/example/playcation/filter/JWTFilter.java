@@ -9,6 +9,7 @@ import com.example.playcation.util.JWTUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -57,9 +58,11 @@ public class JWTFilter extends OncePerRequestFilter {
     }
 
     try {
-      validateToken(accessToken);
       authenticateUser(accessToken);
+      validateToken(accessToken);
     } catch (ExpiredJwtException e) {
+      // 쿠키에서 리플레시 토큰 확인하기 -> 유효하면 트큰 재발급 / 아니면 이대로 진행
+      Cookie[] cookies = request.getCookies();
       sendErrorResponse(response, "토큰이 만료되었습니다.");
       return;
     } catch (Exception e) {
