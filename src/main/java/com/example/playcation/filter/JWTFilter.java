@@ -2,6 +2,8 @@ package com.example.playcation.filter;
 
 import com.example.playcation.common.TokenSettings;
 import com.example.playcation.enums.Role;
+import com.example.playcation.exception.InvalidInputException;
+import com.example.playcation.exception.TokenErrorCode;
 import com.example.playcation.user.entity.CustomUserDetails;
 import com.example.playcation.user.entity.User;
 import com.example.playcation.user.repository.UserRepository;
@@ -101,14 +103,14 @@ public class JWTFilter extends OncePerRequestFilter {
    * JWT 토큰을 검증하는 메서드
    *
    * @param token 검증할 JWT 토큰
-   * @throws IllegalArgumentException 잘못된 토큰일 경우 예외 발생
+   * @throws InvalidInputException 잘못된 토큰일 경우 예외 발생
    */
   private void validateToken(String token) {
     jwtUtil.isExpired(token);
     jwtUtil.isIssuer(token);
     String category = jwtUtil.getCategory(token);
     if (!TokenSettings.ACCESS_TOKEN_CATEGORY.equals(category)) {
-      throw new IllegalArgumentException("잘못된 토큰입니다: 카테고리 불일치");
+      throw new InvalidInputException(TokenErrorCode.TOKEN_CATEGORY_MISS_MATCH);
     }
   }
 

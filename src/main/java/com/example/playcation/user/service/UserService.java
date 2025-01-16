@@ -157,15 +157,4 @@ public class UserService {
   public UserResponseDto restoreUser(@Valid RestoreUserRequestDto requestDto) {
     return null;
   }
-
-  public User authenticateUser(SignInUserRequestDto signInUserRequestDto) {
-    User user = userRepository.findByEmail(signInUserRequestDto.getEmail())
-        .orElseThrow(() -> new IllegalArgumentException("Invalid email or password"));
-
-    if (!bCryptPasswordEncoder.matches(signInUserRequestDto.getPassword(), user.getPassword())) {
-      throw new IllegalArgumentException("Invalid email or password");
-    }
-
-    return user;
-  }
 }

@@ -8,7 +8,6 @@ import com.example.playcation.game.entity.Game;
 import com.example.playcation.game.repository.GameRepository;
 import com.example.playcation.game.service.GameService;
 import com.example.playcation.library.dto.LibraryListResponseDto;
-import com.example.playcation.library.dto.LibraryRequestDto;
 import com.example.playcation.library.dto.LibraryResponseDto;
 import com.example.playcation.library.dto.UpdatedFavouriteRequestDto;
 import com.example.playcation.library.entity.Library;
@@ -34,7 +33,7 @@ public class LibraryService {
 
   // library 생성(중복되는 게임의 추가에 대한 에외처리는 앞서 카드에서 하였기 때문에 생략)
   @Transactional
-  public void createLibrary(List<Long> gameIds, User user) {
+  public void createLibraries(List<Long> gameIds, User user) {
 
     List<Game> games = gameRepository.findAllByIdIn(gameIds);
 

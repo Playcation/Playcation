@@ -86,7 +86,7 @@ public class OrderUserService {
 
     cartService.removeCart(userId);
     List<Long> gameIds = cartItems.stream().map(CartGameResponseDto::getId).toList();
-    libraryService.createLibrary(gameIds, findUser);
+    libraryService.createLibraries(gameIds, findUser);
     return OrderResponseDto.toDto(savedOrder, details);
   }
 

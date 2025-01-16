@@ -1,6 +1,8 @@
 package com.example.playcation.oauth2.controller;
 
 import com.example.playcation.common.TokenSettings;
+import com.example.playcation.exception.InvalidInputException;
+import com.example.playcation.exception.TokenErrorCode;
 import com.example.playcation.user.dto.SignInUserRequestDto;
 import com.example.playcation.user.dto.UserResponseDto;
 import com.example.playcation.user.entity.User;
@@ -25,30 +27,10 @@ public class OAuthController {
   private final UserService userService;
 
   /**
-   * 로그인 - Access Token 및 Refresh Token 발급
-   */
-  @PostMapping("/login")
-  public ResponseEntity<?> login(
-      @RequestBody SignInUserRequestDto signInUserRequestDto,
-      HttpServletResponse response) {
-
-    // 사용자 인증 및 토큰 생성
-    User user = userService.authenticateUser(signInUserRequestDto);
-    String[] tokens = jwtUtil.generateTokens(user.getId().toString(), user.getRole().name());
-
-    // Refresh Token 쿠키 저장
-    Cookie refreshCookie = jwtUtil.createCookie(TokenSettings.REFRESH_TOKEN_CATEGORY, tokens[1]);
-    response.addCookie(refreshCookie);
-
-    // Access Token 응답
-    return ResponseEntity.ok(Map.of("accessToken", tokens[0]));
-  }
-
-  /**
    * Refresh Token을 사용한 Access Token 갱신
    */
   @PostMapping("/token/refresh")
-  public ResponseEntity<?> refreshAccessToken(HttpServletRequest request, HttpServletResponse response) {
+  public void refreshAccessToken(HttpServletRequest request, HttpServletResponse response) {
     try {
       // Refresh Token 추출
       String refreshToken = extractRefreshToken(request);
@@ -57,17 +39,14 @@ public class OAuthController {
       // 사용자 ID 추출 및 Redis에서 검증
       String userId = jwtUtil.getUserId(refreshToken);
       if (!jwtUtil.checkRefreshTokenMatch(userId, refreshToken)) {
-        throw new IllegalArgumentException("Invalid Refresh Token");
+        throw new InvalidInputException(TokenErrorCode.REFRESH_TOKEN_MISS_MATCH);
       }
 
       // 새로운 Access Token 생성
       String userRole = jwtUtil.getAuth(refreshToken);
       String newAccessToken = jwtUtil.generateTokens(userId, userRole)[0];
 
-      // 응답
-      return ResponseEntity.ok(Map.of("accessToken", newAccessToken));
     } catch (Exception e) {
-      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", e.getMessage()));
     }
   }
 

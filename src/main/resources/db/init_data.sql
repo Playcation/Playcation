@@ -3,19 +3,19 @@ USE playcation;
 INSERT INTO user (email, password, name, role, social)
 VALUES ('choLuckUser@choLuckUser.com', 'password', 'name', 'USER', 'NORMAL');
 
-INSERT INTO `'category'` (category_name)
+INSERT INTO category (category_name)
 VALUES ('rpg');
 
-INSERT INTO `'category'` (category_name)
+INSERT INTO category (category_name)
 VALUES ('shooting');
 
-INSERT INTO `'category'` (category_name)
+INSERT INTO category (category_name)
 VALUES ('roguelike');
 
-INSERT INTO `'category'` (category_name)
+INSERT INTO category (category_name)
 VALUES ('action rpg');
 
-INSERT INTO `'category'` (category_name)
+INSERT INTO category (category_name)
 VALUES ('fps');
 
 INSERT INTO game (title, description, category_id, user_id, price, image_url, status)
