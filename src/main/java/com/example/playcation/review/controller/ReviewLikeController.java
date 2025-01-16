@@ -40,11 +40,11 @@ public class ReviewLikeController {
     return new ResponseEntity<>("좋아요", HttpStatus.CREATED);
   }
 
-  // 좋아요 해체
+  // 좋아요 해제
   @DeleteMapping
   public ResponseEntity<String> deleteReview(
       @RequestHeader(TokenSettings.ACCESS_TOKEN_CATEGORY) String authorizationHeader,
-      @PathVariable Long reviewId){
+      @PathVariable Long reviewId) {
     Long userId = jwtUtil.findUserByToken(authorizationHeader);
     reviewLikeService.deleteReview(userId, reviewId);
     return new ResponseEntity<>("좋아요 취소", HttpStatus.OK);

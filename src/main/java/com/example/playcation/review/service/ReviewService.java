@@ -2,7 +2,6 @@ package com.example.playcation.review.service;
 
 import com.example.playcation.common.PagingDto;
 import com.example.playcation.enums.ReviewStatus;
-import com.example.playcation.exception.DuplicatedException;
 import com.example.playcation.exception.NoAuthorizedException;
 import com.example.playcation.exception.NotFoundException;
 import com.example.playcation.exception.ReviewErrorCode;
@@ -42,12 +41,7 @@ public class ReviewService {
     Library library = libraryRepository.findByUserIdAndGameId(userId, gameId)
         .orElseThrow(() -> new NotFoundException(ReviewErrorCode.GAME_NOT_IN_LIBRARY));
 
-    // 중복 리뷰 작성 여부 검증
-    if (reviewRepository.existsByLibraryId(library.getId())) {
-      throw new DuplicatedException(ReviewErrorCode.REVIEW_EXIST);
-    }
-
-    Review review = reviewRepository.save( Review.builder()
+    Review review = reviewRepository.save(Review.builder()
         .game(game) // 리뷰가 어떤 게임에 대한 것인지
         .library(library)
         .content(reviewRequestDto.getContent())
@@ -59,21 +53,22 @@ public class ReviewService {
 
 
   // 리뷰 조회
-  public PagingDto<CreatedReviewResponseDto> searchReviews(int page,int size ,Long gameId,Long userId,
-      ReviewStatus rating){
+  public PagingDto<CreatedReviewResponseDto> searchReviews(int page, int size, Long gameId,
+      Long userId, ReviewStatus rating) {
     // 게임 조회 및 예외처리
     gameRepository.existsByIdOrElseThrow(gameId);
 
     // 페이징시 최대 출력 갯수와 정렬조건 설정 ( 한 페이지당 리뷰 개수는 5개 )
-    Pageable pageable = PageRequest.of(page, size, Sort.by(Direction.DESC,"createdAt"));
+    Pageable pageable = PageRequest.of(page, size, Sort.by(Direction.DESC, "createdAt"));
 
-    return reviewRepository.searchReviews(pageable,gameId, userId,rating);
+    return reviewRepository.searchReviews(pageable, gameId, userId, rating);
   }
 
 
   // 리뷰 수정
   @Transactional
-  public CreatedReviewResponseDto updateReview(Long userId,Long gameId, Long reviewId, UpdatedReviewRequestDto updateRequest){
+  public CreatedReviewResponseDto updateReview(Long userId, Long gameId, Long reviewId,
+      UpdatedReviewRequestDto updateRequest) {
     // 게임이 존재하는지, 리뷰가 있는지
     gameRepository.existsByIdOrElseThrow(gameId);
     Review review = reviewRepository.findByIdOrElseThrow(reviewId);
@@ -91,7 +86,7 @@ public class ReviewService {
 
   // 리뷰 삭제
   @Transactional
-  public void deleteReview(Long userId, Long gameId, Long reviewId){
+  public void deleteReview(Long userId, Long gameId, Long reviewId) {
     // 게임이 존재하는지, 리뷰가 있는지
     gameRepository.existsByIdOrElseThrow(gameId);
     Review review = reviewRepository.findByIdOrElseThrow(reviewId);

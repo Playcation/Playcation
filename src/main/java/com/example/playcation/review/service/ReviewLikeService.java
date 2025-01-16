@@ -1,5 +1,8 @@
 package com.example.playcation.review.service;
 
+import com.example.playcation.exception.DuplicatedException;
+import com.example.playcation.exception.NotFoundException;
+import com.example.playcation.exception.ReviewErrorCode;
 import com.example.playcation.review.entity.Like;
 import com.example.playcation.review.entity.Review;
 import com.example.playcation.review.repository.ReviewLikeRepository;
@@ -28,7 +31,7 @@ public class ReviewLikeService {
     // 이미 좋아요를 누른 경우 예외 처리
     boolean alreadyLiked = reviewLikeRepository.existsByUserIdAndReviewId(userId, reviewId);
     if (alreadyLiked) {
-      throw new IllegalStateException("이미 좋아요를 누른 리뷰입니다.");
+      throw new DuplicatedException(ReviewErrorCode.ALREADY_REVEIW_LIKE);
     }
 
     // 좋아요 생성 및 저장
@@ -51,7 +54,7 @@ public class ReviewLikeService {
     // 리뷰 좋아요 기록 조회
     Like like = reviewLikeRepository.findByUserIdAndReviewId(userId, reviewId);
     if (like == null) {
-      throw new IllegalArgumentException("좋아요 기록이 존재하지 않습니다.");
+      throw new NotFoundException(ReviewErrorCode.LIKE_NOT_FOUND);
     }
 
     // 좋아요 기록 삭제

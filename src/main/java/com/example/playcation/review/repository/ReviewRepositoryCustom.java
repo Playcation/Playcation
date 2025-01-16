@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 
 public interface ReviewRepositoryCustom {
 
-  PagingDto<CreatedReviewResponseDto> searchReviews(Pageable pageable, Long gameId, Long userId, ReviewStatus rating);
+  PagingDto<CreatedReviewResponseDto> searchReviews(Pageable pageable, Long gameId, Long userId,
+      ReviewStatus rating);
 
 }

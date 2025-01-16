@@ -53,7 +53,8 @@ public class ReviewController {
       @RequestParam(required = false) ReviewStatus rating // 필터링할 상태(긍정적/부정적)
   ) {
     Long userId = jwtUtil.findUserByToken(authorizationHeader);
-    PagingDto<CreatedReviewResponseDto> reviews = reviewService.searchReviews(page,size,gameId,userId,rating);
+    PagingDto<CreatedReviewResponseDto> reviews = reviewService.searchReviews(page, size, gameId,
+        userId, rating);
     return new ResponseEntity<>(reviews, HttpStatus.OK);
   }
 
@@ -64,9 +65,10 @@ public class ReviewController {
       @PathVariable Long gameId,
       @PathVariable Long reviewId,
       @Valid @RequestBody UpdatedReviewRequestDto updateRequest
-  ){
+  ) {
     Long userId = jwtUtil.findUserByToken(authorizationHeader);
-    CreatedReviewResponseDto updatedReview = reviewService.updateReview(userId, gameId, reviewId, updateRequest);
+    CreatedReviewResponseDto updatedReview = reviewService.updateReview(userId, gameId, reviewId,
+        updateRequest);
     return new ResponseEntity<>(updatedReview, HttpStatus.OK);
   }
 

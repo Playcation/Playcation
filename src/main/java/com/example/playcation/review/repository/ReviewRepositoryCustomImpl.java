@@ -22,8 +22,8 @@ public class ReviewRepositoryCustomImpl implements ReviewRepositoryCustom {
   private final JPAQueryFactory queryFactory;
 
   @Override
-  public PagingDto<CreatedReviewResponseDto> searchReviews(Pageable pageable, Long gameId, Long userId,
-      ReviewStatus rating){
+  public PagingDto<CreatedReviewResponseDto> searchReviews(Pageable pageable, Long gameId,
+      Long userId, ReviewStatus rating) {
 
     QReview review = QReview.review;
     QGame game = QGame.game;

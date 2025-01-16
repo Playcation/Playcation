@@ -2,6 +2,8 @@ package com.example.playcation.review.entity;
 
 import com.example.playcation.common.BaseEntity;
 import com.example.playcation.enums.ReviewStatus;
+import com.example.playcation.exception.InvalidInputException;
+import com.example.playcation.exception.ReviewErrorCode;
 import com.example.playcation.game.entity.Game;
 import com.example.playcation.library.entity.Library;
 import jakarta.persistence.Column;
@@ -53,15 +55,15 @@ public class Review extends BaseEntity {
     this.rating = rating;
   }
 
-  public void addLike(){
+  public void addLike() {
     this.countLike++;
   }
 
-  public void removeLike(){
+  public void removeLike() {
     if (this.countLike > 0) {
       this.countLike--;
     } else {
-      throw new IllegalStateException("좋아요가 0일 때는 더 이상 제거할 수 없습니다.");
+      throw new InvalidInputException(ReviewErrorCode.NO_LIKE_TO_REMOVE);
     }
   }
 }
