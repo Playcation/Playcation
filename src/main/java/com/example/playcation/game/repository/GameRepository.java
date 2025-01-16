@@ -23,4 +23,10 @@ public interface GameRepository extends JpaRepository<Game, Long>, GameRepositor
   List<Game> findAllByUserId(Long userId);
 
   boolean existsByIdAndUserId(Long id, Long userId);
+
+  default void existsByIdOrElseThrow(Long gameId) {
+    if (!existsById(gameId)) {
+      throw new NotFoundException(GameErrorCode.GAME_NOT_FOUND);
+    }
+  }
 }
