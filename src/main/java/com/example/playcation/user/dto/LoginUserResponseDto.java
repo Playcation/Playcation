@@ -13,11 +13,9 @@ public class LoginUserResponseDto {
   private String token;
 
   public static LoginUserResponseDto toDto(User user, String token) {
-    token= "Bearer " + token;
     return new LoginUserResponseDto(
         user.getEmail(),
         token
     );
   }
-
 }

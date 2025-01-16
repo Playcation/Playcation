@@ -28,7 +28,7 @@ public class OAuth2Service extends DefaultOAuth2UserService {
   @Override
   public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
     OAuth2User oAuth2User = super.loadUser(userRequest);
-    String registrationId = userRequest.getClientRegistration().getRegistrationId();
+    String registrationId = userRequest.getClientRegistration().getRegistrationId().toUpperCase();
 
     // 소셜 로그인 응답 객체 가져오기
     BasicOAuth2Dto oAuth2Response = getOAuth2Response(registrationId, oAuth2User);
@@ -42,9 +42,9 @@ public class OAuth2Service extends DefaultOAuth2UserService {
 
   // 소셜 로그인 응답 객체 생성 메서드 (Google, Naver 구분)
   private BasicOAuth2Dto getOAuth2Response(String registrationId, OAuth2User oAuth2User) {
-    if ("naver".equals(registrationId)) {
+    if ("NAVER".equals(registrationId)) {
       return new NaverResponseDto(oAuth2User.getAttributes());
-    } else if ("google".equals(registrationId)) {
+    } else if ("GOOGLE".equals(registrationId)) {
       return new GoogleResponseDto(oAuth2User.getAttributes());
     }
     return null;
@@ -57,7 +57,7 @@ public class OAuth2Service extends DefaultOAuth2UserService {
         .password("")
         .name(oAuth2Response.getName())
         .role(Role.USER)
-        .social(Social.valueOf(registrationId.toUpperCase()))
+        .social(Social.valueOf(registrationId))
         .build();
 
     userRepository.save(user);
@@ -66,11 +66,13 @@ public class OAuth2Service extends DefaultOAuth2UserService {
 
   // 기존 유저 업데이트 메서드 (소셜 플랫폼 갱신)
   private OAuth2User updateExistingUser(User existData, String registrationId) {
-    if(!Social.NORMAL.equals(existData.getSocial())){
-      throw new NoAuthorizedException(UserErrorCode.EXIST_SOCIAL);
+    if(!existData.getSocial().name().equals(registrationId)){
+      if(!existData.getSocial().equals(Social.NORMAL)) {
+        throw new NoAuthorizedException(UserErrorCode.EXIST_SOCIAL);
+      }
+      existData.updateSocial(Social.valueOf(registrationId.toUpperCase()));
+      userRepository.save(existData);
     }
-    existData.updateSocial(Social.valueOf(registrationId.toUpperCase()));
-    userRepository.save(existData);
 
     return new OAuth2UserDto(new UserDto(existData.getEmail(), existData.getName(), existData.getRole()));
   }

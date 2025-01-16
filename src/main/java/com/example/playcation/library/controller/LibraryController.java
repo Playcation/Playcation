@@ -30,14 +30,6 @@ public class LibraryController {
   private final LibraryService libraryService;
   private final JWTUtil jwtUtil;
 
-  @PostMapping
-  public ResponseEntity<LibraryResponseDto> createLibrary(@RequestHeader(TokenSettings.ACCESS_TOKEN_CATEGORY) String authorizationHeader,
-      @RequestBody LibraryRequestDto requestDto) {
-    Long userId = jwtUtil.findUserByToken(authorizationHeader);
-    LibraryResponseDto responseDto = libraryService.createLibrary(requestDto, userId);
-    return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
-  }
-
   @GetMapping("/{libraryId}")
   public ResponseEntity<LibraryResponseDto> findLibrary(@PathVariable Long libraryId) {
     LibraryResponseDto responseDto = libraryService.findLibrary(libraryId);
