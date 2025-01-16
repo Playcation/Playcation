@@ -94,7 +94,7 @@ public class JWTFilter extends OncePerRequestFilter {
   private String extractToken(HttpServletRequest request) {
     String token = request.getHeader(TokenSettings.ACCESS_TOKEN_CATEGORY);
     if (token != null && token.startsWith(TokenSettings.TOKEN_TYPE)) {
-      return token.substring(TokenSettings.TOKEN_TYPE.length()).trim();
+      return token;
     }
     return null;
   }

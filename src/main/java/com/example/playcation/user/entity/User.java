@@ -77,7 +77,6 @@ public class User extends BaseEntity {
   }
 
   public void delete() {
-    this.name = "(알수없음)";
     this.deletedAt = LocalDateTime.now();
   }
 
@@ -86,9 +85,6 @@ public class User extends BaseEntity {
   }
 
   public boolean isManagerOfGame(Game game) {
-    if (this.equals(game.getUser())) {
-      return true;
-    }
-    return false;
+    return this.equals(game.getUser());
   }
 }
