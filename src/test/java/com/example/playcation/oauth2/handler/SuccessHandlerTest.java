@@ -2,6 +2,7 @@ package com.example.playcation.oauth2.handler;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import jakarta.servlet.ServletException;
 import java.util.List;
 import com.example.playcation.PlaycationApplication;
 import com.example.playcation.common.TokenSettings;
@@ -80,7 +81,7 @@ class SuccessHandlerTest {
 
   @Test
   @DisplayName("소셜 로그인 성공")
-  void onAuthenticationSuccess() throws IOException {
+  void onAuthenticationSuccess() throws IOException, ServletException {
     // Given
     // When
     successHandler.onAuthenticationSuccess(request, response, authentication);

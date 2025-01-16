@@ -4,6 +4,7 @@ import com.example.playcation.common.TokenSettings;
 import com.example.playcation.user.dto.LoginUserRequestDto;
 import com.example.playcation.user.dto.LoginUserResponseDto;
 import com.example.playcation.user.dto.DeletedUserRequestDto;
+import com.example.playcation.user.dto.RestoreUserRequestDto;
 import com.example.playcation.user.dto.UserResponseDto;
 import com.example.playcation.user.dto.SignInUserRequestDto;
 import com.example.playcation.user.dto.UpdatedUserPasswordRequestDto;
@@ -92,6 +93,14 @@ public class UserController {
     // 탈퇴 처리 메서드 호출
     userService.delete(id, userLogoutRequestDto);
     return "회원 탈퇴가 완료되었습니다.";
+  }
+
+  // 회원 복구
+  @PutMapping("/restore")
+  public ResponseEntity<UserResponseDto> restoreUser(
+      @Valid @RequestBody RestoreUserRequestDto requestDto
+  ){
+    return ResponseEntity.ok().body(userService.restoreUser(requestDto));
   }
 
   @PostMapping("/upload/files")

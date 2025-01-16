@@ -79,7 +79,7 @@ public class JWTUtil {
    * @return [0] -> 액세스 토큰, [1] -> 리프레시 토큰
    */
   public String[] generateTokens(String userId, String role) {
-    String access = TokenSettings.TOKEN_TYPE + createJwt(TokenSettings.ACCESS_TOKEN_CATEGORY, userId, role, TokenSettings.ACCESS_TOKEN_EXPIRATION);
+    String access = createJwt(TokenSettings.ACCESS_TOKEN_CATEGORY, userId, role, TokenSettings.ACCESS_TOKEN_EXPIRATION);
     String refresh = createJwt(TokenSettings.REFRESH_TOKEN_CATEGORY, userId, role, TokenSettings.REFRESH_TOKEN_EXPIRATION);
 
     storeRefreshToken(userId, refresh);

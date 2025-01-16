@@ -1,7 +1,6 @@
 package com.example.playcation.config;
 
-import static org.springframework.security.authorization.AuthorityReactiveAuthorizationManager.hasAuthority;
-import static org.springframework.security.authorization.AuthorityReactiveAuthorizationManager.hasRole;
+import static org.springframework.boot.autoconfigure.security.servlet.PathRequest.toH2Console;
 
 import com.example.playcation.enums.Role;
 import com.example.playcation.filter.JWTFilter;
@@ -25,12 +24,15 @@ import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer.FrameOptionsConfig;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
@@ -60,6 +62,17 @@ public class SecurityConfig {
   }
 
   @Bean
+  public WebSecurityCustomizer configure() {
+    return (web) -> web.ignoring()
+        .requestMatchers(
+            new AntPathRequestMatcher("/h2-console/**"),  // H2 콘솔 직접 설정
+            new AntPathRequestMatcher("/img/**"),
+            new AntPathRequestMatcher("/css/**"),
+            new AntPathRequestMatcher("/js/**")
+        );
+  }
+
+  @Bean
   public BCryptPasswordEncoder bCryptPasswordEncoder() {
     return new BCryptPasswordEncoder();
   }
@@ -68,45 +81,35 @@ public class SecurityConfig {
   public SecurityFilterChain filterChain(
       HttpSecurity http,
       UserRepository userRepository) throws Exception {
-    http.cors(corsCustomizer -> corsCustomizer.configurationSource(new CorsConfigurationSource() {
 
-      @Override
-      public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
-
-        CorsConfiguration configuration = new CorsConfiguration();
-
-        configuration.setAllowCredentials(true);
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:8080"));
-        configuration.setAllowedMethods(Arrays.asList("*"));
-        configuration.setAllowedHeaders(Arrays.asList("*"));
-        configuration.setMaxAge(3600L);
-
-        configuration.setExposedHeaders(Arrays.asList("Set-Cookie", "Authorization"));
-
-        return configuration;
-      }
+    http.cors(corsCustomizer -> corsCustomizer.configurationSource(request -> {
+      CorsConfiguration config = new CorsConfiguration();
+      config.addAllowedOrigin("http://localhost:5173");
+      config.addAllowedMethod("*");
+      config.addAllowedHeader("*");
+      config.setAllowCredentials(true);
+      return config;
     }));
 
     // csrf disable
     http.csrf(AbstractHttpConfigurer::disable);
     // form 로그인 방식 disable
     http.formLogin(AbstractHttpConfigurer::disable);
-//    http.formLogin(form -> form
-//        .loginPage("/login")
-//        .permitAll()
-//    );
     // http basic 인증 방식 disable
     http.httpBasic(AbstractHttpConfigurer::disable);
 
+    http.headers(headers -> headers.frameOptions(FrameOptionsConfig::disable));
+
     // oauth2
     http.oauth2Login((oauth2) -> oauth2
+//        .loginPage("/oauth2-login").permitAll()
         .userInfoEndpoint((userInfoEndpointConfig) ->
             userInfoEndpointConfig.userService(oAuth2Service))
         .successHandler(successHandler));
 
     http.authorizeHttpRequests((auth) -> auth
-        .requestMatchers("/", "*/sign-in", "/oauth2-login", "/refresh", "/error").permitAll()
-
+        .requestMatchers("/", "*/sign-in", "/oauth2-login", "/refresh", "/error", "/token/refresh").permitAll()
+        .requestMatchers("/h2-console/**").permitAll()
         // ADMIN 전용 API
         .requestMatchers("/users/{id}/update-role").hasAuthority(Role.ADMIN.name()) // "ADMIN"
         .requestMatchers("/admin/**").hasAuthority(Role.ADMIN.name()) // "ADMIN"
