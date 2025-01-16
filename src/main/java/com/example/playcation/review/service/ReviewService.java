@@ -18,6 +18,7 @@ import com.example.playcation.review.repository.ReviewRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
@@ -37,13 +38,12 @@ public class ReviewService {
     // 게임 조회 및 예외처리
     Game game = gameRepository.findByIdOrElseThrow(gameId);
 
-    // 특정 사용자가 게임을 소유하고 있는지 확인
+    // 특정 사용자가 게임을 소유하고 있는지 확인 -> 게임 Id랑 유저 Id를 가지고있는 라이브러리가 있으면 소유하고있는 것
     Library library = libraryRepository.findByUserIdAndGameId(userId, gameId)
         .orElseThrow(() -> new NotFoundException(ReviewErrorCode.GAME_NOT_IN_LIBRARY));
 
     // 중복 리뷰 작성 여부 검증
-    boolean reviewExists = reviewRepository.existsByLibraryId(library.getId());
-    if (reviewExists) {
+    if (reviewRepository.existsByLibraryId(library.getId())) {
       throw new DuplicatedException(ReviewErrorCode.REVIEW_EXIST);
     }
 
@@ -65,9 +65,9 @@ public class ReviewService {
     gameRepository.existsByIdOrElseThrow(gameId);
 
     // 페이징시 최대 출력 갯수와 정렬조건 설정 ( 한 페이지당 리뷰 개수는 5개 )
-    PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Direction.DESC,"createdAt"));
+    Pageable pageable = PageRequest.of(page, size, Sort.by(Direction.DESC,"createdAt"));
 
-    return reviewRepository.searchReviews(pageRequest,gameId, userId,rating);
+    return reviewRepository.searchReviews(pageable,gameId, userId,rating);
   }
 
 

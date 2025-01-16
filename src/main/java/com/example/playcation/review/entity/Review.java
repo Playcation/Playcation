@@ -21,7 +21,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "review")
+@Table(name = "`review`")
 @Getter
 @Builder
 @AllArgsConstructor
@@ -40,7 +40,7 @@ public class Review extends BaseEntity {
   @JoinColumn(name = "library_id")
   private Library library;
 
-  @Column(length = 250)
+  @Column(columnDefinition = "TEXT")
   private String content;
 
   @Enumerated(value = EnumType.STRING)
@@ -51,5 +51,17 @@ public class Review extends BaseEntity {
   public void updateContent(String content, ReviewStatus rating) {
     this.content = content;
     this.rating = rating;
+  }
+
+  public void addLike(){
+    this.countLike++;
+  }
+
+  public void removeLike(){
+    if (this.countLike > 0) {
+      this.countLike--;
+    } else {
+      throw new IllegalStateException("좋아요가 0일 때는 더 이상 제거할 수 없습니다.");
+    }
   }
 }

@@ -12,6 +12,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -21,7 +22,7 @@ public class ReviewRepositoryCustomImpl implements ReviewRepositoryCustom {
   private final JPAQueryFactory queryFactory;
 
   @Override
-  public PagingDto<CreatedReviewResponseDto> searchReviews(PageRequest pageRequest, Long gameId, Long userId,
+  public PagingDto<CreatedReviewResponseDto> searchReviews(Pageable pageable, Long gameId, Long userId,
       ReviewStatus rating){
 
     QReview review = QReview.review;
@@ -37,8 +38,8 @@ public class ReviewRepositoryCustomImpl implements ReviewRepositoryCustom {
             eqGame(gameId), // 게임 id가 주어진 값과 일치하는지 체크(특정 게임에 대해 리뷰 조회)
             eqRating(rating) // 긍정적,부정적 필터링
         )
-        .offset(pageRequest.getOffset())
-        .limit(pageRequest.getPageSize())
+        .offset(pageable.getOffset())
+        .limit(pageable.getPageSize())
         .orderBy(review.createdAt.desc())
         .fetch();
 

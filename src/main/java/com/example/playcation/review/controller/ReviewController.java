@@ -1,6 +1,7 @@
 package com.example.playcation.review.controller;
 
 import com.example.playcation.common.PagingDto;
+import com.example.playcation.common.TokenSettings;
 import com.example.playcation.enums.ReviewStatus;
 import com.example.playcation.review.dto.CreatedReviewRequestDto;
 import com.example.playcation.review.dto.CreatedReviewResponseDto;
@@ -33,7 +34,7 @@ public class ReviewController {
   // 리뷰 생성
   @PostMapping
   public ResponseEntity<CreatedReviewResponseDto> createReview(
-      @RequestHeader("Authorization") String authorizationHeader,
+      @RequestHeader(TokenSettings.ACCESS_TOKEN_CATEGORY) String authorizationHeader,
       @PathVariable Long gameId,
       @Valid @RequestBody CreatedReviewRequestDto reviewRequestDto) {
     Long userId = jwtUtil.findUserByToken(authorizationHeader);
@@ -45,7 +46,7 @@ public class ReviewController {
   // 리뷰 조회
   @GetMapping
   public ResponseEntity<PagingDto<CreatedReviewResponseDto>> findReviewsAndPaging(
-      @RequestHeader("Authorization") String authorizationHeader,
+      @RequestHeader(TokenSettings.ACCESS_TOKEN_CATEGORY) String authorizationHeader,
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "5") int size,
       @PathVariable Long gameId,
@@ -59,7 +60,7 @@ public class ReviewController {
   // 리뷰 수정
   @PatchMapping("/{reviewId}")
   public ResponseEntity<CreatedReviewResponseDto> updateReview(
-      @RequestHeader("Authorization") String authorizationHeader,
+      @RequestHeader(TokenSettings.ACCESS_TOKEN_CATEGORY) String authorizationHeader,
       @PathVariable Long gameId,
       @PathVariable Long reviewId,
       @Valid @RequestBody UpdatedReviewRequestDto updateRequest
@@ -74,7 +75,7 @@ public class ReviewController {
   @DeleteMapping("/{reviewId}")
   public ResponseEntity<String> deleteReview(
       @PathVariable Long gameId, @PathVariable Long reviewId,
-      @RequestHeader("Authorization") String authorizationHeader) {
+      @RequestHeader(TokenSettings.ACCESS_TOKEN_CATEGORY) String authorizationHeader) {
 
     Long userId = jwtUtil.findUserByToken(authorizationHeader);
     reviewService.deleteReview(userId, gameId, reviewId);
