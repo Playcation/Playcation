@@ -81,23 +81,14 @@ public class SecurityConfig {
   public SecurityFilterChain filterChain(
       HttpSecurity http,
       UserRepository userRepository) throws Exception {
-    http.cors(corsCustomizer -> corsCustomizer.configurationSource(new CorsConfigurationSource() {
 
-      @Override
-      public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
-
-        CorsConfiguration configuration = new CorsConfiguration();
-
-        configuration.setAllowCredentials(true);
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:8080"));
-        configuration.setAllowedMethods(Arrays.asList("*"));
-        configuration.setAllowedHeaders(Arrays.asList("*"));
-        configuration.setMaxAge(3600L);
-
-        configuration.setExposedHeaders(Arrays.asList("Set-Cookie", "Authorization"));
-
-        return configuration;
-      }
+    http.cors(corsCustomizer -> corsCustomizer.configurationSource(request -> {
+      CorsConfiguration config = new CorsConfiguration();
+      config.addAllowedOrigin("http://localhost:5173");
+      config.addAllowedMethod("*");
+      config.addAllowedHeader("*");
+      config.setAllowCredentials(true);
+      return config;
     }));
 
     // csrf disable
