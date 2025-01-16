@@ -3,6 +3,7 @@ package com.example.playcation.coupon.controller;
 import com.example.playcation.common.PagingDto;
 import com.example.playcation.coupon.dto.CouponRequestDto;
 import com.example.playcation.coupon.dto.CouponResponseDto;
+import com.example.playcation.coupon.dto.IssuedCouponRequestDto;
 import com.example.playcation.coupon.service.CouponAdminService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +26,7 @@ public class CouponAdminController {
   private final CouponAdminService couponAdminService;
 
   @PostMapping("/users/{userAmount}")
-  public ResponseEntity<?> createTestUsers(@PathVariable Long userAmount) {
+  public ResponseEntity<String> createTestUsers(@PathVariable Long userAmount) {
     couponAdminService.createTestUsers(userAmount);
     return new ResponseEntity<>("유저 생성 완료", HttpStatus.CREATED);
   }
@@ -57,5 +58,13 @@ public class CouponAdminController {
       @PathVariable Long couponId, @Valid @RequestBody CouponRequestDto requestDto) {
     CouponResponseDto responseDto = couponAdminService.updateCoupon(couponId, requestDto);
     return new ResponseEntity<>(responseDto, HttpStatus.OK);
+  }
+
+  @PostMapping("/{userId}/issue")
+  public ResponseEntity<String> issueCoupon(
+      @PathVariable Long userId,
+      @RequestBody IssuedCouponRequestDto requestDto) {
+    couponAdminService.issueCoupon(userId, requestDto);
+    return new ResponseEntity<>("발급 완료", HttpStatus.CREATED);
   }
 }

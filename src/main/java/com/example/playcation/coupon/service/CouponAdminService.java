@@ -3,12 +3,16 @@ package com.example.playcation.coupon.service;
 import com.example.playcation.common.PagingDto;
 import com.example.playcation.coupon.dto.CouponRequestDto;
 import com.example.playcation.coupon.dto.CouponResponseDto;
+import com.example.playcation.coupon.dto.IssuedCouponRequestDto;
 import com.example.playcation.coupon.entity.Coupon;
+import com.example.playcation.coupon.entity.CouponUser;
 import com.example.playcation.coupon.repository.CouponRepository;
+import com.example.playcation.coupon.repository.CouponUserRepository;
 import com.example.playcation.enums.Role;
 import com.example.playcation.enums.Social;
 import com.example.playcation.exception.CouponErrorCode;
 import com.example.playcation.exception.DuplicatedException;
+import com.example.playcation.exception.InvalidInputException;
 import com.example.playcation.user.entity.User;
 import com.example.playcation.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -27,6 +31,7 @@ public class CouponAdminService {
 
   private final UserRepository userRepository;
   private final CouponRepository couponRepository;
+  private final CouponUserRepository couponUserRepository;
 
   @Transactional
   public void createTestUsers(Long userAmount) {
@@ -89,4 +94,28 @@ public class CouponAdminService {
     return CouponResponseDto.toDto(newCoupon);
   }
 
+  @Transactional
+  public void issueCoupon(Long userId, IssuedCouponRequestDto requestDto) {
+    // 사용자와 쿠폰 조회
+    User user = userRepository.findByIdOrElseThrow(userId);
+    Coupon coupon = couponRepository.findByIdOrElseThrow(requestDto.getCouponId());
+
+    // 쿠폰 재고 확인
+    if (coupon.getStock() <= 0) {
+      throw new InvalidInputException(CouponErrorCode.COUPON_OUT_OF_STOCK);
+    }
+
+    // 쿠폰 발급 정보 저장
+    CouponUser couponUser = CouponUser.builder()
+        .user(user)
+        .coupon(coupon)
+        .issuedDate(requestDto.getIssuedDate())
+        .expireDate(requestDto.getExpiredDate()) // 만료일을 기본 30일로 설정
+        .build();
+
+    couponUserRepository.save(couponUser);
+
+    // 쿠폰 재고 감소
+    coupon.updateStock(coupon.getStock() - 1);
+  }
 }

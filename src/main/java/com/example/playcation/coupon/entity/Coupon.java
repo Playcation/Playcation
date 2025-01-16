@@ -47,4 +47,8 @@ public class Coupon {
     this.rate = requestDto.getRate();
     this.couponType = requestDto.getCouponType();
   }
+
+  public void updateStock(Long stock) {
+    stock = stock - this.stock;
+  }
 }
