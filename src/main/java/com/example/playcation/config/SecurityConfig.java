@@ -1,7 +1,5 @@
 package com.example.playcation.config;
 
-import static org.springframework.boot.autoconfigure.security.servlet.PathRequest.toH2Console;
-
 import com.example.playcation.enums.Role;
 import com.example.playcation.filter.JWTFilter;
 import com.example.playcation.filter.CustomLoginFilter;
@@ -9,12 +7,8 @@ import com.example.playcation.filter.CustomLogoutFilter;
 import com.example.playcation.oauth2.handler.SuccessHandler;
 import com.example.playcation.oauth2.service.OAuth2Service;
 import com.example.playcation.user.repository.UserRepository;
-import com.example.playcation.user.service.AdminService;
 import com.example.playcation.util.JWTUtil;
-import jakarta.servlet.http.HttpServletRequest;
-import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
@@ -34,7 +28,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
 
 @Configuration
 @EnableWebSecurity(debug = true)
@@ -47,7 +40,8 @@ public class SecurityConfig {
   private final JWTUtil jwtUtil;
 
   @Bean
-  public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+  public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration)
+      throws Exception {
     return configuration.getAuthenticationManager();
   }
 
@@ -108,7 +102,8 @@ public class SecurityConfig {
         .successHandler(successHandler));
 
     http.authorizeHttpRequests((auth) -> auth
-        .requestMatchers("/", "*/sign-in", "/oauth2-login", "/refresh", "/error", "/token/refresh").permitAll()
+        .requestMatchers("/", "*/sign-in", "/oauth2-login", "/refresh", "/error", "/token/refresh")
+        .permitAll()
         .requestMatchers("/h2-console/**").permitAll()
         // ADMIN 전용 API
         .requestMatchers("/users/{id}/update-role").hasAuthority(Role.ADMIN.name()) // "ADMIN"
@@ -120,7 +115,8 @@ public class SecurityConfig {
         // ADMIN은 /games/** 접근 불가
         .requestMatchers("/games/**").access((authentication, context) ->
             new AuthorizationDecision(authentication.get().getAuthorities().stream()
-                .noneMatch(grantedAuthority -> grantedAuthority.getAuthority().equals(Role.ADMIN.name())))
+                .noneMatch(
+                    grantedAuthority -> grantedAuthority.getAuthority().equals(Role.ADMIN.name())))
         )
         // 기타 요청은 인증 필요
         .anyRequest().authenticated()
@@ -128,7 +124,9 @@ public class SecurityConfig {
 
     http.addFilterBefore(new JWTFilter(userRepository, jwtUtil), CustomLoginFilter.class);
     http.addFilterBefore(new CustomLogoutFilter(jwtUtil), LogoutFilter.class);
-    http.addFilterAt(new CustomLoginFilter(authenticationManager(authenticationConfiguration), jwtUtil), UsernamePasswordAuthenticationFilter.class);
+    http.addFilterAt(
+        new CustomLoginFilter(authenticationManager(authenticationConfiguration), jwtUtil),
+        UsernamePasswordAuthenticationFilter.class);
 
     // 세션 설정
     http.sessionManagement((session) ->

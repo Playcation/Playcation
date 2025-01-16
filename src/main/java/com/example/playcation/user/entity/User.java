@@ -77,7 +77,6 @@ public class User extends BaseEntity {
   }
 
   public void delete() {
-    this.name = "(알수없음)";
     this.deletedAt = LocalDateTime.now();
   }
 
