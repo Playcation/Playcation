@@ -3,7 +3,9 @@ package com.example.playcation.filter;
 import com.example.playcation.common.TokenSettings;
 import com.example.playcation.enums.Role;
 import com.example.playcation.exception.InvalidInputException;
+import com.example.playcation.exception.NoAuthorizedException;
 import com.example.playcation.exception.TokenErrorCode;
+import com.example.playcation.exception.UserErrorCode;
 import com.example.playcation.user.entity.CustomUserDetails;
 import com.example.playcation.user.entity.User;
 import com.example.playcation.user.repository.UserRepository;
@@ -48,7 +50,7 @@ public class JWTFilter extends OncePerRequestFilter {
       throws ServletException, IOException {
 
     String requestUri = request.getRequestURI();
-    if (isLoginRequest(requestUri)) {
+    if (isLoginRequest(requestUri) || isSinginRequest(requestUri)) {
       filterChain.doFilter(request, response);
       return;
     }
@@ -82,7 +84,11 @@ public class JWTFilter extends OncePerRequestFilter {
    * @return true면 필터링 제외
    */
   private boolean isLoginRequest(String uri) {
-    return uri.matches("^/login(?:/.*)?$") || uri.matches("^/oauth2(?:/.*)?$");
+    return uri.matches(".*/login(?:/.*)?$") || uri.matches(".*/oauth2(?:/.*)?$");
+  }
+
+  private boolean isSinginRequest(String uri) {
+    return uri.matches(".*/sign-in(?:/.*)?$");
   }
 
   /**
@@ -93,10 +99,10 @@ public class JWTFilter extends OncePerRequestFilter {
    */
   private String extractToken(HttpServletRequest request) {
     String token = request.getHeader(TokenSettings.ACCESS_TOKEN_CATEGORY);
-    if (token != null && token.startsWith(TokenSettings.TOKEN_TYPE)) {
-      return token;
+    if (token == null) {
+      throw new NoAuthorizedException(UserErrorCode.NOT_LOGIN);
     }
-    return null;
+    return token;
   }
 
   /**
