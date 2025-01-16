@@ -1,7 +1,7 @@
 package com.example.playcation.coupon.service;
 
 import com.example.playcation.common.PagingDto;
-import com.example.playcation.coupon.dto.CouponResponseDto;
+import com.example.playcation.coupon.dto.CouponUserResponseDto;
 import com.example.playcation.coupon.entity.CouponUser;
 import com.example.playcation.coupon.repository.CouponUserRepository;
 import com.example.playcation.exception.CouponErrorCode;
@@ -23,25 +23,28 @@ public class CouponUserService {
   private final CouponUserRepository couponUserRepository;
   private final UserRepository userRepository;
 
-  public CouponResponseDto findUserCoupon(Long userId, Long couponId) {
+  public CouponUserResponseDto findUserCoupon(Long userId, Long couponId) {
     userRepository.findByIdOrElseThrow(userId);
     CouponUser couponUser = couponUserRepository.findByUserIdAndCouponId(userId, couponId)
         .orElseThrow(() -> new NotFoundException(CouponErrorCode.COUPON_NOT_FOUND));
 
-    return CouponResponseDto.toDto(couponUser.getCoupon());
+    return CouponUserResponseDto.toDto(couponUser);
   }
 
-  public PagingDto<CouponResponseDto> findAllUserCouponsAndPaging(int page, Long userId) {
-    Pageable pageable = PageRequest.of(page, 10, Sort.by(Direction.DESC, "id"));
+  public PagingDto<CouponUserResponseDto> findAllUserCouponsAndPaging(Long userId, int page,
+      int size) {
+    Pageable pageable = PageRequest.of(page, size, Sort.by(Direction.DESC, "id"));
     userRepository.findByIdOrElseThrow(userId);
     Page<CouponUser> couponUserPage = couponUserRepository.findAll(pageable);
 
-    List<CouponResponseDto> couponDtoList = couponUserPage.getContent().stream()
-        .map(couponUser -> new CouponResponseDto(couponUser.getId(),
+    List<CouponUserResponseDto> couponDtoList = couponUserPage.getContent().stream()
+        .map(couponUser -> new CouponUserResponseDto(couponUser.getId(),
             couponUser.getCoupon().getName(),
             couponUser.getCoupon().getStock(),
             couponUser.getCoupon().getRate(),
-            couponUser.getCoupon().getCouponType()))
+            couponUser.getCoupon().getCouponType(),
+            couponUser.getIssuedDate(),
+            couponUser.getExpireDate()))
         .toList();
 
     return new PagingDto<>(couponDtoList, couponUserPage.getTotalElements());

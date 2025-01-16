@@ -65,8 +65,8 @@ public class CouponAdminService {
     return CouponResponseDto.toDto(coupon);
   }
 
-  public PagingDto<CouponResponseDto> findAllCouponsAndPaging(int page) {
-    Pageable pageable = PageRequest.of(page, 10, Sort.by(Direction.DESC, "id"));
+  public PagingDto<CouponResponseDto> findAllCouponsAndPaging(int page, int size) {
+    Pageable pageable = PageRequest.of(page, size, Sort.by(Direction.DESC, "id"));
 
     Page<Coupon> couponPage = couponRepository.findAll(pageable);
 

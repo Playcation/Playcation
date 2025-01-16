@@ -2,7 +2,7 @@ package com.example.playcation.coupon.controller;
 
 import com.example.playcation.common.PagingDto;
 import com.example.playcation.common.TokenSettings;
-import com.example.playcation.coupon.dto.CouponResponseDto;
+import com.example.playcation.coupon.dto.CouponUserResponseDto;
 import com.example.playcation.coupon.service.CouponUserService;
 import com.example.playcation.util.JWTUtil;
 import lombok.RequiredArgsConstructor;
@@ -24,20 +24,21 @@ public class CouponUserController {
   private final JWTUtil jwtUtil;
 
   @GetMapping("/{couponId}")
-  public ResponseEntity<CouponResponseDto> findUserCoupon(
+  public ResponseEntity<CouponUserResponseDto> findUserCoupon(
       @RequestHeader(TokenSettings.ACCESS_TOKEN_CATEGORY) String authorizationHeader,
       @PathVariable Long couponId) {
-    CouponResponseDto responseDto = couponUserService.findUserCoupon(
+    CouponUserResponseDto responseDto = couponUserService.findUserCoupon(
         jwtUtil.findUserByToken(authorizationHeader), couponId);
     return new ResponseEntity<>(responseDto, HttpStatus.OK);
   }
 
   @GetMapping
-  public ResponseEntity<PagingDto<CouponResponseDto>> findAllUserCouponsAndPaging(
+  public ResponseEntity<PagingDto<CouponUserResponseDto>> findAllUserCouponsAndPaging(
       @RequestHeader(TokenSettings.ACCESS_TOKEN_CATEGORY) String authorizationHeader,
-      @RequestParam(defaultValue = "0") int page) {
-    PagingDto<CouponResponseDto> coupons = couponUserService.findAllUserCouponsAndPaging(page,
-        jwtUtil.findUserByToken(authorizationHeader));
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "10") int size) {
+    PagingDto<CouponUserResponseDto> coupons = couponUserService.findAllUserCouponsAndPaging(
+        jwtUtil.findUserByToken(authorizationHeader), page, size);
 
     return new ResponseEntity<>(coupons, HttpStatus.OK);
   }

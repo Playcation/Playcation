@@ -45,8 +45,9 @@ public class CouponAdminController {
 
   @GetMapping
   public ResponseEntity<PagingDto<CouponResponseDto>> findAllCouponsAndPaging(
-      @RequestParam(defaultValue = "0") int page) {
-    PagingDto<CouponResponseDto> coupons = couponAdminService.findAllCouponsAndPaging(page);
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "10") int size) {
+    PagingDto<CouponResponseDto> coupons = couponAdminService.findAllCouponsAndPaging(page, size);
 
     return new ResponseEntity<>(coupons, HttpStatus.OK);
   }
