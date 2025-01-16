@@ -24,11 +24,17 @@ public class CouponAdminController {
 
   private final CouponAdminService couponAdminService;
 
+  @PostMapping("/users/{userAmount}")
+  public ResponseEntity<?> createTestUsers(@PathVariable Long userAmount) {
+    couponAdminService.createTestUsers(userAmount);
+    return new ResponseEntity<>("유저 생성 완료", HttpStatus.CREATED);
+  }
+
   @PostMapping
   public ResponseEntity<CouponResponseDto> createCoupon(
       @Valid @RequestBody CouponRequestDto requestDto) {
     CouponResponseDto responseDto = couponAdminService.createCoupon(requestDto);
-    return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
   }
 
   @GetMapping("/{couponId}")

@@ -3,27 +3,23 @@ package com.example.playcation.coupon.dto;
 import com.example.playcation.coupon.entity.Coupon;
 import com.example.playcation.enums.CouponType;
 import java.math.BigDecimal;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
+@Getter
+@RequiredArgsConstructor
 public class CouponResponseDto {
 
-  private Long couponId;
+  private final Long couponId;
 
-  private String name;
+  private final String name;
 
-  private Long stock;
+  private final Long stock;
 
-  private BigDecimal rate;
+  private final BigDecimal rate;
 
-  private CouponType couponType;
+  private final CouponType couponType;
 
-  public CouponResponseDto(Long couponId, String name, Long stock, BigDecimal rate,
-      CouponType couponType) {
-    this.couponId = couponId;
-    this.name = name;
-    this.stock = stock;
-    this.rate = rate;
-    this.couponType = couponType;
-  }
 
   public static CouponResponseDto toDto(Coupon coupon) {
     return new CouponResponseDto(

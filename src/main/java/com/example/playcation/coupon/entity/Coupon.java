@@ -9,7 +9,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import java.math.BigDecimal;
@@ -37,7 +36,6 @@ public class Coupon {
   private Long stock;
 
   @DecimalMin(value = "0.0")
-  @DecimalMax(value = "100.0")
   private BigDecimal rate;
 
   @Enumerated(value = EnumType.STRING)

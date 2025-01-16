@@ -15,7 +15,9 @@ public class CouponRequestDto {
 
   private CouponType couponType;
 
-  public CouponRequestDto(String name, Long stock, BigDecimal rate, CouponType couponType) {
+
+  public CouponRequestDto(String name, Long stock, BigDecimal rate,
+      CouponType couponType) {
     this.name = name;
     this.stock = stock;
     this.rate = rate;
