@@ -12,6 +12,7 @@ import com.example.playcation.exception.DuplicatedException;
 import com.example.playcation.user.entity.User;
 import com.example.playcation.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
+import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -19,6 +20,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -27,12 +29,14 @@ public class CouponAdminService {
 
   private final UserRepository userRepository;
   private final CouponRepository couponRepository;
+  private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
   @Transactional
   public void createTestUsers(Long userAmount) {
     for (int i = 1; i <= userAmount; i++) {
       userRepository.save(
-          new User("email" + i + "@example.com", "q1w2e3r4!!", "name" + i, Role.USER,
+          new User("email" + i + "@example.com", bCryptPasswordEncoder.encode("q1w2e3r4!!"),
+              "name" + i, Role.USER,
               Social.NORMAL));
     }
   }
@@ -52,6 +56,8 @@ public class CouponAdminService {
         .stock(requestDto.getStock())
         .rate(requestDto.getRate())
         .couponType(requestDto.getCouponType())
+        .issuedDate(LocalDate.now())
+        .validDays(requestDto.getValidDays())
         .build();
 
     couponRepository.save(coupon);
@@ -65,14 +71,15 @@ public class CouponAdminService {
     return CouponResponseDto.toDto(coupon);
   }
 
-  public PagingDto<CouponResponseDto> findAllCouponsAndPaging(int page) {
-    Pageable pageable = PageRequest.of(page, 10, Sort.by(Direction.DESC, "id"));
+  public PagingDto<CouponResponseDto> findAllCouponsAndPaging(int page, int size) {
+    Pageable pageable = PageRequest.of(page, size, Sort.by(Direction.DESC, "id"));
 
     Page<Coupon> couponPage = couponRepository.findAll(pageable);
 
     List<CouponResponseDto> couponDtoList = couponPage.getContent().stream()
         .map(coupon -> new CouponResponseDto(coupon.getId(), coupon.getName(), coupon.getStock(),
-            coupon.getRate(), coupon.getCouponType()))
+            coupon.getRate(), coupon.getCouponType(), coupon.getIssuedDate(),
+            coupon.getValidDays()))
         .toList();
 
     return new PagingDto<>(couponDtoList, couponPage.getTotalElements());
@@ -88,5 +95,4 @@ public class CouponAdminService {
 
     return CouponResponseDto.toDto(newCoupon);
   }
-
 }

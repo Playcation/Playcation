@@ -4,6 +4,8 @@ import com.example.playcation.coupon.entity.CouponUser;
 import com.example.playcation.exception.CouponErrorCode;
 import com.example.playcation.exception.NotFoundException;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface CouponUserRepository extends JpaRepository<CouponUser, Long> {
@@ -16,4 +18,6 @@ public interface CouponUserRepository extends JpaRepository<CouponUser, Long> {
   }
 
   Optional<CouponUser> findByUserIdAndCouponId(Long userId, Long couponId);
+
+  Page<CouponUser> findAllByUserId(Long userId, Pageable pageable);
 }

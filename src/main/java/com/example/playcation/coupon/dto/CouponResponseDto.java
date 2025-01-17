@@ -3,6 +3,7 @@ package com.example.playcation.coupon.dto;
 import com.example.playcation.coupon.entity.Coupon;
 import com.example.playcation.enums.CouponType;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -20,6 +21,10 @@ public class CouponResponseDto {
 
   private final CouponType couponType;
 
+  private final LocalDate issuedDate;
+
+  private final Long validDays;
+
 
   public static CouponResponseDto toDto(Coupon coupon) {
     return new CouponResponseDto(
@@ -27,7 +32,9 @@ public class CouponResponseDto {
         coupon.getName(),
         coupon.getStock(),
         coupon.getRate(),
-        coupon.getCouponType()
+        coupon.getCouponType(),
+        coupon.getIssuedDate(),
+        coupon.getValidDays()
     );
   }
 }
