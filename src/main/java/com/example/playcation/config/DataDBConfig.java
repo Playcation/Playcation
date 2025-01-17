@@ -17,8 +17,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 @Configuration
 @EnableJpaRepositories(
     basePackages = "com.example.playcation.*.repository", // 어떤 패키지에 대해 동작할지
-    entityManagerFactoryRef = "dataEntityManager", // 아래 작성할 메서드 명
-    transactionManagerRef = "dataTransactionManager" // "
+    entityManagerFactoryRef = "dataEntityManager", // 엔티티 매니저 설정 메서드
+    transactionManagerRef = "dataTransactionManager" // 트랜잭션 매니저 설정 메서드
 )
 @EntityScan(basePackages = {"com.example.playcation.*"})
 public class DataDBConfig {
@@ -36,7 +36,6 @@ public class DataDBConfig {
     LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
 
     em.setDataSource(dataDBSource());
-    // em.setPackagesToScan("com.example.playcation.*.entity");
     em.setPackagesToScan("com.example.playcation.*");
     em.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
 
