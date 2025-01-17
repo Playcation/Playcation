@@ -13,6 +13,7 @@ import com.example.playcation.enums.Social;
 import com.example.playcation.exception.CouponErrorCode;
 import com.example.playcation.exception.DuplicatedException;
 import com.example.playcation.exception.InvalidInputException;
+import com.example.playcation.exception.NoAuthorizedException;
 import com.example.playcation.user.entity.User;
 import com.example.playcation.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -23,6 +24,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -32,12 +34,14 @@ public class CouponAdminService {
   private final UserRepository userRepository;
   private final CouponRepository couponRepository;
   private final CouponUserRepository couponUserRepository;
+  private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
   @Transactional
   public void createTestUsers(Long userAmount) {
     for (int i = 1; i <= userAmount; i++) {
       userRepository.save(
-          new User("email" + i + "@example.com", "q1w2e3r4!!", "name" + i, Role.USER,
+          new User("email" + i + "@example.com", bCryptPasswordEncoder.encode("q1w2e3r4!!"),
+              "name" + i, Role.USER,
               Social.NORMAL));
     }
   }
@@ -100,6 +104,12 @@ public class CouponAdminService {
     User user = userRepository.findByIdOrElseThrow(userId);
     Coupon coupon = couponRepository.findByIdOrElseThrow(requestDto.getCouponId());
 
+    // 사용자가 USER인지 확인
+    Role userRole = user.getRole();
+    if (userRole.equals(Role.MANAGER) || (userRole.equals(Role.ADMIN))) {
+      throw new NoAuthorizedException(CouponErrorCode.NO_AUTHORIZED_COUPON);
+    }
+
     // 쿠폰 재고 확인
     if (coupon.getStock() <= 0) {
       throw new InvalidInputException(CouponErrorCode.COUPON_OUT_OF_STOCK);
@@ -116,6 +126,6 @@ public class CouponAdminService {
     couponUserRepository.save(couponUser);
 
     // 쿠폰 재고 감소
-    coupon.updateStock(coupon.getStock() - 1);
+    coupon.updateStock();
   }
 }
