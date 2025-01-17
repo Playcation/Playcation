@@ -45,7 +45,7 @@ public class CouponUserService {
             couponUser.getCoupon().getRate(),
             couponUser.getCoupon().getCouponType(),
             couponUser.getIssuedDate(),
-            couponUser.getExpireDate()))
+            couponUser.getExpiredDate()))
         .toList();
 
     return new PagingDto<>(couponDtoList, couponUserPage.getTotalElements());

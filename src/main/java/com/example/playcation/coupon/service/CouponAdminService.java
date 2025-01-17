@@ -3,7 +3,6 @@ package com.example.playcation.coupon.service;
 import com.example.playcation.common.PagingDto;
 import com.example.playcation.coupon.dto.CouponRequestDto;
 import com.example.playcation.coupon.dto.CouponResponseDto;
-import com.example.playcation.coupon.dto.IssuedCouponRequestDto;
 import com.example.playcation.coupon.entity.Coupon;
 import com.example.playcation.coupon.entity.CouponUser;
 import com.example.playcation.coupon.repository.CouponRepository;
@@ -17,6 +16,7 @@ import com.example.playcation.exception.NoAuthorizedException;
 import com.example.playcation.user.entity.User;
 import com.example.playcation.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
+import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -61,6 +61,8 @@ public class CouponAdminService {
         .stock(requestDto.getStock())
         .rate(requestDto.getRate())
         .couponType(requestDto.getCouponType())
+        .issuedDate(LocalDate.now())
+        .validDays(requestDto.getValidDays())
         .build();
 
     couponRepository.save(coupon);
@@ -81,7 +83,8 @@ public class CouponAdminService {
 
     List<CouponResponseDto> couponDtoList = couponPage.getContent().stream()
         .map(coupon -> new CouponResponseDto(coupon.getId(), coupon.getName(), coupon.getStock(),
-            coupon.getRate(), coupon.getCouponType()))
+            coupon.getRate(), coupon.getCouponType(), coupon.getIssuedDate(),
+            coupon.getValidDays()))
         .toList();
 
     return new PagingDto<>(couponDtoList, couponPage.getTotalElements());
@@ -99,14 +102,14 @@ public class CouponAdminService {
   }
 
   @Transactional
-  public void issueCoupon(Long userId, IssuedCouponRequestDto requestDto) {
+  public void issueCoupon(Long userId, Long couponId) {
     // 사용자와 쿠폰 조회
     User user = userRepository.findByIdOrElseThrow(userId);
-    Coupon coupon = couponRepository.findByIdOrElseThrow(requestDto.getCouponId());
+    Coupon coupon = couponRepository.findByIdOrElseThrow(couponId);
 
-    // 사용자가 USER인지 확인
+    // 사용자가 ADMIN이 아닌지 확인
     Role userRole = user.getRole();
-    if (userRole.equals(Role.MANAGER) || (userRole.equals(Role.ADMIN))) {
+    if (userRole.equals(Role.ADMIN)) {
       throw new NoAuthorizedException(CouponErrorCode.NO_AUTHORIZED_COUPON);
     }
 
@@ -119,8 +122,8 @@ public class CouponAdminService {
     CouponUser couponUser = CouponUser.builder()
         .user(user)
         .coupon(coupon)
-        .issuedDate(requestDto.getIssuedDate())
-        .expireDate(requestDto.getExpiredDate()) // 만료일을 기본 30일로 설정
+        .issuedDate(coupon.getIssuedDate())
+        .expiredDate(coupon.getIssuedDate().plusDays(coupon.getValidDays()))
         .build();
 
     couponUserRepository.save(couponUser);

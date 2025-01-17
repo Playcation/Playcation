@@ -33,7 +33,7 @@ public class CouponUserResponseDto {
         couponUser.getCoupon().getRate(),
         couponUser.getCoupon().getCouponType(),
         couponUser.getIssuedDate(),
-        couponUser.getExpireDate()
+        couponUser.getExpiredDate()
     );
   }
 }

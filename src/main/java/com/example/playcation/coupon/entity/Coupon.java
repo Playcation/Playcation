@@ -2,6 +2,7 @@ package com.example.playcation.coupon.entity;
 
 import com.example.playcation.coupon.dto.CouponRequestDto;
 import com.example.playcation.enums.CouponType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -12,11 +13,13 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
 
 @Getter
 @Entity
@@ -41,11 +44,19 @@ public class Coupon {
   @Enumerated(value = EnumType.STRING)
   private CouponType couponType;
 
+  @CreatedDate
+  @Column(nullable = false, updatable = false)
+  private LocalDate issuedDate;
+
+  private Long validDays;
+
   public void updateCoupon(CouponRequestDto requestDto) {
     this.name = requestDto.getName();
     this.stock = requestDto.getStock();
     this.rate = requestDto.getRate();
     this.couponType = requestDto.getCouponType();
+    this.issuedDate = LocalDate.now();
+    this.validDays = requestDto.getValidDays();
   }
 
   public void updateStock() {

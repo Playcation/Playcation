@@ -3,7 +3,6 @@ package com.example.playcation.coupon.controller;
 import com.example.playcation.common.PagingDto;
 import com.example.playcation.coupon.dto.CouponRequestDto;
 import com.example.playcation.coupon.dto.CouponResponseDto;
-import com.example.playcation.coupon.dto.IssuedCouponRequestDto;
 import com.example.playcation.coupon.service.CouponAdminService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -60,11 +59,10 @@ public class CouponAdminController {
     return new ResponseEntity<>(responseDto, HttpStatus.OK);
   }
 
-  @PostMapping("/{userId}/issue")
+  @PostMapping("users/{userId}/issue/{couponId}")
   public ResponseEntity<String> issueCoupon(
-      @PathVariable Long userId,
-      @RequestBody IssuedCouponRequestDto requestDto) {
-    couponAdminService.issueCoupon(userId, requestDto);
+      @PathVariable Long userId, @PathVariable Long couponId) {
+    couponAdminService.issueCoupon(userId, couponId);
     return new ResponseEntity<>("발급 완료", HttpStatus.CREATED);
   }
 }
