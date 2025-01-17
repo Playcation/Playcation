@@ -45,7 +45,7 @@ public class EmailSenderService {
    */
   private String buildEmailContent(Order order, List<OrderDetail> orderDetails) {
     StringBuilder details = new StringBuilder(); // 이메일 본문에 주문 내역을 작성하기 위해 StringBuilder를 사용
-    BigDecimal totalAmount = BigDecimal.ZERO; // 총 금액을 계산할 변수, 초기값은 0
+    BigDecimal totalAmount = BigDecimal.ZERO; // 총 금액을 계산할 변수, 초기값은 0, order_detail entity에서 price는 BigDecimal
 
     // 주문 내역에 대해 순차적으로 처리
     for (OrderDetail detail : orderDetails) {
