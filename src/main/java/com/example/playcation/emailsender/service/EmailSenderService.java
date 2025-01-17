@@ -3,6 +3,7 @@ package com.example.playcation.emailsender.service;
 import com.example.playcation.order.entity.Order;
 import com.example.playcation.order.entity.OrderDetail;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -53,6 +54,8 @@ public class EmailSenderService {
       // 게임 제목과 가격을 이메일 본문에 추가
       details.append(String.format("- %s: %s원\n", detail.getGame().getTitle(), price.toPlainString()));
       totalAmount = totalAmount.add(price); // 총 금액에 해당 가격을 더함
+      // 소수점 아래를 버리고 정수만 가져오기
+      totalAmount = totalAmount.setScale(0, RoundingMode.FLOOR);
     }
 
     // 이메일 본문
@@ -65,8 +68,8 @@ public class EmailSenderService {
             "주문 내역:\n%s\n\n" +
             "이용해 주셔서 감사합니다.",
         order.getUser().getName(), // 주문자의 이름 출력
-        totalAmount.toPlainString(),  // 총 금액을 출력
-        order.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")), // 주문 시간에 초까지 포함
+        totalAmount,  // 총 금액을 출력
+        order.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")), // 주문 시간에 초까지 포함
         details.toString() // 주문 내역을 이메일 본문에 표시하기 위한 역할
     );
   }
