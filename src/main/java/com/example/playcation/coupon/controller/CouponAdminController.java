@@ -25,7 +25,7 @@ public class CouponAdminController {
   private final CouponAdminService couponAdminService;
 
   @PostMapping("/users/{userAmount}")
-  public ResponseEntity<?> createTestUsers(@PathVariable Long userAmount) {
+  public ResponseEntity<String> createTestUsers(@PathVariable Long userAmount) {
     couponAdminService.createTestUsers(userAmount);
     return new ResponseEntity<>("유저 생성 완료", HttpStatus.CREATED);
   }
@@ -45,8 +45,9 @@ public class CouponAdminController {
 
   @GetMapping
   public ResponseEntity<PagingDto<CouponResponseDto>> findAllCouponsAndPaging(
-      @RequestParam(defaultValue = "0") int page) {
-    PagingDto<CouponResponseDto> coupons = couponAdminService.findAllCouponsAndPaging(page);
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "10") int size) {
+    PagingDto<CouponResponseDto> coupons = couponAdminService.findAllCouponsAndPaging(page, size);
 
     return new ResponseEntity<>(coupons, HttpStatus.OK);
   }
@@ -57,4 +58,5 @@ public class CouponAdminController {
     CouponResponseDto responseDto = couponAdminService.updateCoupon(couponId, requestDto);
     return new ResponseEntity<>(responseDto, HttpStatus.OK);
   }
+
 }
