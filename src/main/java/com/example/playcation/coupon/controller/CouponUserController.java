@@ -45,10 +45,12 @@ public class CouponUserController {
     return new ResponseEntity<>(coupons, HttpStatus.OK);
   }
 
-  @PostMapping("{userId}/issue/{couponId}")
+  @PostMapping("/issue/{couponId}")
   public ResponseEntity<CouponUserResponseDto> getCoupon(
-      @PathVariable Long userId, @PathVariable Long couponId) {
-    CouponUserResponseDto response = couponUserService.getCoupon(userId, couponId);
+      @RequestHeader(TokenSettings.ACCESS_TOKEN_CATEGORY) String authorizationHeader
+      , @PathVariable Long couponId) {
+    CouponUserResponseDto response = couponUserService.getCoupon(
+        jwtUtil.findUserByToken(authorizationHeader), couponId);
     return new ResponseEntity<>(response, HttpStatus.OK);
   }
 }
