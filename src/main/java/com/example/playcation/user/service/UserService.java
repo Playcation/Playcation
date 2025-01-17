@@ -5,6 +5,7 @@ import com.example.playcation.enums.Role;
 import com.example.playcation.enums.Social;
 import com.example.playcation.exception.DuplicatedException;
 import com.example.playcation.exception.InvalidInputException;
+import com.example.playcation.exception.NotFoundException;
 import com.example.playcation.exception.UserErrorCode;
 import com.example.playcation.s3.entity.FileDetail;
 import com.example.playcation.s3.entity.UserFile;
@@ -21,6 +22,7 @@ import com.example.playcation.user.entity.User;
 import com.example.playcation.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import java.util.List;
@@ -31,6 +33,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -127,6 +130,24 @@ public class UserService {
 
     checkPassword(user, deletedUserRequestDto.getPassword());
     user.delete();
+  }
+
+
+  /**
+   * 탈퇴일로부터 30일 지난 유저 영구 삭제
+   *
+   * @param user 유저 정보
+   * @apiNote 스프링 배치 실행용 메서드
+   */
+  @Transactional
+  public void expire(User user) {
+    try {
+      s3Service.deleteFile(user.getImageUrl());
+    } catch (NotFoundException e) {
+      log.info(e.getMessage());
+    } finally {
+      user.expire();
+    }
   }
 
   // 비밀번호 확인

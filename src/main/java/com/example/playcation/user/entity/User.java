@@ -87,4 +87,16 @@ public class User extends BaseEntity {
   public boolean isManagerOfGame(Game game) {
     return this.equals(game.getUser());
   }
+
+  /**
+   * 회원 탈퇴 후 30일이 지난 계정을 영구 삭제
+   */
+  public void expire() {
+    this.name = null;
+    this.password = null;
+    this.description = null;
+    this.imageUrl = null;
+    this.role = null;
+    this.social = null;
+  }
 }
