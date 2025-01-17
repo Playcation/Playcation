@@ -27,7 +27,7 @@ public class CouponUserResponseDto {
 
   public static CouponUserResponseDto toDto(CouponUser couponUser) {
     return new CouponUserResponseDto(
-        couponUser.getId(),
+        couponUser.getCoupon().getId(),
         couponUser.getCoupon().getName(),
         couponUser.getCoupon().getStock(),
         couponUser.getCoupon().getRate(),

@@ -33,12 +33,13 @@ public class CouponUserService {
 
   public PagingDto<CouponUserResponseDto> findAllUserCouponsAndPaging(Long userId, int page,
       int size) {
-    Pageable pageable = PageRequest.of(page, size, Sort.by(Direction.DESC, "id"));
     userRepository.findByIdOrElseThrow(userId);
-    Page<CouponUser> couponUserPage = couponUserRepository.findAll(pageable);
+    Pageable pageable = PageRequest.of(page, size, Sort.by(Direction.DESC, "couponId"));
+    Page<CouponUser> couponUserPage = couponUserRepository.findAllByUserId(userId, pageable);
 
     List<CouponUserResponseDto> couponDtoList = couponUserPage.getContent().stream()
-        .map(couponUser -> new CouponUserResponseDto(couponUser.getId(),
+        .map(couponUser -> new CouponUserResponseDto(
+            couponUser.getCoupon().getId(),
             couponUser.getCoupon().getName(),
             couponUser.getCoupon().getStock(),
             couponUser.getCoupon().getRate(),
