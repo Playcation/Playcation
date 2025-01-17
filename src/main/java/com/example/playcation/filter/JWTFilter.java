@@ -98,7 +98,7 @@ public class JWTFilter extends OncePerRequestFilter {
    * @return 추출된 토큰 (없으면 null 반환)
    */
   private String extractToken(HttpServletRequest request) {
-    String token = request.getHeader(TokenSettings.ACCESS_TOKEN_CATEGORY);
+    String token = request.getHeader(TokenSettings.ACCESS_TOKEN_CATEGORY).replace("Bearer ", "");
     if (token == null) {
       throw new NoAuthorizedException(UserErrorCode.NOT_LOGIN);
     }

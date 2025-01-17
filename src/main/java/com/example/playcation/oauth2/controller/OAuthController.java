@@ -39,4 +39,15 @@ public class OAuthController {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", e.getMessage()));
     }
   }
+
+  @GetMapping("/home")
+  public ResponseEntity<?> getHome(@RequestHeader("Authorization") String accessToken) {
+    try {
+      Long userId = jwtUtil.findUserByToken(accessToken);
+      UserResponseDto user = userService.findUser(userId);
+      return ResponseEntity.ok(user);
+    } catch (Exception e) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", e.getMessage()));
+    }
+  }
 }
