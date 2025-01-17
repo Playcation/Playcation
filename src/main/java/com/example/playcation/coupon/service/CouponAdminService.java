@@ -4,15 +4,11 @@ import com.example.playcation.common.PagingDto;
 import com.example.playcation.coupon.dto.CouponRequestDto;
 import com.example.playcation.coupon.dto.CouponResponseDto;
 import com.example.playcation.coupon.entity.Coupon;
-import com.example.playcation.coupon.entity.CouponUser;
 import com.example.playcation.coupon.repository.CouponRepository;
-import com.example.playcation.coupon.repository.CouponUserRepository;
 import com.example.playcation.enums.Role;
 import com.example.playcation.enums.Social;
 import com.example.playcation.exception.CouponErrorCode;
 import com.example.playcation.exception.DuplicatedException;
-import com.example.playcation.exception.InvalidInputException;
-import com.example.playcation.exception.NoAuthorizedException;
 import com.example.playcation.user.entity.User;
 import com.example.playcation.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -33,7 +29,6 @@ public class CouponAdminService {
 
   private final UserRepository userRepository;
   private final CouponRepository couponRepository;
-  private final CouponUserRepository couponUserRepository;
   private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
   @Transactional
@@ -99,36 +94,5 @@ public class CouponAdminService {
     couponRepository.save(newCoupon);
 
     return CouponResponseDto.toDto(newCoupon);
-  }
-
-  @Transactional
-  public void issueCoupon(Long userId, Long couponId) {
-    // 사용자와 쿠폰 조회
-    User user = userRepository.findByIdOrElseThrow(userId);
-    Coupon coupon = couponRepository.findByIdOrElseThrow(couponId);
-
-    // 사용자가 ADMIN이 아닌지 확인
-    Role userRole = user.getRole();
-    if (userRole.equals(Role.ADMIN)) {
-      throw new NoAuthorizedException(CouponErrorCode.NO_AUTHORIZED_COUPON);
-    }
-
-    // 쿠폰 재고 확인
-    if (coupon.getStock() <= 0) {
-      throw new InvalidInputException(CouponErrorCode.COUPON_OUT_OF_STOCK);
-    }
-
-    // 쿠폰 발급 정보 저장
-    CouponUser couponUser = CouponUser.builder()
-        .user(user)
-        .coupon(coupon)
-        .issuedDate(coupon.getIssuedDate())
-        .expiredDate(coupon.getIssuedDate().plusDays(coupon.getValidDays()))
-        .build();
-
-    couponUserRepository.save(couponUser);
-
-    // 쿠폰 재고 감소
-    coupon.updateStock();
   }
 }

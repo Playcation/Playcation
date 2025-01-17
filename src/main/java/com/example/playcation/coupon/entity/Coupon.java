@@ -19,7 +19,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
 
 @Getter
 @Entity
@@ -44,7 +43,6 @@ public class Coupon {
   @Enumerated(value = EnumType.STRING)
   private CouponType couponType;
 
-  @CreatedDate
   @Column(nullable = false, updatable = false)
   private LocalDate issuedDate;
 

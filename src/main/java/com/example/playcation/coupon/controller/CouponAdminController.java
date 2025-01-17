@@ -59,10 +59,4 @@ public class CouponAdminController {
     return new ResponseEntity<>(responseDto, HttpStatus.OK);
   }
 
-  @PostMapping("users/{userId}/issue/{couponId}")
-  public ResponseEntity<String> issueCoupon(
-      @PathVariable Long userId, @PathVariable Long couponId) {
-    couponAdminService.issueCoupon(userId, couponId);
-    return new ResponseEntity<>("발급 완료", HttpStatus.CREATED);
-  }
 }

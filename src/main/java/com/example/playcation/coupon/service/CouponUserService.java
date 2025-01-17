@@ -2,11 +2,16 @@ package com.example.playcation.coupon.service;
 
 import com.example.playcation.common.PagingDto;
 import com.example.playcation.coupon.dto.CouponUserResponseDto;
+import com.example.playcation.coupon.entity.Coupon;
 import com.example.playcation.coupon.entity.CouponUser;
+import com.example.playcation.coupon.repository.CouponRepository;
 import com.example.playcation.coupon.repository.CouponUserRepository;
 import com.example.playcation.exception.CouponErrorCode;
+import com.example.playcation.exception.InvalidInputException;
 import com.example.playcation.exception.NotFoundException;
+import com.example.playcation.user.entity.User;
 import com.example.playcation.user.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -22,6 +27,8 @@ public class CouponUserService {
 
   private final CouponUserRepository couponUserRepository;
   private final UserRepository userRepository;
+  private final CouponRepository couponRepository;
+
 
   public CouponUserResponseDto findUserCoupon(Long userId, Long couponId) {
     userRepository.findByIdOrElseThrow(userId);
@@ -51,4 +58,29 @@ public class CouponUserService {
     return new PagingDto<>(couponDtoList, couponUserPage.getTotalElements());
   }
 
+  @Transactional
+  public CouponUserResponseDto getCoupon(Long userId, Long couponId) {
+    // 쿠폰 조회 및 재고 확인
+    Coupon coupon = couponRepository.findByIdOrElseThrow(couponId);
+    User user = userRepository.findByIdOrElseThrow(userId);
+
+    if (coupon.getStock() <= 0) {
+      throw new InvalidInputException(CouponErrorCode.COUPON_OUT_OF_STOCK);
+    }
+
+    // 쿠폰 재고 감소
+    coupon.updateStock();
+
+    // 쿠폰 발급
+    CouponUser couponUser = CouponUser.builder()
+        .user(user)
+        .coupon(coupon)
+        .issuedDate(coupon.getIssuedDate())
+        .expiredDate(coupon.getIssuedDate().plusDays(coupon.getValidDays()))
+        .build();
+
+    couponUserRepository.save(couponUser);
+
+    return CouponUserResponseDto.toDto(couponUser);
+  }
 }

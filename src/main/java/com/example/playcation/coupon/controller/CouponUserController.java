@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -22,6 +23,7 @@ public class CouponUserController {
 
   private final CouponUserService couponUserService;
   private final JWTUtil jwtUtil;
+
 
   @GetMapping("/{couponId}")
   public ResponseEntity<CouponUserResponseDto> findUserCoupon(
@@ -43,4 +45,10 @@ public class CouponUserController {
     return new ResponseEntity<>(coupons, HttpStatus.OK);
   }
 
+  @PostMapping("{userId}/issue/{couponId}")
+  public ResponseEntity<CouponUserResponseDto> getCoupon(
+      @PathVariable Long userId, @PathVariable Long couponId) {
+    CouponUserResponseDto response = couponUserService.getCoupon(userId, couponId);
+    return new ResponseEntity<>(response, HttpStatus.OK);
+  }
 }
