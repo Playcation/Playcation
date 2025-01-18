@@ -6,6 +6,7 @@ import com.example.playcation.exception.InvalidInputException;
 import com.example.playcation.exception.NoAuthorizedException;
 import com.example.playcation.exception.TokenErrorCode;
 import com.example.playcation.exception.UserErrorCode;
+import com.example.playcation.token.service.TokenService;
 import com.example.playcation.user.entity.CustomUserDetails;
 import com.example.playcation.user.entity.User;
 import com.example.playcation.user.repository.UserRepository;
@@ -19,6 +20,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -35,6 +37,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public class JWTFilter extends OncePerRequestFilter {
 
   private final UserRepository userRepository;
+  private final TokenService tokenService;
   private final JWTUtil jwtUtil;
 
   /**
@@ -66,8 +69,17 @@ public class JWTFilter extends OncePerRequestFilter {
       validateToken(accessToken);
     } catch (ExpiredJwtException e) {
       // 쿠키에서 리플레시 토큰 확인하기 -> 유효하면 트큰 재발급 / 아니면 이대로 진행
-      Cookie[] cookies = request.getCookies();
-      sendErrorResponse(response, "토큰이 만료되었습니다.");
+      String[] tokens = tokenService.createNewToken(request);
+      String newAccessToken = tokens[0];
+      String newRefreshToken = tokens[1];
+      response.addCookie(jwtUtil.createCookie(TokenSettings.REFRESH_TOKEN_CATEGORY, newRefreshToken));
+
+      response.setStatus(HttpServletResponse.SC_OK); // 302 Found 설정
+      response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+      response.getWriter().write(
+          "{\"token\" : \"" + newAccessToken + "\"}"
+      );
+//      sendErrorResponse(response, "토큰이 만료되었습니다.");
       return;
     } catch (Exception e) {
       sendErrorResponse(response, "잘못된 토큰입니다.");

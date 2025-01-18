@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -35,5 +36,10 @@ public class TokenController {
     response.addCookie(jwtUtil.createCookie(TokenSettings.REFRESH_TOKEN_CATEGORY, tokens[1]));
 
     return new ResponseEntity<>("토큰이 발급되었습니다. : " + tokens[0], HttpStatus.OK);
+  }
+
+  @PostMapping("/check/token")
+  public ResponseEntity<String> checkToken(){
+    return new ResponseEntity<>("토큰 검증 완료", HttpStatus.OK);
   }
 }

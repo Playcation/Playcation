@@ -6,6 +6,7 @@ import com.example.playcation.filter.CustomLoginFilter;
 import com.example.playcation.filter.CustomLogoutFilter;
 import com.example.playcation.oauth2.handler.SuccessHandler;
 import com.example.playcation.oauth2.service.OAuth2Service;
+import com.example.playcation.token.service.TokenService;
 import com.example.playcation.user.repository.UserRepository;
 import com.example.playcation.util.JWTUtil;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +38,7 @@ import org.springframework.web.cors.CorsConfiguration;
 public class SecurityConfig {
 
   private final AuthenticationConfiguration authenticationConfiguration;
+  private final TokenService tokenService;
   private final SuccessHandler successHandler;
   private final OAuth2Service oAuth2Service;
   private final JWTUtil jwtUtil;
@@ -125,7 +127,7 @@ public class SecurityConfig {
         .anyRequest().authenticated()
     );
 
-    http.addFilterBefore(new JWTFilter(userRepository, jwtUtil), CustomLoginFilter.class);
+    http.addFilterBefore(new JWTFilter(userRepository, tokenService, jwtUtil), CustomLoginFilter.class);
     http.addFilterBefore(new CustomLogoutFilter(jwtUtil), LogoutFilter.class);
     http.addFilterAt(
         new CustomLoginFilter(authenticationManager(authenticationConfiguration), jwtUtil),
