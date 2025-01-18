@@ -1,4 +1,4 @@
-package com.example.playcation.batch.schedule;
+package com.example.playcation.scheduler;
 
 
 import lombok.RequiredArgsConstructor;
@@ -7,9 +7,7 @@ import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.annotation.Scheduled;
 
-@Slf4j
 @Configuration
 @RequiredArgsConstructor
 public class BatchJobScheduler {

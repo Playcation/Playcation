@@ -19,7 +19,7 @@ import org.springframework.batch.item.data.builder.RepositoryItemReaderBuilder;
 import org.springframework.batch.item.data.builder.RepositoryItemWriterBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.transaction.PlatformTransactionManager;
 
 /**
@@ -30,13 +30,11 @@ import org.springframework.transaction.PlatformTransactionManager;
 @RequiredArgsConstructor
 public class ExpiredUserJob {
 
+  private static final Long USER_DELETION_WAIT_TIME = 30L;
   private final JobRepository jobRepository;
   private final PlatformTransactionManager platformTransactionManager;
-
   private final UserRepository userRepository;
   private final UserService userService;
-
-  private static final Long USER_DELETION_WAIT_TIME = 30L;
 
   @Bean
   public Job deleteExpiredUser() {
@@ -50,7 +48,7 @@ public class ExpiredUserJob {
   public Step firstStep() {
 
     return new StepBuilder("findUserAndDelete", jobRepository)
-        .<User, User> chunk(10, platformTransactionManager)
+        .<User, User>chunk(10, platformTransactionManager)
         .allowStartIfComplete(true)
         .reader(reader())
         .processor(processor())
@@ -67,7 +65,7 @@ public class ExpiredUserJob {
         .methodName("findAllByDeletedAtIsNotNullAndDeletedAtIsBeforeAndNameIsNotNull")
         .arguments(LocalDateTime.now().minusDays(USER_DELETION_WAIT_TIME))
         .repository(userRepository)
-        .sorts(Map.of("createdAt", Sort.Direction.ASC))
+        .sorts(Map.of("createdAt", Direction.DESC))
         .build();
   }
 
