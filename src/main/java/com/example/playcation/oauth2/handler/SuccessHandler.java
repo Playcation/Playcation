@@ -57,10 +57,12 @@ public class SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
     // refresh token 쿠키 설정
     response.addCookie(jwtUtil.createCookie(TokenSettings.REFRESH_TOKEN_CATEGORY, refreshToken));
 
+    // access token을 프론트로 전달
     String redirectUrl = UriComponentsBuilder.fromUriString("http://localhost:5173/redirect")
         .queryParam("token", accessToken)
         .build().toUriString();
 
+    // url을 프론트로 리디렉션
     getRedirectStrategy().sendRedirect(request, response, redirectUrl);
   }
 }
