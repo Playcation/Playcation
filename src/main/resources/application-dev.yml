@@ -1,0 +1,6 @@
+payment:
+  toss:
+    test_client_api_key: ${TOSS_CLIENT_KEY}
+    test_secrete_api_key: ${TOSS_SECRETE_KEY}
+    success_url: "http://localhost:8080/api/v1/payments/toss/success"
+    fail_url: "http://localhost:8080/api/v1/payments/toss/fail"
