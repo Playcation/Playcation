@@ -10,18 +10,21 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * CustomLoginFilter: 사용자 로그인 시 JWT 기반 인증을 수행하는 필터
@@ -70,16 +73,25 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
    * @param authentication 인증 정보 (사용자 ID 및 권한 포함)
    */
   @Override
-  protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) {
+  protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication)
+      throws IOException {
     CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
     String userId = customUserDetails.getUserId().toString();
     String role = authentication.getAuthorities().iterator().next().getAuthority();
 
     // JWT 토큰 생성
     String[] tokens = jwtUtil.generateTokens(userId, role);
+    String accessToken = tokens[0];
+    String refreshToken = tokens[1];
+    Map<String, String> body = new HashMap<>();
+    body.put("token", accessToken);
+    // refresh token 쿠키 설정
+    response.addCookie(jwtUtil.createCookie(TokenSettings.REFRESH_TOKEN_CATEGORY, refreshToken));
 
-    response.setHeader(TokenSettings.ACCESS_TOKEN_CATEGORY, tokens[0]);
-    response.addCookie(jwtUtil.createCookie(TokenSettings.REFRESH_TOKEN_CATEGORY, tokens[1]));
-    response.setStatus(HttpStatus.OK.value());
+    response.setStatus(HttpServletResponse.SC_OK); // 302 Found 설정
+    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+    response.getWriter().write(
+        "{\"token\" : \"" + accessToken + "\"}"
+    );
   }
 }
