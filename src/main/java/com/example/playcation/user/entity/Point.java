@@ -46,6 +46,7 @@ public class Point {
 
   public BigDecimal getFreePoint(User user){
     this.freePoint = this.freePoint.add(user.getGrade().getFreePoint());
+    isGetFreePoint = true;
     return this.freePoint.add(this.paidPoint);
   }
 
