@@ -54,7 +54,7 @@ public class Payment extends BaseEntity {
   private boolean paySuccessYN;
 
   @ManyToOne(cascade = CascadeType.PERSIST)
-  @JoinColumn(name = "user")
+  @JoinColumn(name = "user_id")
   private User user;
 
   @Column
