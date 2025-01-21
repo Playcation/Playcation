@@ -3,6 +3,7 @@ package com.example.playcation.coupon.repository;
 import com.example.playcation.coupon.entity.CouponUser;
 import com.example.playcation.exception.CouponErrorCode;
 import com.example.playcation.exception.NotFoundException;
+import java.time.LocalDate;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,4 +21,12 @@ public interface CouponUserRepository extends JpaRepository<CouponUser, Long> {
   Optional<CouponUser> findByUserIdAndCouponId(Long userId, Long couponId);
 
   Page<CouponUser> findAllByUserId(Long userId, Pageable pageable);
+
+  /**
+   * 유효 기간 지난 쿠폰 찾기
+   *
+   * @param date 현재 날짜
+   * @apiNote {@link com.example.playcation.batch.job.ExpiredCouponJob} 배치 실행용
+   */
+  Page<CouponUser> findAllByExpiredDateIsBefore(LocalDate date, Pageable pageable);
 }

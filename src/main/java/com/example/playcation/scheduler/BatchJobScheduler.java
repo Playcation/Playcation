@@ -1,4 +1,4 @@
-package com.example.playcation.batch.schedule;
+package com.example.playcation.scheduler;
 
 
 import lombok.RequiredArgsConstructor;
@@ -9,7 +9,6 @@ import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.Scheduled;
 
-@Slf4j
 @Configuration
 @RequiredArgsConstructor
 public class BatchJobScheduler {
@@ -17,15 +16,15 @@ public class BatchJobScheduler {
   private final JobLauncher jobLauncher;
   private final JobRegistry jobRegistry;
 
-  // TODO: 배포 전에 스케줄러 작동 켜놓기
-  //  테스트할 때는 cron = "10 * * * * *"
+  // TODO: 배포 전에 스케줄러 설정 바꿔서 작동 켜놓기
+  //  매일 정각: cron = "0 0 0 * * *"
   /**
-   * 탈퇴 후 30일이 지난 유저 정보를 삭제하는 job<br>
-   * 매일 오전 4시에 작동
+   * 유효 기간이 지난 쿠폰을 삭제하는 job<br>
+   * 매일 정각에 실행
    */
-//  @Scheduled(cron = "0 0 4 * * *", zone = "Asia/Seoul")
+  // @Scheduled(cron = "10 * * * * *", zone = "Asia/Seoul")
   public void runDeleteExpiredUserJob() throws Exception {
 
-    jobLauncher.run(jobRegistry.getJob("deleteExpiredUser"), new JobParameters());
+    jobLauncher.run(jobRegistry.getJob("deleteExpiredCouponUser"), new JobParameters());
   }
 }
