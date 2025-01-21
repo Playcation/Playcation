@@ -2,12 +2,14 @@ package com.example.playcation.order.controller;
 
 import com.example.playcation.common.PagingDto;
 import com.example.playcation.common.TokenSettings;
+import com.example.playcation.game.dto.GameSimpleResponseDto;
 import com.example.playcation.order.dto.OrderResponseDto;
 import com.example.playcation.order.dto.RefundRequestDto;
 import com.example.playcation.order.dto.RefundResponseDto;
 import com.example.playcation.order.service.OrderUserService;
 import com.example.playcation.util.JWTUtil;
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -88,5 +90,18 @@ public class OrderUserController {
         jwtUtil.findUserByToken(authorizationHeader), orderId, requestDto);
 
     return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
+  }
+
+  /**
+   * 가장 최근의 주문 한 건의 게임 목록을 반환
+   */
+  @GetMapping("/latest")
+  public ResponseEntity<List<GameSimpleResponseDto>> findLatestOrder(
+      @RequestHeader(TokenSettings.ACCESS_TOKEN_CATEGORY) String authorizationHeader
+  ) {
+    List<GameSimpleResponseDto> responseDtos = orderService.findLatestOrder(
+        jwtUtil.findUserByToken(authorizationHeader));
+
+    return new ResponseEntity<>(responseDtos, HttpStatus.OK);
   }
 }
