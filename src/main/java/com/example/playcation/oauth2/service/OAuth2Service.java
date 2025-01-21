@@ -56,6 +56,7 @@ public class OAuth2Service extends DefaultOAuth2UserService {
         .email(oAuth2Response.getEmail())
         .password("")
         .name(oAuth2Response.getName())
+        .username(oAuth2Response.getName())
         .role(Role.USER)
         .social(Social.valueOf(registrationId))
         .build();

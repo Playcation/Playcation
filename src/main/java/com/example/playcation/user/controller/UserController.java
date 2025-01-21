@@ -1,5 +1,6 @@
 package com.example.playcation.user.controller;
 
+import com.example.playcation.common.PagingDto;
 import com.example.playcation.common.TokenSettings;
 import com.example.playcation.user.dto.LoginUserRequestDto;
 import com.example.playcation.user.dto.LoginUserResponseDto;
@@ -18,6 +19,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -59,6 +62,15 @@ public class UserController {
     Long id = jwtUtil.findUserByToken(authorizationHeader);
 
     return ResponseEntity.ok().body(userService.findUser(id));
+  }
+
+  // 유저 프로필 조회
+  @GetMapping("/search")
+  public ResponseEntity<PagingDto<UserResponseDto>> searchUser(
+      @RequestParam String username,
+      @PageableDefault(size = 10, page = 0, sort = "username") Pageable pageable
+  ){
+    return ResponseEntity.ok().body(userService.searchUser(username, pageable));
   }
 
   // 유저 수정

@@ -43,6 +43,8 @@ public class User extends BaseEntity {
   @Column(length = 10)
   private String name;
 
+  private String username;
+
   private String description;
 
   @Enumerated(value = EnumType.STRING)
@@ -54,16 +56,17 @@ public class User extends BaseEntity {
   @JsonFormat(pattern = "yy:MM:dd hh:mm:ss")
   private LocalDateTime deletedAt;
 
-  public User(String email, String password, String name, Role role, Social social) {
+  public User(String email, String password, String name, String username, Role role, Social social) {
     this.email = email;
     this.password = password;
     this.name = name;
+    this.username = username;
     this.role = role;
     this.social = social;
   }
 
-  public void update(String name, String description, FileDetail fileDetail) {
-    this.name = name == null ? this.name : name;
+  public void update(String username, String description, FileDetail fileDetail) {
+    this.username = username == null ? this.username : username;
     this.imageUrl = fileDetail == null ? this.imageUrl : fileDetail.getFilePath();
     this.description = description == null ? this.description : description;
   }
@@ -93,6 +96,7 @@ public class User extends BaseEntity {
    */
   public void expire() {
     this.name = null;
+    this.username = null;
     this.password = null;
     this.description = null;
     this.imageUrl = null;

@@ -8,10 +8,9 @@ import lombok.Getter;
 @AllArgsConstructor
 public class UpdatedUserRequestDto {
 
-  private String password;
+  private String username;
 
-  @Column(nullable = true)
-  private String name;
+  private String password;
 
   @Column(nullable = true)
   private String description;

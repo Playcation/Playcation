@@ -58,7 +58,7 @@ public class SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
     response.addCookie(jwtUtil.createCookie(TokenSettings.REFRESH_TOKEN_CATEGORY, refreshToken));
 
     // access token을 프론트로 전달
-    String redirectUrl = UriComponentsBuilder.fromUriString("http://localhost:5173/redirect")
+    String redirectUrl = UriComponentsBuilder.fromUriString("http://localhost:3000/redirect")
         .queryParam("token", accessToken)
         .build().toUriString();
 

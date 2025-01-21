@@ -39,6 +39,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
   Page<User> findAll(Pageable pageable);
 
+  Page<User> findAllByUsername(String username, Pageable pageable);
+
   /**
    * 회원 탈퇴일로부터 30일이 지났고 영구 삭제 처리가 되지 않은 유저를 찾음
    *

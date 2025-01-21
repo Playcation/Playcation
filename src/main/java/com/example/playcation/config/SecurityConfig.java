@@ -82,7 +82,7 @@ public class SecurityConfig {
 
     http.cors(corsCustomizer -> corsCustomizer.configurationSource(request -> {
       CorsConfiguration config = new CorsConfiguration();
-      config.addAllowedOrigin("http://localhost:5173");
+      config.addAllowedOrigin("http://localhost:3000");
       config.addAllowedMethod("*");
       config.addAllowedHeader("*");
       config.setAllowCredentials(true);
@@ -100,7 +100,6 @@ public class SecurityConfig {
 
     // oauth2
     http.oauth2Login((oauth2) -> oauth2
-//        .loginPage("/oauth2-login").permitAll()
         .userInfoEndpoint((userInfoEndpointConfig) ->
             userInfoEndpointConfig.userService(oAuth2Service))
         .successHandler(successHandler));

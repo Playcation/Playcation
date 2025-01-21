@@ -23,4 +23,6 @@ public class SignInUserRequestDto {
   @NotBlank(message = "이름은 필수값입니다.")
   @Size(max = 10, message = "이름은 최대 10자입니다.")
   private String name;
+
+  private String username;
 }

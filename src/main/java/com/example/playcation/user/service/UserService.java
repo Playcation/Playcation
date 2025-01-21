@@ -7,6 +7,7 @@ import com.example.playcation.exception.DuplicatedException;
 import com.example.playcation.exception.InvalidInputException;
 import com.example.playcation.exception.NotFoundException;
 import com.example.playcation.exception.UserErrorCode;
+import com.example.playcation.game.dto.GameResponseDto;
 import com.example.playcation.s3.entity.FileDetail;
 import com.example.playcation.s3.entity.UserFile;
 import com.example.playcation.s3.repository.FileDetailRepository;
@@ -60,6 +61,7 @@ public class UserService {
         .password(password)
         .imageUrl(fileDetail == null ? "" : fileDetail.getFilePath())
         .name(signInUserRequestDto.getName())
+        .username(signInUserRequestDto.getUsername())
         .role(Role.USER)
         .social(Social.NORMAL)
         .build()
@@ -71,6 +73,14 @@ public class UserService {
   // 유저 조회
   public UserResponseDto findUser(Long id) {
     return UserResponseDto.toDto(userRepository.findByIdOrElseThrow(id));
+  }
+
+  // 유저 검색
+  public PagingDto<UserResponseDto> searchUser(String username, Pageable pageable) {
+    Page<User> userList = userRepository.findAllByUsername(username, pageable);
+    List<UserResponseDto> users = userList.stream().map(UserResponseDto::toDto).toList();
+    Long count = userList.getTotalElements();
+    return new PagingDto<>(users, count);
   }
 
   // 유저 정보 수정
@@ -86,9 +96,10 @@ public class UserService {
       fileDetail = updateFileDetail(user, file);
     }
 
-    user.update(updatedUserRequestDto.getName(),
+    user.update(updatedUserRequestDto.getUsername(),
         updatedUserRequestDto.getDescription(),
         fileDetail);
+    userRepository.save(user);
     return UserResponseDto.toDto(user);
   }
 
