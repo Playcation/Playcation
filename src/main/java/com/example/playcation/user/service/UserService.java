@@ -1,12 +1,14 @@
 package com.example.playcation.user.service;
 
 import com.example.playcation.common.PagingDto;
+import com.example.playcation.enums.Grade;
 import com.example.playcation.enums.Role;
 import com.example.playcation.enums.Social;
 import com.example.playcation.exception.DuplicatedException;
 import com.example.playcation.exception.InvalidInputException;
 import com.example.playcation.exception.NotFoundException;
 import com.example.playcation.exception.UserErrorCode;
+import com.example.playcation.game.dto.GameResponseDto;
 import com.example.playcation.s3.entity.FileDetail;
 import com.example.playcation.s3.entity.UserFile;
 import com.example.playcation.s3.repository.FileDetailRepository;
@@ -18,10 +20,13 @@ import com.example.playcation.user.dto.SignInUserRequestDto;
 import com.example.playcation.user.dto.UpdatedUserPasswordRequestDto;
 import com.example.playcation.user.dto.UpdatedUserRequestDto;
 import com.example.playcation.user.dto.UserResponseDto;
+import com.example.playcation.user.entity.Point;
 import com.example.playcation.user.entity.User;
+import com.example.playcation.user.repository.PointRepository;
 import com.example.playcation.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +45,7 @@ public class UserService {
   private final UserRepository userRepository;
   private final UserFileRepository userFileRepository;
   private final BCryptPasswordEncoder bCryptPasswordEncoder;
+  private final PointRepository pointRepository;
   private final S3Service s3Service;
   private final FileDetailRepository fileDetailRepository;
 
@@ -59,8 +65,10 @@ public class UserService {
         .password(password)
         .imageUrl(fileDetail == null ? "" : fileDetail.getFilePath())
         .name(signInUserRequestDto.getName())
+        .username(signInUserRequestDto.getUsername())
         .role(Role.USER)
         .social(Social.NORMAL)
+        .grade(Grade.NORMAL)
         .build()
     );
     userFileRepository.save(new UserFile(user, fileDetail));
@@ -70,6 +78,14 @@ public class UserService {
   // 유저 조회
   public UserResponseDto findUser(Long id) {
     return UserResponseDto.toDto(userRepository.findByIdOrElseThrow(id));
+  }
+
+  // 유저 검색
+  public PagingDto<UserResponseDto> searchUser(String username, Pageable pageable) {
+    Page<User> userList = userRepository.findAllByUsername(username, pageable);
+    List<UserResponseDto> users = userList.stream().map(UserResponseDto::toDto).toList();
+    Long count = userList.getTotalElements();
+    return new PagingDto<>(users, count);
   }
 
   // 유저 정보 수정
@@ -85,9 +101,10 @@ public class UserService {
       fileDetail = updateFileDetail(user, file);
     }
 
-    user.update(updatedUserRequestDto.getName(),
+    user.update(updatedUserRequestDto.getUsername(),
         updatedUserRequestDto.getDescription(),
         fileDetail);
+    userRepository.save(user);
     return UserResponseDto.toDto(user);
   }
 
@@ -182,5 +199,12 @@ public class UserService {
 
   public UserResponseDto restoreUser(@Valid RestoreUserRequestDto requestDto) {
     return null;
+  }
+
+  public String attendanceUser(Long id) {
+    User user = userRepository.findByIdOrElseThrow(id);
+    Point pointDetail = pointRepository.getPointByUserIdOrElseThrow(id);
+    BigDecimal point = pointDetail.getFreePoint(user);
+    return "현재 포인트는" + point.toString() + "입니다.";
   }
 }

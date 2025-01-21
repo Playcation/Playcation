@@ -13,7 +13,7 @@ public class UserResponseDto {
 
   private String filePath;
 
-  private String name;
+  private String username;
 
   private String description;
 
@@ -23,7 +23,7 @@ public class UserResponseDto {
     return new UserResponseDto(
         user.getEmail(),
         user.getImageUrl(),
-        user.getName(),
+        user.getUsername(),
         user.getDescription(),
         user.getUpdatedAt()
     );

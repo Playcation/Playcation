@@ -18,6 +18,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.security.core.Authentication;
@@ -32,6 +33,9 @@ public class SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
   private final UserRepository userRepository;
   private final JWTUtil jwtUtil;
+
+  @Value("${spring.profiles.front_url}")
+  private String frontUrl;
 
   @Override
   public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
@@ -58,7 +62,7 @@ public class SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
     response.addCookie(jwtUtil.createCookie(TokenSettings.REFRESH_TOKEN_CATEGORY, refreshToken));
 
     // access token을 프론트로 전달
-    String redirectUrl = UriComponentsBuilder.fromUriString("http://localhost:5173/redirect")
+    String redirectUrl = UriComponentsBuilder.fromUriString(frontUrl + "/redirect")
         .queryParam("token", accessToken)
         .build().toUriString();
 

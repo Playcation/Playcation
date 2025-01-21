@@ -1,6 +1,7 @@
 package com.example.playcation.user.entity;
 
 import com.example.playcation.common.BaseEntity;
+import com.example.playcation.enums.Grade;
 import com.example.playcation.enums.Role;
 import com.example.playcation.enums.Social;
 import com.example.playcation.game.entity.Game;
@@ -20,6 +21,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import software.amazon.ion.Decimal;
 
 @Entity
 @Getter
@@ -44,11 +46,9 @@ public class User extends BaseEntity {
   @Column(length = 10)
   private String name;
 
+  private String username;
+
   private String description;
-
-  private BigDecimal paidPoint;
-
-  private BigDecimal freePoint;
 
   @Enumerated(value = EnumType.STRING)
   private Role role;
@@ -56,19 +56,24 @@ public class User extends BaseEntity {
   @Enumerated(value = EnumType.STRING)
   private Social social;
 
+  @Enumerated(value = EnumType.STRING)
+  private Grade grade;
+
   @JsonFormat(pattern = "yy:MM:dd hh:mm:ss")
   private LocalDateTime deletedAt;
 
-  public User(String email, String password, String name, Role role, Social social) {
+  public User(String email, String password, String name, String username, Role role, Social social) {
     this.email = email;
     this.password = password;
     this.name = name;
+    this.username = username;
     this.role = role;
     this.social = social;
+    this.grade = Grade.NORMAL;
   }
 
-  public void update(String name, String description, FileDetail fileDetail) {
-    this.name = name == null ? this.name : name;
+  public void update(String username, String description, FileDetail fileDetail) {
+    this.username = username == null ? this.username : username;
     this.imageUrl = fileDetail == null ? this.imageUrl : fileDetail.getFilePath();
     this.description = description == null ? this.description : description;
   }
@@ -98,18 +103,11 @@ public class User extends BaseEntity {
    */
   public void expire() {
     this.name = null;
+    this.username = null;
     this.password = null;
     this.description = null;
     this.imageUrl = null;
     this.role = null;
     this.social = null;
-  }
-
-  public void updatePaidPoint(BigDecimal paidPoint) {
-    this.paidPoint = paidPoint;
-  }
-
-  public void updateFreePoint(BigDecimal freePoint) {
-    this.freePoint = freePoint;
   }
 }
