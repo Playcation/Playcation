@@ -83,23 +83,4 @@ public class CouponUserService {
 
     return CouponUserResponseDto.toDto(couponUser);
   }
-
-  /**
-   * 유저에게 발급된 쿠폰 중 유효기간이 지난 것들 삭제
-   * @apiNote {@link com.example.playcation.scheduler.CommonScheduler} 스케줄링 적용한 메서드
-   */
-  @Transactional
-  public void deleteExpiredCoupons() {
-
-    // TODO: deleteAllByExpiredDateIsBefore()은 왜 작동 안 하는지 알아보기
-    //  현재 DB를 두번 일 시키는 중... 수정 필요!!!
-
-    List<CouponUser> expiredCoupons = couponUserRepository.findAllByExpiredDateIsBefore(
-        LocalDate.now());
-
-    log.info(expiredCoupons.toString());
-
-    couponUserRepository.deleteAll(expiredCoupons);
-  }
-
 }

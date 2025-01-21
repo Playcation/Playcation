@@ -1,8 +1,6 @@
 package com.example.playcation.scheduler;
 
-import com.example.playcation.coupon.repository.CouponUserRepository;
-import com.example.playcation.coupon.service.CouponUserService;
-import java.time.LocalDate;
+import com.example.playcation.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -11,14 +9,17 @@ import org.springframework.scheduling.annotation.Scheduled;
 @RequiredArgsConstructor
 public class CommonScheduler {
 
-  private final CouponUserService couponUserService;
+  private static final Long USER_DELETION_WAIT_TIME = 30L;
 
+  private final UserService userService;
+
+  // TODO: 스케줄러 설정 바꿔서 켜놓기!!
+  //  정각: cron = "0 0 0 * * *"
   /**
-   * 유저에게 발급된 쿠폰들 중 유효 기간이 지난 것들을 삭제
+   * 탈퇴 후 30일이 지난 유저 정보를 삭제
    */
-  @Scheduled(cron = "0 * * * * *")
-  public void runDeleteExpireCoupon() {
-
-    couponUserService.deleteExpiredCoupons();
+  // @Scheduled(cron = "10 * * * * *")
+  public void runDeleteExpiredUser() {
+    userService.deleteExpiredUsers(USER_DELETION_WAIT_TIME);
   }
 }
