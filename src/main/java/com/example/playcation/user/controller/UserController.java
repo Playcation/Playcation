@@ -132,5 +132,4 @@ public class UserController {
     Long id = jwtUtil.findUserByToken(authorizationHeader);
     return ResponseEntity.ok().body(userService.uploadFiles(id, files));
   }
-
 }

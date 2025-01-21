@@ -11,6 +11,7 @@ import com.example.playcation.user.repository.UserRepository;
 import com.example.playcation.util.JWTUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -39,9 +40,9 @@ import org.springframework.web.cors.CorsConfiguration;
 public class SecurityConfig {
 
   private final AuthenticationConfiguration authenticationConfiguration;
+  private final ApplicationContext applicationContext;
   private final TokenService tokenService;
   private final SuccessHandler successHandler;
-  private final OAuth2Service oAuth2Service;
   private final JWTUtil jwtUtil;
 
   @Value("${spring.profiles.front_url}")
@@ -83,6 +84,7 @@ public class SecurityConfig {
   public SecurityFilterChain filterChain(
       HttpSecurity http,
       UserRepository userRepository) throws Exception {
+    OAuth2Service oAuth2Service = applicationContext.getBean(OAuth2Service.class);
 
     http.cors(corsCustomizer -> corsCustomizer.configurationSource(request -> {
       CorsConfiguration config = new CorsConfiguration();

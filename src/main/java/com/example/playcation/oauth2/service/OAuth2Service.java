@@ -1,5 +1,6 @@
 package com.example.playcation.oauth2.service;
 
+import com.example.playcation.enums.Grade;
 import com.example.playcation.enums.Role;
 import com.example.playcation.enums.Social;
 import com.example.playcation.exception.DuplicatedException;
@@ -10,9 +11,13 @@ import com.example.playcation.oauth2.dto.GoogleResponseDto;
 import com.example.playcation.oauth2.dto.NaverResponseDto;
 import com.example.playcation.oauth2.dto.OAuth2UserDto;
 import com.example.playcation.oauth2.dto.UserDto;
+import com.example.playcation.user.entity.Point;
 import com.example.playcation.user.entity.User;
+import com.example.playcation.user.repository.PointRepository;
 import com.example.playcation.user.repository.UserRepository;
+import io.lettuce.core.StrAlgoArgs.By;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -24,6 +29,8 @@ import org.springframework.stereotype.Service;
 public class OAuth2Service extends DefaultOAuth2UserService {
 
   private final UserRepository userRepository;
+  private final PointRepository pointRepository;
+  private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
   @Override
   public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -59,9 +66,12 @@ public class OAuth2Service extends DefaultOAuth2UserService {
         .username(oAuth2Response.getName())
         .role(Role.USER)
         .social(Social.valueOf(registrationId))
+        .password(bCryptPasswordEncoder.encode(oAuth2Response.getPassword()))
+        .grade(Grade.NORMAL)
         .build();
 
     userRepository.save(user);
+    pointRepository.save(new Point(user));
     return new OAuth2UserDto(new UserDto(user.getEmail(), user.getName(), Role.USER));
   }
 

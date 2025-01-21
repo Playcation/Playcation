@@ -31,4 +31,11 @@ public class GoogleResponseDto implements BasicOAuth2Dto{
 
     return attribute.get("name").toString();
   }
+
+  @Override
+  public String getPassword() {
+    return "0000";
+  }
+
+
 }

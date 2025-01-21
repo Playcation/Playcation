@@ -42,4 +42,8 @@ public class OAuth2UserDto implements OAuth2User {
   public String getEmail() {
     return userDto.getEmail();
   }
+
+  public String getPassword(){
+    return userDto.getPassword();
+  }
 }

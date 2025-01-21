@@ -31,4 +31,9 @@ public class NaverResponseDto implements BasicOAuth2Dto{
   public String getName() {
     return attribute.get("name").toString();
   }
+
+  @Override
+  public String getPassword() {
+    return "0000";
+  }
 }

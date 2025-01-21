@@ -203,12 +203,14 @@ public class UserService {
     return null;
   }
 
+  @Transactional
   public String attendanceUser(Long id) {
     User user = userRepository.findByIdOrElseThrow(id);
     Point pointDetail = pointRepository.getPointByUserIdOrElseThrow(id);
     BigDecimal point;
     if(!pointDetail.getIsGetFreePoint()) {
       point = pointDetail.getFreePoint(user);
+      pointRepository.save(pointDetail);
       return "현재 포인트는" + point.toString() + "입니다.";
     }else{
       throw new DuplicatedException(PaymentErrorCode.ALREADY_GET_FREE_POINT);

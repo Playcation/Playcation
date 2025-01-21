@@ -13,5 +13,7 @@ public interface BasicOAuth2Dto {
 
   //사용자 실명 (설정한 이름)
   String getName();
-
+  
+  // 기본 비밀번호 설정
+  String getPassword();
 }
