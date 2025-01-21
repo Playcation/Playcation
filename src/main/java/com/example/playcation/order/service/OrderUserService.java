@@ -24,6 +24,7 @@ import com.example.playcation.order.repository.RefundRepository;
 import com.example.playcation.user.entity.User;
 import com.example.playcation.user.repository.UserRepository;
 import com.example.playcation.user.service.UserService;
+import jakarta.mail.MessagingException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -93,8 +94,16 @@ public class OrderUserService {
     List<Long> gameIds = cartItems.stream().map(CartGameResponseDto::getId).toList();
     libraryService.createLibraries(gameIds, findUser);
 
-    // 이메일 발송(주문,주문 상세내역)
-    emailSenderService.sendOrderConfirmationEmail(savedOrder, details);
+    try {
+      // 이메일 발송(주문, 주문 상세내역)
+      emailSenderService.sendOrderConfirmationEmail(savedOrder, details);
+    } catch (Exception e) {
+      // 예외 로그를 남기고, 필요한 경우 사용자에게 알림
+      log.error("주문 확인 이메일 전송에 실패했습니다. 주문 ID: {}", savedOrder.getId(), e);
+      // 예외를 다시 던질지 여부는 비즈니스 로직에 따라 결정
+      // throw new RuntimeException("이메일 전송 실패", e); // 필요 시 다시 던짐
+    }
+
 
     return OrderResponseDto.toDto(savedOrder, details);
   }
