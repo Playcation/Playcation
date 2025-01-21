@@ -8,7 +8,9 @@ import com.example.playcation.exception.PaymentErrorCode;
 import com.example.playcation.toss.dto.PaymentSuccessDto;
 import com.example.playcation.toss.entity.Payment;
 import com.example.playcation.toss.repository.PaymentRepository;
+import com.example.playcation.user.entity.Point;
 import com.example.playcation.user.entity.User;
+import com.example.playcation.user.repository.PointRepository;
 import com.example.playcation.user.repository.UserRepository;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
@@ -33,6 +35,7 @@ import org.springframework.http.HttpHeaders;
 public class PaymentServiceImpl implements PaymentService {
 
   private final UserRepository userRepository;
+  private final PointRepository pointRepository;
   private final PaymentRepository paymentRepository;
   private final TossPaymentConfig tossPaymentConfig;
 
@@ -51,7 +54,8 @@ public class PaymentServiceImpl implements PaymentService {
     payment.updatePaymentKey(paymentKey);
     payment.updatePaySuccess(true);
     // 포인트 증가
-    payment.getUser().updatePaidPoint(payment.getUser().getPaidPoint().add(amount));
+    Point point = pointRepository.getPointByUserIdOrElseThrow(payment.getUser().getId());
+    point.updatePaidPoint(point.getPaidPoint().add(amount));
     // 유저가 보유한 금액 증가(결제 -> 충전 -> 구매로 흘러갈 시 사용)
     userRepository.save(payment.getUser());
     return result;
@@ -104,10 +108,11 @@ public class PaymentServiceImpl implements PaymentService {
   public Map cancelPaymentPoint(Long userId, String paymentKet, String cancelReason) {
     User user = userRepository.findByIdOrElseThrow(userId);
     Payment payment = paymentRepository.findByPaymentKeyAndUser_EmailOrElseThrow(paymentKet, user.getEmail());
-    if (payment.getUser().getPaidPoint().compareTo(payment.getAmount()) > 0) {
+    Point point = pointRepository.getPointByUserIdOrElseThrow(userId);
+    if (point.getPaidPoint().compareTo(payment.getAmount()) > 0) {
       payment.updateCancelYN(true);
       payment.updateCancelReason(cancelReason);
-      payment.getUser().updatePaidPoint( payment.getUser().getPaidPoint().subtract(payment.getAmount()));
+      point.updatePaidPoint( point.getPaidPoint().subtract(payment.getAmount()));
       return tossPaymentCancel(paymentKet, cancelReason);
     }
     throw new InsufficientException(PaymentErrorCode.PAYMENT_NOT_ENOUGH_POINT);

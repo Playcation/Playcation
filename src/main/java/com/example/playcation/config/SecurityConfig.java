@@ -10,6 +10,7 @@ import com.example.playcation.token.service.TokenService;
 import com.example.playcation.user.repository.UserRepository;
 import com.example.playcation.util.JWTUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -42,6 +43,9 @@ public class SecurityConfig {
   private final SuccessHandler successHandler;
   private final OAuth2Service oAuth2Service;
   private final JWTUtil jwtUtil;
+
+  @Value("${spring.profiles.front_url}")
+  private String frontUrl;
 
   @Bean
   public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration)
@@ -82,7 +86,7 @@ public class SecurityConfig {
 
     http.cors(corsCustomizer -> corsCustomizer.configurationSource(request -> {
       CorsConfiguration config = new CorsConfiguration();
-      config.addAllowedOrigin("http://localhost:3000");
+      config.addAllowedOrigin(frontUrl);
       config.addAllowedMethod("*");
       config.addAllowedHeader("*");
       config.setAllowCredentials(true);

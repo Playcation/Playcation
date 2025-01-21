@@ -115,6 +115,15 @@ public class UserController {
     return ResponseEntity.ok().body(userService.restoreUser(requestDto));
   }
 
+  // 출석 시
+  @PutMapping("/attendance")
+  public ResponseEntity<String> attendanceUser(
+      @RequestHeader(TokenSettings.ACCESS_TOKEN_CATEGORY) String authorizationHeader
+  ){
+    Long id = jwtUtil.findUserByToken(authorizationHeader);
+    return ResponseEntity.ok().body(userService.attendanceUser(id));
+  }
+
   @PostMapping("/upload/files")
   public ResponseEntity<UserResponseDto> uploadFiles(
       @RequestHeader(TokenSettings.ACCESS_TOKEN_CATEGORY) String authorizationHeader,

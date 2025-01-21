@@ -1,6 +1,7 @@
 package com.example.playcation.user.service;
 
 import com.example.playcation.common.PagingDto;
+import com.example.playcation.enums.Grade;
 import com.example.playcation.enums.Role;
 import com.example.playcation.enums.Social;
 import com.example.playcation.exception.DuplicatedException;
@@ -19,10 +20,13 @@ import com.example.playcation.user.dto.SignInUserRequestDto;
 import com.example.playcation.user.dto.UpdatedUserPasswordRequestDto;
 import com.example.playcation.user.dto.UpdatedUserRequestDto;
 import com.example.playcation.user.dto.UserResponseDto;
+import com.example.playcation.user.entity.Point;
 import com.example.playcation.user.entity.User;
+import com.example.playcation.user.repository.PointRepository;
 import com.example.playcation.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import java.math.BigDecimal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -42,6 +46,7 @@ public class UserService {
   private final UserRepository userRepository;
   private final UserFileRepository userFileRepository;
   private final BCryptPasswordEncoder bCryptPasswordEncoder;
+  private final PointRepository pointRepository;
   private final S3Service s3Service;
   private final FileDetailRepository fileDetailRepository;
 
@@ -64,6 +69,7 @@ public class UserService {
         .username(signInUserRequestDto.getUsername())
         .role(Role.USER)
         .social(Social.NORMAL)
+        .grade(Grade.NORMAL)
         .build()
     );
     userFileRepository.save(new UserFile(user, fileDetail));
@@ -143,7 +149,6 @@ public class UserService {
     user.delete();
   }
 
-
   /**
    * 탈퇴일로부터 30일 지난 유저 영구 삭제
    *
@@ -188,5 +193,12 @@ public class UserService {
 
   public UserResponseDto restoreUser(@Valid RestoreUserRequestDto requestDto) {
     return null;
+  }
+
+  public String attendanceUser(Long id) {
+    User user = userRepository.findByIdOrElseThrow(id);
+    Point pointDetail = pointRepository.getPointByUserIdOrElseThrow(id);
+    BigDecimal point = pointDetail.getFreePoint(user);
+    return "현재 포인트는" + point.toString() + "입니다.";
   }
 }
