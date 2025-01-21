@@ -1,5 +1,6 @@
 package com.example.playcation.user.repository;
 
+import com.example.playcation.batch.job.ExpiredCouponJob;
 import com.example.playcation.enums.Role;
 import com.example.playcation.exception.NotFoundException;
 import com.example.playcation.exception.UserErrorCode;
@@ -11,7 +12,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
@@ -44,8 +44,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
   /**
    * 회원 탈퇴일로부터 30일이 지났고 영구 삭제 처리가 되지 않은 유저를 찾음
    *
-   * @apiNote {@link com.example.playcation.batch.job.ExpiredUserJob}에 사용되는 메서드
+   * @apiNote {@link ExpiredCouponJob}에 사용되는 메서드
    * @param expireDay 영구 삭제 유예 기간
    */
-  Page<User> findAllByDeletedAtIsNotNullAndDeletedAtIsBeforeAndNameIsNotNull (LocalDateTime expireDay, Pageable pageable);
+  List<User> findAllByDeletedAtIsBeforeAndNameIsNotNull(LocalDateTime expireDay);
 }
