@@ -48,7 +48,9 @@ public class User extends BaseEntity {
 
   private String description;
 
-  private BigDecimal point;
+  private BigDecimal paidPoint;
+
+  private BigDecimal freePoint;
 
   @Enumerated(value = EnumType.STRING)
   private Role role;
@@ -107,7 +109,11 @@ public class User extends BaseEntity {
     this.social = null;
   }
 
-  public void updatePoint(BigDecimal point) {
-    this.point = point;
+  public void updatePaidPoint(BigDecimal paidPoint) {
+    this.paidPoint = paidPoint;
+  }
+
+  public void updateFreePoint(BigDecimal freePoint) {
+    this.freePoint = freePoint;
   }
 }
