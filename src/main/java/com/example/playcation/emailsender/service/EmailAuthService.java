@@ -1,6 +1,5 @@
 package com.example.playcation.emailsender.service;
 
-import com.example.playcation.user.service.UserService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import java.io.IOException;
