@@ -7,6 +7,7 @@ import com.example.playcation.enums.Social;
 import com.example.playcation.exception.DuplicatedException;
 import com.example.playcation.exception.InvalidInputException;
 import com.example.playcation.exception.NotFoundException;
+import com.example.playcation.exception.PaymentErrorCode;
 import com.example.playcation.exception.UserErrorCode;
 import com.example.playcation.game.dto.GameResponseDto;
 import com.example.playcation.s3.entity.FileDetail;
@@ -72,6 +73,7 @@ public class UserService {
         .build()
     );
     userFileRepository.save(new UserFile(user, fileDetail));
+    pointRepository.save(new Point(user));
     return UserResponseDto.toDto(user);
   }
 
@@ -204,7 +206,12 @@ public class UserService {
   public String attendanceUser(Long id) {
     User user = userRepository.findByIdOrElseThrow(id);
     Point pointDetail = pointRepository.getPointByUserIdOrElseThrow(id);
-    BigDecimal point = pointDetail.getFreePoint(user);
-    return "현재 포인트는" + point.toString() + "입니다.";
+    BigDecimal point;
+    if(!pointDetail.getIsGetFreePoint()) {
+      point = pointDetail.getFreePoint(user);
+      return "현재 포인트는" + point.toString() + "입니다.";
+    }else{
+      throw new DuplicatedException(PaymentErrorCode.ALREADY_GET_FREE_POINT);
+    }
   }
 }
