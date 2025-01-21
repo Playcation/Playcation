@@ -14,6 +14,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -46,6 +47,8 @@ public class User extends BaseEntity {
   private String username;
 
   private String description;
+
+  private BigDecimal point;
 
   @Enumerated(value = EnumType.STRING)
   private Role role;
@@ -102,5 +105,9 @@ public class User extends BaseEntity {
     this.imageUrl = null;
     this.role = null;
     this.social = null;
+  }
+
+  public void updatePoint(BigDecimal point) {
+    this.point = point;
   }
 }

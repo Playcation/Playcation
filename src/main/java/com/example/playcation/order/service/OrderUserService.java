@@ -5,10 +5,12 @@ import static org.springframework.data.domain.Sort.Direction.DESC;
 import com.example.playcation.cart.dto.CartGameResponseDto;
 import com.example.playcation.cart.service.CartService;
 import com.example.playcation.common.PagingDto;
+import com.example.playcation.emailsender.service.EmailSenderService;
 import com.example.playcation.enums.OrderStatus;
 import com.example.playcation.exception.InvalidInputException;
 import com.example.playcation.exception.NoAuthorizedException;
 import com.example.playcation.exception.OrderErrorCode;
+import com.example.playcation.game.dto.GameSimpleResponseDto;
 import com.example.playcation.library.service.LibraryService;
 import com.example.playcation.order.dto.OrderResponseDto;
 import com.example.playcation.order.dto.RefundRequestDto;
@@ -50,6 +52,8 @@ public class OrderUserService {
   private final LibraryService libraryService;
   private final UserService userService;
 
+  private final EmailSenderService emailSenderService;
+
   /**
    * 주문 생성(결제)
    *
@@ -83,10 +87,15 @@ public class OrderUserService {
     for (OrderDetail o : details) {
       o.assignOrder(savedOrder);
     }
+    orderDetailRepository.saveAll(details);
 
     cartService.removeCart(userId);
     List<Long> gameIds = cartItems.stream().map(CartGameResponseDto::getId).toList();
     libraryService.createLibraries(gameIds, findUser);
+
+    // 이메일 발송(주문,주문 상세내역)
+    emailSenderService.sendOrderConfirmationEmail(savedOrder, details);
+
     return OrderResponseDto.toDto(savedOrder, details);
   }
 
@@ -170,5 +179,19 @@ public class OrderUserService {
     // ************************
 
     return RefundResponseDto.toDto(savedRefund, OrderStatus.EXPIRED);
+  }
+
+  /**
+   * 가장 최근의 주문 한 건을 검색
+   *
+   * @param userId 현재 로그인한 유저
+   * @return 가장 최근 주문의 게임 목록
+   */
+  public List<GameSimpleResponseDto> findLatestOrder(Long userId) {
+
+    Order latestOrder = orderRepository.findFirstByUserIdOrderByCreatedAtDesc(userId);
+    List<OrderDetail> findDetail = orderDetailRepository.findAllByOrderId(latestOrder.getId());
+
+    return findDetail.stream().map(GameSimpleResponseDto::orderDetailToDto).toList();
   }
 }
