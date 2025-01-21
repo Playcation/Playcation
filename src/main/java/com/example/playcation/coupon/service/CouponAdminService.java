@@ -36,7 +36,6 @@ public class CouponAdminService {
     for (int i = 1; i <= userAmount; i++) {
       userRepository.save(
           new User("email" + i + "@example.com", bCryptPasswordEncoder.encode("q1w2e3r4!!"),
-              // TODO : 올리기 전에 지우기
               "name" + i, "username" + i, Role.USER,
               Social.NORMAL));
     }
