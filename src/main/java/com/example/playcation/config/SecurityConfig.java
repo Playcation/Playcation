@@ -45,6 +45,18 @@ public class SecurityConfig {
   private final SuccessHandler successHandler;
   private final JWTUtil jwtUtil;
 
+  private String[] WHITE_LIST = new String[]{
+      "/", "/email", "*/sign-in", "/oauth2-login", "/refresh", "/error", "/token/refresh", "/h2-console/**"
+  };
+
+  private String[] ADMIN_LIST = new String[]{
+      "/admin/**", "/users/{id}/update-role"
+  };
+
+  private String[] MANAGER_LIST = new String[]{
+      "/manager/**"
+  };
+
   @Value("${spring.profiles.front_url}")
   private String frontUrl;
 
@@ -111,17 +123,13 @@ public class SecurityConfig {
         .successHandler(successHandler));
 
     http.authorizeHttpRequests((auth) -> auth
-        .requestMatchers(HttpMethod.OPTIONS,"/**/*").permitAll()
-        .requestMatchers("/", "*/sign-in", "/oauth2-login", "/refresh", "/error", "/token/refresh")
-        .permitAll()
-        .requestMatchers("/h2-console/**").permitAll()
+        .requestMatchers(HttpMethod.OPTIONS,"/**").permitAll()
+        // 전체 허용 API
+        .requestMatchers(WHITE_LIST).permitAll()
         // ADMIN 전용 API
-        .requestMatchers("/users/{id}/update-role").hasAuthority(Role.ADMIN.name()) // "ADMIN"
-        .requestMatchers("/admin/**").hasAuthority(Role.ADMIN.name()) // "ADMIN"
-
+        .requestMatchers(ADMIN_LIST).hasAuthority(Role.ADMIN.name())
         // MANAGER 전용 API
-        .requestMatchers("/manager/**").hasAuthority(Role.MANAGER.name()) // "MANAGER"
-
+        .requestMatchers(MANAGER_LIST).hasAuthority(Role.MANAGER.name())
         // ADMIN은 /games/** 접근 불가
         .requestMatchers("/games/**").access((authentication, context) ->
             new AuthorizationDecision(authentication.get().getAuthorities().stream()

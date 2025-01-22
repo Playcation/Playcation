@@ -58,11 +58,12 @@ public class JWTFilter extends OncePerRequestFilter {
       return;
     }
 
-    String accessToken = extractToken(request);
+    String accessToken = request.getHeader(TokenSettings.ACCESS_TOKEN_CATEGORY);
     if (accessToken == null) {
       filterChain.doFilter(request, response);
       return;
     }
+    accessToken = accessToken.replace("Bearer ", "");
 
     try {
       authenticateUser(accessToken);
@@ -101,20 +102,6 @@ public class JWTFilter extends OncePerRequestFilter {
 
   private boolean isSinginRequest(String uri) {
     return uri.matches(".*/sign-in(?:/.*)?$");
-  }
-
-  /**
-   * HTTP 요청 헤더에서 JWT 액세스 토큰을 추출하는 메서드
-   *
-   * @param request HTTP 요청 객체
-   * @return 추출된 토큰 (없으면 null 반환)
-   */
-  private String extractToken(HttpServletRequest request) {
-    String token = request.getHeader(TokenSettings.ACCESS_TOKEN_CATEGORY).replace("Bearer ", "");
-    if (token == null) {
-      throw new NoAuthorizedException(UserErrorCode.NOT_LOGIN);
-    }
-    return token;
   }
 
   /**
