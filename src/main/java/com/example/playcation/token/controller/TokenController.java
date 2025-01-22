@@ -42,9 +42,4 @@ public class TokenController {
   public ResponseEntity<String> checkToken(){
     return new ResponseEntity<>("토큰 검증 완료", HttpStatus.OK);
   }
-
-  @PostMapping("/email")
-  public void chekcSecu(){
-    return;
-  }
 }

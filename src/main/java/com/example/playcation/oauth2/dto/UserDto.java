@@ -1,6 +1,7 @@
 package com.example.playcation.oauth2.dto;
 
 import com.example.playcation.enums.Role;
+import com.example.playcation.enums.Social;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -20,6 +21,6 @@ public class UserDto {
     this.email = email;
     this.name = name;
     this.role = role;
-    this.password = "0000";
+    this.password = Social.DEFAULT_PASSWORD.getPassword();
   }
 }
