@@ -11,6 +11,7 @@ import com.example.playcation.user.repository.UserRepository;
 import com.example.playcation.util.JWTUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -39,10 +40,22 @@ import org.springframework.web.cors.CorsConfiguration;
 public class SecurityConfig {
 
   private final AuthenticationConfiguration authenticationConfiguration;
+  private final ApplicationContext applicationContext;
   private final TokenService tokenService;
   private final SuccessHandler successHandler;
-  private final OAuth2Service oAuth2Service;
   private final JWTUtil jwtUtil;
+
+  private String[] WHITE_LIST = new String[]{
+      "/", "/email", "*/sign-in", "/oauth2-login", "/refresh", "/error", "/token/refresh", "/h2-console/**"
+  };
+
+  private String[] ADMIN_LIST = new String[]{
+      "/admin/**", "/users/{id}/update-role"
+  };
+
+  private String[] MANAGER_LIST = new String[]{
+      "/manager/**"
+  };
 
   @Value("${spring.profiles.front_url}")
   private String frontUrl;
@@ -83,6 +96,7 @@ public class SecurityConfig {
   public SecurityFilterChain filterChain(
       HttpSecurity http,
       UserRepository userRepository) throws Exception {
+    OAuth2Service oAuth2Service = applicationContext.getBean(OAuth2Service.class);
 
     http.cors(corsCustomizer -> corsCustomizer.configurationSource(request -> {
       CorsConfiguration config = new CorsConfiguration();
@@ -109,19 +123,15 @@ public class SecurityConfig {
         .successHandler(successHandler));
 
     http.authorizeHttpRequests((auth) -> auth
-        .requestMatchers(HttpMethod.OPTIONS,"/**/*").permitAll()
-        .requestMatchers("/", "*/sign-in", "/oauth2-login", "/refresh", "/error", "/token/refresh")
-        .permitAll()
-        .requestMatchers("/h2-console/**").permitAll()
+        .requestMatchers(HttpMethod.OPTIONS,"/**").permitAll()
+        // 전체 허용 API
+        .requestMatchers(WHITE_LIST).permitAll()
         // ADMIN 전용 API
-        .requestMatchers("/users/{id}/update-role").hasAuthority(Role.ADMIN.name()) // "ADMIN"
-        .requestMatchers("/admin/**").hasAuthority(Role.ADMIN.name()) // "ADMIN"
-
+        .requestMatchers(ADMIN_LIST).hasAuthority(Role.ADMIN.name())
         // MANAGER 전용 API
-        .requestMatchers("/manager/**").hasAuthority(Role.MANAGER.name()) // "MANAGER"
-
-        // ADMIN은 /games/** 접근 불가
-        .requestMatchers("/games/**").access((authentication, context) ->
+        .requestMatchers(MANAGER_LIST).hasAuthority(Role.MANAGER.name())
+        // ADMIN은 /carts/** 접근 불가
+        .requestMatchers("/carts/**").access((authentication, context) ->
             new AuthorizationDecision(authentication.get().getAuthorities().stream()
                 .noneMatch(
                     grantedAuthority -> grantedAuthority.getAuthority().equals(Role.ADMIN.name())))
