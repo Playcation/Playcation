@@ -1,5 +1,6 @@
 package com.example.playcation.oauth2.dto;
 
+import com.example.playcation.enums.Social;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 
@@ -11,7 +12,7 @@ public class GoogleResponseDto implements BasicOAuth2Dto{
   @Override
   public String getProvider() {
 
-    return "google";
+    return Social.GOOGLE.name();
   }
 
   @Override
@@ -31,4 +32,11 @@ public class GoogleResponseDto implements BasicOAuth2Dto{
 
     return attribute.get("name").toString();
   }
+
+  @Override
+  public String getPassword() {
+    return Social.DEFAULT_PASSWORD.getPassword();
+  }
+
+
 }
