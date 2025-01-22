@@ -9,6 +9,5 @@ import lombok.NoArgsConstructor;
 @Builder
 public class EmailMessage {
 
-  private String email;      // 이메일 수신자
 
 }
