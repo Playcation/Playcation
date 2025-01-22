@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class TokenService {
 
-  private final RedisTemplate<String, String> redisTemplate;
   private final JWTUtil jwtUtil;
 
   public String[] createNewToken(HttpServletRequest request) {
@@ -30,9 +29,7 @@ public class TokenService {
     }
 
     // 새로운 액세스 & 리프레시 토큰 생성
-    String[] tokens = jwtUtil.generateTokens(userId, auth);
-
-    return tokens;
+    return jwtUtil.generateTokens(userId, auth);
   }
 
   // HTTP 요청에서 Refresh 토큰 추출
