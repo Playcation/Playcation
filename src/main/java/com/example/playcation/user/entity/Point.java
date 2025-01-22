@@ -31,7 +31,6 @@ public class Point {
 
   private BigDecimal freePoint;
 
-  private Boolean isGetFreePoint;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "user_id")
@@ -40,13 +39,11 @@ public class Point {
   public Point(User user){
     this.paidPoint = BigDecimal.ZERO;
     this.freePoint = BigDecimal.ZERO;
-    this.isGetFreePoint = false;
     this.user = user;
   }
 
   public BigDecimal getFreePoint(User user){
     this.freePoint = this.freePoint.add(user.getGrade().getFreePoint());
-    isGetFreePoint = true;
     return this.freePoint.add(this.paidPoint);
   }
 

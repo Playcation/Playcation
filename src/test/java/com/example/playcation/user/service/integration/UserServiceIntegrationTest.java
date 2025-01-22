@@ -98,7 +98,7 @@ class UserServiceIntegrationTest {
   @DisplayName("회원가입 성공")
   void signUp() {
     // Given
-    SignInUserRequestDto requestDto = new SignInUserRequestDto("test@example.com", "password", "Test User");
+    SignInUserRequestDto requestDto = new SignInUserRequestDto("test@example.com", "password", "Test User", "Test UserName");
     when(s3.putObject(any(PutObjectRequest.class))).thenReturn(null);
     // When
     UserResponseDto response = userService.signUp(requestDto, file);
@@ -111,9 +111,9 @@ class UserServiceIntegrationTest {
   @DisplayName("회원가입 실패 : 중복 이메일")
   void signUp_Fail() {
     // Given
-    SignInUserRequestDto requestDto = new SignInUserRequestDto("test@example.com", "password", "Test User");
+    SignInUserRequestDto requestDto = new SignInUserRequestDto("test@example.com", "password", "Test User", "Test UserName");
     userService.signUp(requestDto, file);
-    SignInUserRequestDto requestDto2 = new SignInUserRequestDto("test@example.com", "password2!qfqef", "User2");
+    SignInUserRequestDto requestDto2 = new SignInUserRequestDto("test@example.com", "password2!qfqef", "User2", "Test UserName");
     // When
     // Then
     assertThrows(DuplicatedException.class, () -> userService.signUp(requestDto2, file));
@@ -123,7 +123,7 @@ class UserServiceIntegrationTest {
   @DisplayName("유저 비밀번호 수정 성공")
   void updateUserPassword() {
     // Given
-    SignInUserRequestDto signinDto = new SignInUserRequestDto("test@example.com", "encodedPassword", "Test User");
+    SignInUserRequestDto signinDto = new SignInUserRequestDto("test@example.com", "encodedPassword", "Test User", "Test UserName");
     when(s3.putObject(any(PutObjectRequest.class))).thenReturn(null);
     userService.signUp(signinDto, file);
     entityManager.clear();
@@ -153,13 +153,13 @@ class UserServiceIntegrationTest {
   @DisplayName("유저 정보 수정 성공")
   void updateUser(){
     // Given
-    SignInUserRequestDto signinDto = new SignInUserRequestDto("test@example.com", "encodedPassword", "Test User");
+    SignInUserRequestDto signinDto = new SignInUserRequestDto("test@example.com", "encodedPassword", "Test User", "Test UserName");
     when(s3.putObject(any(PutObjectRequest.class))).thenReturn(null);
     userService.signUp(signinDto, file);
     UpdatedUserRequestDto requestDto = new UpdatedUserRequestDto("encodedPassword", "updateName", "update description");
     // When
     UserResponseDto responseDto = userService.updateUser(1L, requestDto, file);
     // Then
-    assertThat(responseDto.getName()).isEqualTo(responseDto.getName());
+    assertThat(responseDto.getUsername()).isEqualTo(responseDto.getUsername());
   }
 }
