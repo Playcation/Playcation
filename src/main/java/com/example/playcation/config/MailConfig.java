@@ -21,15 +21,6 @@ public class MailConfig {
   @Value("${spring.mail.password}")
   private String mailPassword;
 
-  @Value("${spring.mail.properties.mail.smtp.connectiontimeout}")
-  private int connectionTimeout;
-
-  @Value("${spring.mail.properties.mail.smtp.timeout}")
-  private int timeout;
-
-  @Value("${spring.mail.properties.mail.smtp.writetimeout}")
-  private int writeTimeout;
-
   /**
    * JavaMailSender : 이메일 전송을 위한 빈 설정 코드
    * mailSender : 이메일을 설정 할 때 사용
@@ -72,9 +63,6 @@ public class MailConfig {
     props.put("mail.debug", "true");
 
     props.put("mail.smtp.starttls.required", "ture");
-    props.put("mail.smtp.connectiontimeout", connectionTimeout);
-    props.put("mail.smtp.timeout", timeout);
-    props.put("mail.smtp.writetimeout", writeTimeout);
 
 
     // 설정을 마친 mailSender 객체를 반환
