@@ -5,7 +5,7 @@ import static org.springframework.data.domain.Sort.Direction.DESC;
 import com.example.playcation.cart.dto.CartGameResponseDto;
 import com.example.playcation.cart.service.CartService;
 import com.example.playcation.common.PagingDto;
-import com.example.playcation.emailsender.service.EmailSenderService;
+import com.example.playcation.emailsender.service.OrderEmailService;
 import com.example.playcation.enums.OrderStatus;
 import com.example.playcation.exception.InvalidInputException;
 import com.example.playcation.exception.NoAuthorizedException;
@@ -24,7 +24,6 @@ import com.example.playcation.order.repository.RefundRepository;
 import com.example.playcation.user.entity.User;
 import com.example.playcation.user.repository.UserRepository;
 import com.example.playcation.user.service.UserService;
-import jakarta.mail.MessagingException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -53,7 +52,7 @@ public class OrderUserService {
   private final LibraryService libraryService;
   private final UserService userService;
 
-  private final EmailSenderService emailSenderService;
+  private final OrderEmailService orderEmailService;
 
   /**
    * 주문 생성(결제)
@@ -96,12 +95,10 @@ public class OrderUserService {
 
     try {
       // 이메일 발송(주문, 주문 상세내역)
-      emailSenderService.sendOrderConfirmationEmail(savedOrder, details);
+      orderEmailService.sendOrderConfirmationEmail(savedOrder, details);
     } catch (Exception e) {
-      // 예외 로그를 남기고, 필요한 경우 사용자에게 알림
+      // 예외 로그
       log.error("주문 확인 이메일 전송에 실패했습니다. 주문 ID: {}", savedOrder.getId(), e);
-      // 예외를 다시 던질지 여부는 비즈니스 로직에 따라 결정
-      // throw new RuntimeException("이메일 전송 실패", e); // 필요 시 다시 던짐
     }
 
 

@@ -3,7 +3,6 @@ package com.example.playcation.emailsender.service;
 import com.example.playcation.order.entity.Order;
 import com.example.playcation.order.entity.OrderDetail;
 import jakarta.mail.MessagingException;
-import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -11,14 +10,13 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class EmailSenderService {
+public class OrderEmailService {
 
   private final JavaMailSender javaMailSender; // 실제 이메일을 보내는 역할
 
@@ -73,7 +71,6 @@ public class EmailSenderService {
       totalAmount = totalAmount.add(price); // 총 금액에 해당 가격을 더함
       totalAmount = totalAmount.setScale(0, RoundingMode.FLOOR); // 소수점 아래를 버리고 정수만 가져오기
     }
-
     details.append("</table><br>"); // 테이블 종료
 
     // 이메일 본문
