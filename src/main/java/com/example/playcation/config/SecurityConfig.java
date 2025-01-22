@@ -130,8 +130,8 @@ public class SecurityConfig {
         .requestMatchers(ADMIN_LIST).hasAuthority(Role.ADMIN.name())
         // MANAGER 전용 API
         .requestMatchers(MANAGER_LIST).hasAuthority(Role.MANAGER.name())
-        // ADMIN은 /games/** 접근 불가
-        .requestMatchers("/games/**").access((authentication, context) ->
+        // ADMIN은 /carts/** 접근 불가
+        .requestMatchers("/carts/**").access((authentication, context) ->
             new AuthorizationDecision(authentication.get().getAuthorities().stream()
                 .noneMatch(
                     grantedAuthority -> grantedAuthority.getAuthority().equals(Role.ADMIN.name())))
