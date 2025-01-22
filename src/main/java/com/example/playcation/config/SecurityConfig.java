@@ -19,7 +19,6 @@ import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authorization.AuthorizationDecision;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -46,7 +45,7 @@ public class SecurityConfig {
   private final JWTUtil jwtUtil;
 
   private String[] WHITE_LIST = new String[]{
-      "/", "/email", "*/sign-in", "/oauth2-login", "/refresh", "/error", "/token/refresh", "/h2-console/**"
+      "/", "/email","/mail-check", "*/sign-in", "/oauth2-login", "/refresh", "/error", "/token/refresh", "/h2-console/**"
   };
 
   private String[] ADMIN_LIST = new String[]{
