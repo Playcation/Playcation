@@ -146,13 +146,16 @@ public class UserService {
   public void delete(Long id, DeletedUserRequestDto deletedUserRequestDto) {
     User user = userRepository.findByIdOrElseThrow(id);
     // S3에서 파일 삭제
-    if (!user.getImageUrl().isEmpty()) {
-      userFileRepository.deleteByUserId(id);
-      s3Service.deleteFile(user.getImageUrl());
+    if (user.getImageUrl() != null) {
+      if(!user.getImageUrl().isEmpty()) {
+        userFileRepository.deleteByUserId(id);
+        s3Service.deleteFile(user.getImageUrl());
+      }
     }
 
     checkPassword(user, deletedUserRequestDto.getPassword());
     user.delete();
+    userRepository.save(user);
   }
 
 

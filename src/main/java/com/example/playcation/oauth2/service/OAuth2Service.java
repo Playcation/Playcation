@@ -77,6 +77,9 @@ public class OAuth2Service extends DefaultOAuth2UserService {
 
   // 기존 유저 업데이트 메서드 (소셜 플랫폼 갱신)
   private OAuth2User updateExistingUser(User existData, String registrationId) {
+    if(existData.getDeletedAt() != null){
+      throw new DuplicatedException(UserErrorCode.EMAIL_EXIST);
+    }
     if(!existData.getSocial().name().equals(registrationId)){
       if(!existData.getSocial().equals(Social.NORMAL)) {
         throw new NoAuthorizedException(UserErrorCode.EXIST_SOCIAL);
