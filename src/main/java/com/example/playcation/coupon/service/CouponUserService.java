@@ -12,6 +12,7 @@ import com.example.playcation.exception.InvalidInputException;
 import com.example.playcation.exception.NotFoundException;
 import com.example.playcation.user.entity.User;
 import com.example.playcation.user.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -80,6 +81,7 @@ public class CouponUserService {
   }
 
   // 큐에 사용자 추가
+  @Transactional
   public boolean addQueue(Long couponId, Long userId) {
     User user = userRepository.findByIdOrElseThrow(userId);
     Coupon coupon = couponRepository.findByIdOrElseThrow(couponId);
@@ -110,6 +112,7 @@ public class CouponUserService {
   }
 
   // 큐를 처리하는 메서드
+  @Transactional
   public void processQueue(Long couponId) {
     Coupon coupon = couponRepository.findByIdOrElseThrow(couponId);
     // 쿠폰이 남아 있는지 확인한 후 발행 시도
@@ -127,6 +130,7 @@ public class CouponUserService {
   }
 
   // 큐에 있는 사용자들에게 쿠폰 발행
+  @Transactional
   public void publish(Coupon coupon) {
     List<User> users = getUsersFromQueue(coupon);
     for (User user : users) {
@@ -160,6 +164,7 @@ public class CouponUserService {
   }
 
   // 사용자에게 쿠폰 발행
+  @Transactional
   public void issueCoupon(Coupon coupon, User user) {
     // 쿠폰 발급
     CouponUser couponUser = CouponUser.builder()
