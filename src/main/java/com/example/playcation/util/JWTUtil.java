@@ -80,9 +80,9 @@ public class JWTUtil {
    */
   public String[] generateTokens(String userId, String role) {
     String access = createJwt(TokenSettings.ACCESS_TOKEN_CATEGORY, userId, role, TokenSettings.ACCESS_TOKEN_EXPIRATION);
-    String refresh = createJwt(TokenSettings.REFRESH_TOKEN_CATEGORY, userId, role, TokenSettings.REFRESH_TOKEN_EXPIRATION);
+    String refresh = createJwt(TokenSettings.REFRESH_TOKEN_CATEGORY, TokenSettings.REFRESH_TOKEN_CATEGORY + userId, role, TokenSettings.REFRESH_TOKEN_EXPIRATION);
 
-    storeRefreshToken(userId, refresh);
+    storeRefreshToken(TokenSettings.REFRESH_TOKEN_CATEGORY + userId, refresh);
 
     return new String[]{access, refresh};
   }

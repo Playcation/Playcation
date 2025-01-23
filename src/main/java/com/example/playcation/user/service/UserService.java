@@ -9,7 +9,6 @@ import com.example.playcation.exception.InvalidInputException;
 import com.example.playcation.exception.NotFoundException;
 import com.example.playcation.exception.PaymentErrorCode;
 import com.example.playcation.exception.UserErrorCode;
-import com.example.playcation.game.dto.GameResponseDto;
 import com.example.playcation.s3.entity.FileDetail;
 import com.example.playcation.s3.entity.UserFile;
 import com.example.playcation.s3.repository.FileDetailRepository;
@@ -28,12 +27,16 @@ import com.example.playcation.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -47,6 +50,7 @@ public class UserService {
   private final UserFileRepository userFileRepository;
   private final BCryptPasswordEncoder bCryptPasswordEncoder;
   private final PointRepository pointRepository;
+  private final RedisTemplate<String, String> redisTemplate;
   private final S3Service s3Service;
   private final FileDetailRepository fileDetailRepository;
 
@@ -133,6 +137,7 @@ public class UserService {
     checkPassword(user, updatedUserPasswordRequestDto.getOldPassword());
     user.updatePassword(
         bCryptPasswordEncoder.encode(updatedUserPasswordRequestDto.getNewPassword()));
+    userRepository.save(user);
     return UserResponseDto.toDto(user);
   }
 
@@ -141,13 +146,16 @@ public class UserService {
   public void delete(Long id, DeletedUserRequestDto deletedUserRequestDto) {
     User user = userRepository.findByIdOrElseThrow(id);
     // S3에서 파일 삭제
-    if (!user.getImageUrl().isEmpty()) {
-      userFileRepository.deleteByUserId(id);
-      s3Service.deleteFile(user.getImageUrl());
+    if (user.getImageUrl() != null) {
+      if(!user.getImageUrl().isEmpty()) {
+        userFileRepository.deleteByUserId(id);
+        s3Service.deleteFile(user.getImageUrl());
+      }
     }
 
     checkPassword(user, deletedUserRequestDto.getPassword());
     user.delete();
+    userRepository.save(user);
   }
 
 
@@ -207,13 +215,32 @@ public class UserService {
   public String attendanceUser(Long id) {
     User user = userRepository.findByIdOrElseThrow(id);
     Point pointDetail = pointRepository.getPointByUserIdOrElseThrow(id);
+    String redisKey = "attendance" + user.getId();
     BigDecimal point;
-    if(!pointDetail.getIsGetFreePoint()) {
+    if(redisTemplate.opsForValue().get(redisKey) == null) {
+      ValueOperations<String, String> ops = redisTemplate.opsForValue();
+      Duration seconds = calculateSeconds();
+      ops.set(redisKey, String.valueOf(true), seconds);
+
       point = pointDetail.getFreePoint(user);
       pointRepository.save(pointDetail);
       return "현재 포인트는" + point.toString() + "입니다.";
     }else{
       throw new DuplicatedException(PaymentErrorCode.ALREADY_GET_FREE_POINT);
     }
+  }
+
+  private Duration calculateSeconds(){
+    // 현재 시간
+    LocalDateTime now = LocalDateTime.now();
+
+    // 오늘 자정
+    LocalDateTime midnight = now.toLocalDate().atTime(LocalTime.MAX).plusSeconds(1);
+
+    // 자정까지 남은 시간 계산
+    Duration duration = Duration.between(now, midnight);
+    long secondsUntilMidnight = duration.getSeconds();
+
+    return Duration.ofSeconds(secondsUntilMidnight);
   }
 }
