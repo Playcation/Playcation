@@ -16,7 +16,8 @@ public class RedisTestContainerConfig {
   private static final GenericContainer<?> redisContainer;
 
   static {
-    redisContainer = new GenericContainer<>(DockerImageName.parse("redis:7.4.2"))
+    redisContainer = new GenericContainer<>(
+        DockerImageName.parse("redis:7.4.2"))
         .withExposedPorts(6379);
     redisContainer.start();
   }
