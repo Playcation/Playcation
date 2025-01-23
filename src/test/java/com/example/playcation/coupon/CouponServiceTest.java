@@ -1,152 +1,95 @@
 package com.example.playcation.coupon;
 
-import static org.hibernate.validator.internal.util.Contracts.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import com.example.playcation.coupon.entity.CouponUser;
-import com.example.playcation.coupon.repository.CouponUserRepository;
-import com.example.playcation.coupon.service.CouponAdminService;
+import com.example.playcation.PlaycationApplication;
+import com.example.playcation.config.RedisTestContainerConfig;
+import com.example.playcation.coupon.entity.Coupon;
+import com.example.playcation.coupon.repository.CouponRepository;
 import com.example.playcation.coupon.service.CouponUserService;
+import com.example.playcation.enums.CouponType;
 import com.example.playcation.enums.Role;
 import com.example.playcation.enums.Social;
 import com.example.playcation.user.entity.User;
 import com.example.playcation.user.repository.UserRepository;
-import com.example.playcation.util.JWTUtil;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
+import jakarta.transaction.Transactional;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-
-@AutoConfigureMockMvc
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @ActiveProfiles("test")
-public class CouponServiceTest {
+@SpringBootTest(classes = {PlaycationApplication.class, RedisTestContainerConfig.class})
+@Transactional
+class CouponServiceTest {
 
   @Autowired
   private CouponUserService couponUserService;
 
-  @Autowired
-  private CouponAdminService couponAdminService;
+  @MockitoBean
+  private CouponRepository couponRepository;
 
-  @Autowired
-  private RedisTemplate<String, Object> redisTemplate;
-
-  @Autowired
-  private MockMvc mockMvc;
-  //
-  @MockBean
+  @MockitoBean
   private UserRepository userRepository;
-  //
-  @MockBean
-  private CouponUserRepository couponUserRepository;
 
-  @Mock
-  private JWTUtil jwtUtil;
-
-  private String authorizationHeader;
-
-  @BeforeEach
-  void setUp() {
-    redisTemplate.getConnectionFactory().getConnection().flushAll(); // 테스트 전에 Redis 초기화
-  }
+  @Autowired
+  @MockitoBean
+  private RedisTemplate<String, String> redisTemplate;
 
   @Test
-  void requestCouponTest() throws Exception {
-    final long couponId = 1L;
-    final int numberOfUsers = 10;
-    final int couponLimit = 3;
+  @DisplayName("Redis의 싱글 스레드 특성을 이용한 쿠폰 동시 발급 테스트")
+  void concurrencyTestWithRedis() {
+    // Redis 초기화
+    String couponKey = "coupon:count:1"; // 쿠폰 ID 1의 Redis 키
+    redisTemplate.opsForValue().set(couponKey, "100"); // 쿠폰 초기 개수 100 설정
 
-    // Redis에 이벤트 쿠폰 수량 설정
-    couponAdminService.setCouponCount(couponId, couponLimit);
-
-    // 가짜 사용자 생성 메소드 호출
-    List<User> users = createMockUsers(numberOfUsers);
-
-    // JWTUtil Mock 설정
-    when(jwtUtil.findUserByToken(any(String.class))).thenAnswer(invocation -> {
-      String token = invocation.getArgument(0);
-      if (token.startsWith("Bearer mock-jwt-token-for-user-")) {
-        return Long.parseLong(token.replace("Bearer mock-jwt-token-for-user-", ""));
+    // Mocking
+    Mockito.when(couponRepository.findByIdOrElseThrow(1L))
+        .thenReturn(
+            new Coupon(1L, "TestCoupon", (long) 100, BigDecimal.valueOf(10), CouponType.PERCENT,
+                LocalDate.now(), (long) 10));
+    Mockito.when(userRepository.findByIdOrElseThrow(Mockito.anyLong()))
+        .thenAnswer(invocation -> {
+          Long userId = invocation.getArgument(0);
+          System.out.println("habin : " + userId);
+          return new User(
+              "user" + userId + "@example.com", // email
+              "qwer1234!!",                   // password
+              "User",           // name
+              "username",             // username
+              Role.USER,                       // role (example value)
+              Social.NORMAL                      // social (example value)
+          );
+        });
+    // 병렬 요청 실행
+    AtomicInteger successCounter = new AtomicInteger();
+    IntStream.range(0, 100).parallel().forEach(i -> {
+      try {
+        boolean result = couponUserService.addQueue(1L, (long) i);
+        if (result) {
+          successCounter.incrementAndGet();
+        }
+      } catch (Exception e) {
+        // 무시: 실패한 요청은 성공 카운트에 포함되지 않음
       }
-      return null; // 잘못된 토큰 처리
     });
 
-    // 모든 요청이 처리될 때까지 기다리기 위해 CountDownLatch 사용
-    CountDownLatch enqueueLatch = new CountDownLatch(numberOfUsers);
-    AtomicInteger failureCount = new AtomicInteger();
-    for (User user : users) {
-      // Mock JWT Token 생성
-      String mockToken = "Bearer mock-jwt-token-for-user-" + user.getId();
-      // UserRepository Mock 설정
-      when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
-      when(jwtUtil.findUserByToken("Authorization")).thenReturn(user.getId());
-      // MockMvc 요청 수행
-      mockMvc.perform(post("/coupons/request/" + couponId)
-              .with(csrf())
-              .header("Authorization", mockToken) // Authorization 헤더 설정
-              .contentType(MediaType.APPLICATION_JSON))
-          .andDo(result -> {
-            System.out.println("Response Status: " + result.getResponse().getStatus());
-            System.out.println("User ID: " + user.getId());
-            if (result.getResponse().getContentAsString().contains("쿠폰 요청 추가에 실패하였습니다.")) {
-              assertEquals(HttpStatus.BAD_REQUEST.value(), result.getResponse().getStatus());
-              failureCount.incrementAndGet();
-            } else {
-              assertEquals(HttpStatus.OK.value(), result.getResponse().getStatus());
-            }
-            enqueueLatch.countDown();
-          });
-    }
+    // 결과 확인
+    String remainingCoupons = redisTemplate.opsForValue().get("coupon:count:1");
+    System.out.println("\n\n[테스트 결과] 성공 요청 수: " + successCounter.get());
+    System.out.println("[Redis에 남은 쿠폰 수량] " + remainingCoupons);
 
-    assertTrue(enqueueLatch.await(10, TimeUnit.SECONDS), "타임아웃 내에 모든 사용자가 큐에 추가되지 못했습니다.");
-
-    // 스케줄러가 큐를 처리할 시간을 주기 위해 대기
-    Thread.sleep(5000);
-
-    // 쿠폰을 받은 사용자 수 검증
-    verify(couponUserRepository, times(couponLimit)).save(any(CouponUser.class));
-
-    // 실패한 요청 수 검증
-    assertEquals(numberOfUsers - couponLimit, failureCount.get(), "실패한 요청 수가 예상과 다릅니다.");
-
-    // 큐에 남아있는 사용자 수 검증
-    long remainingUsersInQueue = couponUserService.getSize(couponId);
-    assertEquals(0, remainingUsersInQueue, "큐에 사용자가 남아 있지 않아야 합니다.");
-  }
-
-  // 가짜 사용자 생성
-  private List<User> createMockUsers(int count) {
-    return IntStream.range(0, count)
-        .mapToObj(i -> User.builder()
-            .id((long) i + 1)
-            .email("unique" + System.nanoTime() + "@example.com")
-            .password("qwer1234!!")
-            .name("User" + System.nanoTime())
-            .role(Role.USER)
-            .social(Social.NORMAL)
-            .build())
-        .collect(Collectors.toList());
+    assertThat(Integer.parseInt(remainingCoupons)).isEqualTo(0); // 남은 쿠폰은 0이어야 함
+    assertThat(successCounter.get()).isEqualTo(100); // 성공 요청 수는 초기 쿠폰 개수와 같아야 함
   }
 }

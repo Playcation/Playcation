@@ -7,13 +7,14 @@ import com.example.playcation.coupon.entity.CouponUser;
 import com.example.playcation.coupon.repository.CouponRepository;
 import com.example.playcation.coupon.repository.CouponUserRepository;
 import com.example.playcation.exception.CouponErrorCode;
+import com.example.playcation.exception.DuplicatedException;
 import com.example.playcation.exception.InvalidInputException;
 import com.example.playcation.exception.NotFoundException;
 import com.example.playcation.user.entity.User;
 import com.example.playcation.user.repository.UserRepository;
-import jakarta.transaction.Transactional;
-import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -58,34 +59,9 @@ public class CouponUserService {
     return new PagingDto<>(couponDtoList, couponUserPage.getTotalElements());
   }
 
-  //  @Transactional
-//  public CouponUserResponseDto getCoupon(Long userId, Long couponId) {
-//    // 쿠폰 조회 및 재고 확인
-//    Coupon coupon = couponRepository.findByIdOrElseThrow(couponId);
-//    User user = userRepository.findByIdOrElseThrow(userId);
-//
-//    if (coupon.getStock() <= 0) {
-//      throw new InvalidInputException(CouponErrorCode.COUPON_OUT_OF_STOCK);
-//    }
-//
-//    // 쿠폰 재고 감소
-//    coupon.updateStock();
-//
-//    // 쿠폰 발급
-//    CouponUser couponUser = CouponUser.builder()
-//        .user(user)
-//        .coupon(coupon)
-//        .issuedDate(coupon.getIssuedDate())
-//        .expiredDate(coupon.getIssuedDate().plusDays(coupon.getValidDays()))
-//        .build();
-//
-//    couponUserRepository.save(couponUser);
-//
-//    return CouponUserResponseDto.toDto(couponUser);
-//  }
-// 남은 이벤트 쿠폰 수량 가져오기
+  // 남은 이벤트 쿠폰 수량 가져오기
   public int getRemainingCouponCount(Coupon coupon) {
-    String countStr = redisTemplate.opsForValue().get(coupon.getId() + "_COUNT");
+    String countStr = redisTemplate.opsForValue().get("coupon:count:" + coupon.getId());
     if (countStr != null) {
       try {
         return Integer.parseInt(countStr);
@@ -99,7 +75,7 @@ public class CouponUserService {
   // 큐에 남아있는 사용자 수 가져오기
   public long getSize(long couponId) {
     Coupon coupon = couponRepository.findByIdOrElseThrow(couponId);
-    Long size = redisTemplate.opsForZSet().size(coupon.getName());
+    Long size = redisTemplate.opsForZSet().size("coupon:request:" + coupon.getName());
     return size != null ? size : 0L; // null일 경우 0 반환
   }
 
@@ -124,7 +100,7 @@ public class CouponUserService {
     }
 
     final long now = System.currentTimeMillis();
-    redisTemplate.opsForZSet().add(coupon.getName(), user.getEmail(), now);
+    redisTemplate.opsForZSet().add("coupon:request:" + coupon.getName(), user.getEmail(), now);
     log.info("큐에 추가됨 - {} at {}ms", user.getName(), now);
 
     // 큐에 추가된 후 바로 큐를 처리
@@ -139,7 +115,7 @@ public class CouponUserService {
     // 쿠폰이 남아 있는지 확인한 후 발행 시도
     if (getRemainingCouponCount(coupon) > 0) {
       log.info("이벤트 처리 중: {}", coupon);
-      couponAdminService.publish(coupon);
+      publish(coupon);
     } else {
       log.info("===== 선착순 이벤트가 종료되었습니다: {} =====", coupon);
     }
@@ -150,4 +126,50 @@ public class CouponUserService {
     return couponUserRepository.findByUserIdAndCouponId(userId, couponId).isEmpty();
   }
 
+  // 큐에 있는 사용자들에게 쿠폰 발행
+  public void publish(Coupon coupon) {
+    List<User> users = getUsersFromQueue(coupon);
+    for (User user : users) {
+      issueCoupon(coupon, user);
+      decrementCouponCount(coupon);
+      redisTemplate.opsForZSet().remove("coupon:request:" + coupon.getName(), user.getEmail());
+    }
+  }
+
+  // 이벤트 쿠폰 수량 설정
+  public void setCouponCount(Long couponId, long count) {
+    redisTemplate.opsForValue().set("coupon:count:" + couponId, String.valueOf(count));
+  }
+
+  // 이벤트 쿠폰 수량 감소
+  public void decrementCouponCount(Coupon coupon) {
+    redisTemplate.opsForValue().decrement("coupon:count:" + coupon.getId());
+  }
+
+  // 큐에 있는 사용자 목록 가져오기
+  private List<User> getUsersFromQueue(Coupon coupon) {
+    Set<String> emails = redisTemplate.opsForZSet()
+        .range("coupon:request:" + coupon.getName(), 0, -1);
+    List<User> users = new ArrayList<>();
+    if (emails != null) {
+      for (String email : emails) {
+        userRepository.findByEmail(email).ifPresent(users::add);
+      }
+    }
+    return users;
+  }
+
+  // 사용자에게 쿠폰 발행
+  public void issueCoupon(Coupon coupon, User user) {
+    // 쿠폰 발급
+    CouponUser couponUser = CouponUser.builder()
+        .user(user)
+        .coupon(coupon)
+        .issuedDate(coupon.getIssuedDate())
+        .expiredDate(coupon.getIssuedDate().plusDays(coupon.getValidDays()))
+        .build();
+
+    couponUserRepository.save(couponUser);
+    log.info("'{}'에게 {} 쿠폰이 발급되었습니다", user.getEmail(), coupon.getName());
+  }
 }
