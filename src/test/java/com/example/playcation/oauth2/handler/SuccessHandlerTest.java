@@ -2,13 +2,9 @@ package com.example.playcation.oauth2.handler;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.example.playcation.config.BatchConfiguration;
-import com.example.playcation.coupon.repository.CouponUserRepository;
 import jakarta.servlet.ServletException;
 import java.util.List;
-import com.example.playcation.PlaycationApplication;
 import com.example.playcation.common.TokenSettings;
-import com.example.playcation.config.RedisTestContainerConfig;
 import com.example.playcation.enums.Role;
 import com.example.playcation.oauth2.dto.OAuth2UserDto;
 import com.example.playcation.oauth2.dto.UserDto;
@@ -24,7 +20,6 @@ import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.batch.test.context.SpringBatchTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -36,13 +31,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @Transactional
 @SpringBootTest
 @ActiveProfiles("test")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-//@SpringBatchTest
 class SuccessHandlerTest {
 
   @Autowired
@@ -90,9 +83,9 @@ class SuccessHandlerTest {
     // When
     successHandler.onAuthenticationSuccess(request, response, authentication);
     // Then
-    assertThat(response.getHeader(TokenSettings.ACCESS_TOKEN_CATEGORY)).isNotNull();
-    assertThat(((MockHttpServletResponse) response).getCookies()).isNotEmpty();
-    String storedToken = redisTemplate.opsForValue().get("1");
+    assertThat(response.getHeader("Set-Cookie")).isNotNull();
+    assertThat(response.getHeader("Location")).isNotNull();
+    String storedToken = redisTemplate.opsForValue().get(TokenSettings.REFRESH_TOKEN_CATEGORY + "1");
     assertThat(storedToken).isNotNull();
   }
 }
