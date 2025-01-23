@@ -27,18 +27,25 @@ public class MailConfig {
    */
 
   @Bean
-  public JavaMailSender javaMailSender() {
+  public JavaMailSender mailSender() {
     JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
     mailSender.setHost(mailHost); // 이메일 서버의 호스트 주소 설정(해당 서버 주소) SMTP 서버 주소(ex. smtp.gamil.com) 설정
     mailSender.setPort(mailPort); // 포트 번호를 담고 있는 변수
     mailSender.setUsername(mailUsername); // 이메일 서버 접속할 때 사용할 비밀번호 설정(사용자 이름을 담고 있는 변수)
     mailSender.setPassword(mailPassword); // 이메일 서버 접속할 때 사용할 비밀번호 설정(사용자 비밀번호를 담고 있는 변수)
+    mailSender.setDefaultEncoding("UTF-8"); // 이메일 전송 시 기본 인코딩 설정 (UTF-8로 설정하여 한글이나 특수문자가 깨지지 않도록 함)
+    mailSender.setJavaMailProperties(getMailProperties()); // JavaMail의 속성을 설정해줌(SMTP 서버와 관련된 속성 등을 설정하기 위해 메서드 호출)
+
+    return mailSender;
+  }
 
     /**
      * getJavaMailProperties()는 이메일 서버의 설정을 저장할 Properties 객체를 반환
      * 이 Properties 객체를 사용하여 추가적인 SMTP 설정을 할 수 있음
+     * Properties는 속성 설정을 저장하고 관리하는 클래스(키-값)
      */
-    Properties props = mailSender.getJavaMailProperties();
+  private Properties getMailProperties() {
+    Properties props = new Properties();
 
     // mail.transport.protocol은 이메일 전송에 사용할 프로토콜을 설정
     // SMTP(Simple Mail Transfer Protocol)를 사용
@@ -56,8 +63,11 @@ public class MailConfig {
     // true로 설정하면 이메일 전송 로그가 콘솔에 출력되어 디버깅, 운영 환경에서는 보안 문제로 false
     props.put("mail.debug", "true");
 
+    props.put("mail.smtp.starttls.required", "ture");
+
+
     // 설정을 마친 mailSender 객체를 반환
     // 이메일을 전송하는 데 사용할 수 있는 JavaMailSender 빈으로 Spring IoC 컨테이너에 등록됨
-    return mailSender;
+    return props;
   }
 }
