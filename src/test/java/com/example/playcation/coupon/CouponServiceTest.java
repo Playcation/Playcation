@@ -12,7 +12,6 @@ import com.example.playcation.enums.Role;
 import com.example.playcation.enums.Social;
 import com.example.playcation.user.entity.User;
 import com.example.playcation.user.repository.UserRepository;
-import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -27,10 +26,10 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+
 @ActiveProfiles("test")
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @SpringBootTest(classes = {PlaycationApplication.class, RedisTestContainerConfig.class})
-@Transactional
 class CouponServiceTest {
 
   @Autowired
@@ -56,7 +55,8 @@ class CouponServiceTest {
     // Mocking
     Mockito.when(couponRepository.findByIdOrElseThrow(1L))
         .thenReturn(
-            new Coupon(1L, "TestCoupon", (long) 100, BigDecimal.valueOf(10), CouponType.PERCENT,
+            Coupon.createForTest(1L, "TestCoupon", (long) 100, BigDecimal.valueOf(10),
+                CouponType.PERCENT,
                 LocalDate.now(), (long) 10));
     Mockito.when(userRepository.findByIdOrElseThrow(Mockito.anyLong()))
         .thenAnswer(invocation -> {
