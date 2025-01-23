@@ -156,7 +156,7 @@ class UserServiceIntegrationTest {
     SignInUserRequestDto signinDto = new SignInUserRequestDto("test@example.com", "encodedPassword", "Test User", "Test UserName");
     when(s3.putObject(any(PutObjectRequest.class))).thenReturn(null);
     userService.signUp(signinDto, file);
-    UpdatedUserRequestDto requestDto = new UpdatedUserRequestDto("encodedPassword", "updateName", "update description");
+    UpdatedUserRequestDto requestDto = new UpdatedUserRequestDto("updateName", "encodedPassword", "update description");
     // When
     UserResponseDto responseDto = userService.updateUser(1L, requestDto, file);
     // Then
