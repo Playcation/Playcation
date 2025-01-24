@@ -3,6 +3,7 @@ package com.example.playcation.coupon.controller;
 import com.example.playcation.common.PagingDto;
 import com.example.playcation.common.TokenSettings;
 import com.example.playcation.coupon.dto.CouponUserResponseDto;
+import com.example.playcation.coupon.repository.CouponRepository;
 import com.example.playcation.coupon.service.CouponUserService;
 import com.example.playcation.util.JWTUtil;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class CouponUserController {
 
   private final CouponUserService couponUserService;
+  private final CouponRepository couponRepository;
   private final JWTUtil jwtUtil;
 
 
@@ -45,24 +47,14 @@ public class CouponUserController {
     return new ResponseEntity<>(coupons, HttpStatus.OK);
   }
 
-//  @PostMapping("/issue/{couponId}")
-//  public ResponseEntity<CouponUserResponseDto> getCoupon(
-//      @RequestHeader(TokenSettings.ACCESS_TOKEN_CATEGORY) String authorizationHeader
-//      , @PathVariable Long couponId) {
-//    CouponUserResponseDto response = couponUserService.getCoupon(
-//        jwtUtil.findUserByToken(authorizationHeader), couponId);
-//    return new ResponseEntity<>(response, HttpStatus.OK);
-//  }
-
-  @PostMapping("/request/{couponId}")
-  public ResponseEntity<String> requestCoupon(@PathVariable("couponId") Long couponId,
+  @PostMapping("/request/{couponName}")
+  public ResponseEntity<String> requestCoupon(@PathVariable("couponName") String couponName,
       @RequestHeader(TokenSettings.ACCESS_TOKEN_CATEGORY) String authorizationHeader) {
-
+    boolean existCoupon = couponUserService.existCoupon(couponName);
     // 쿠폰 발급 큐에 사용자 추가 시도
-    boolean addedToQueue = couponUserService.addQueue(couponId,
-        jwtUtil.findUserByToken(authorizationHeader));
+    couponUserService.requestCoupon(jwtUtil.findUserByToken(authorizationHeader), couponName);
 
-    if (!addedToQueue) {
+    if (!existCoupon) {
       return new ResponseEntity<>("쿠폰 요청 실패.", HttpStatus.BAD_REQUEST);
     }
     return new ResponseEntity<>("쿠폰 요청 완료.", HttpStatus.OK);

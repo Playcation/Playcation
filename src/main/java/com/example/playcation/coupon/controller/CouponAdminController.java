@@ -59,4 +59,12 @@ public class CouponAdminController {
     return new ResponseEntity<>(responseDto, HttpStatus.OK);
   }
 
+  @PostMapping("/publish/{couponId}")
+  public ResponseEntity<String> publishCoupon(
+      @PathVariable Long couponId) {
+    couponAdminService.publish(couponId);
+    return new ResponseEntity<>("발급 완료", HttpStatus.OK);
+  }
+
+
 }

@@ -4,7 +4,9 @@ import com.example.playcation.common.PagingDto;
 import com.example.playcation.coupon.dto.CouponRequestDto;
 import com.example.playcation.coupon.dto.CouponResponseDto;
 import com.example.playcation.coupon.entity.Coupon;
+import com.example.playcation.coupon.entity.CouponUser;
 import com.example.playcation.coupon.repository.CouponRepository;
+import com.example.playcation.coupon.repository.CouponUserRepository;
 import com.example.playcation.enums.Role;
 import com.example.playcation.enums.Social;
 import com.example.playcation.exception.CouponErrorCode;
@@ -13,7 +15,9 @@ import com.example.playcation.user.entity.User;
 import com.example.playcation.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -21,6 +25,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +38,9 @@ public class CouponAdminService {
   private final CouponRepository couponRepository;
   private final BCryptPasswordEncoder bCryptPasswordEncoder;
   private final CouponUserService couponUserService;
+  private final CouponUserRepository couponUserRepository;
+
+  private final RedisTemplate<String, String> redisTemplate;
 
   @Transactional
   public void createTestUsers(Long userAmount) {
@@ -63,7 +71,7 @@ public class CouponAdminService {
         .validDays(requestDto.getValidDays())
         .build();
 
-    couponUserService.setCouponCount(coupon.getId(), requestDto.getStock());
+    couponUserService.setCouponCount(coupon.getName(), requestDto.getStock());
 
     couponRepository.save(coupon);
 
@@ -101,5 +109,49 @@ public class CouponAdminService {
     return CouponResponseDto.toDto(newCoupon);
   }
 
+  // 해당 쿠폰을 이미 받았는지 확인
+  public boolean canIssueCoupon(Long userId, Long couponId) {
+    return couponUserRepository.findByUserIdAndCouponId(userId, couponId).isEmpty();
+  }
 
+  // 사용자에게 쿠폰 발행
+  @Transactional
+  public void issueCoupon(Long userId, Long couponId) {
+    User user = userRepository.findByIdOrElseThrow(userId);
+    Coupon coupon = couponRepository.findByIdOrElseThrow(couponId);
+
+    if (!canIssueCoupon(userId, couponId)) {
+      throw new DuplicatedException(CouponErrorCode.DUPLICATE_COUPON);
+    }
+    // 쿠폰 발급
+    CouponUser couponUser = CouponUser.builder()
+        .user(user)
+        .coupon(coupon)
+        .issuedDate(coupon.getIssuedDate())
+        .expiredDate(coupon.getIssuedDate().plusDays(coupon.getValidDays()))
+        .build();
+
+    couponUserRepository.save(couponUser);
+  }
+
+  // 큐에 있는 사용자 목록 가져오기
+  private List<String> getUsersFromQueue(String couponName) {
+    // Redis ZSet에서 사용자 이메일을 조회
+    Set<String> userIdList = redisTemplate.opsForZSet()
+        .range("coupon:request:" + couponName, 0, -1);
+
+    // 결과를 List로 변환
+    return userIdList != null ? new ArrayList<>(userIdList) : new ArrayList<>();
+  }
+
+  // 큐에 있는 사용자들에게 쿠폰 발행
+  @Transactional
+  public void publish(Long couponId) {
+    Coupon coupon = couponRepository.findByIdOrElseThrow(couponId);
+    List<String> userIdList = getUsersFromQueue(coupon.getName());
+    for (String userId : userIdList) {
+      issueCoupon(Long.valueOf(userId), couponId);
+      redisTemplate.opsForZSet().remove("coupon:request:" + couponId, userId);
+    }
+  }
 }
