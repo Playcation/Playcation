@@ -69,7 +69,7 @@ public class GameController {
       @RequestParam(required = false) LocalDate createdAt
   ) {
     PagingDto<GameResponseDto> games = gameService.searchGames(page, title, categoryId, price,
-        createdAt.atStartOfDay());
+        createdAt);
     return new ResponseEntity<>(games, HttpStatus.OK);
   }
 
