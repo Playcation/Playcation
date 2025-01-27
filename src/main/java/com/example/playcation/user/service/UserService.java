@@ -15,14 +15,18 @@ import com.example.playcation.s3.repository.FileDetailRepository;
 import com.example.playcation.s3.repository.UserFileRepository;
 import com.example.playcation.s3.service.S3Service;
 import com.example.playcation.user.dto.DeletedUserRequestDto;
+import com.example.playcation.user.dto.RegistManagerRequestDto;
+import com.example.playcation.user.dto.RegistManagerResponseDto;
 import com.example.playcation.user.dto.RestoreUserRequestDto;
 import com.example.playcation.user.dto.SignInUserRequestDto;
 import com.example.playcation.user.dto.UpdatedUserPasswordRequestDto;
 import com.example.playcation.user.dto.UpdatedUserRequestDto;
 import com.example.playcation.user.dto.UserResponseDto;
 import com.example.playcation.user.entity.Point;
+import com.example.playcation.user.entity.RegistManager;
 import com.example.playcation.user.entity.User;
 import com.example.playcation.user.repository.PointRepository;
+import com.example.playcation.user.repository.RegistManagerRepository;
 import com.example.playcation.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -53,6 +57,7 @@ public class UserService {
   private final RedisTemplate<String, String> redisTemplate;
   private final S3Service s3Service;
   private final FileDetailRepository fileDetailRepository;
+  private final RegistManagerRepository registManagerRepository;
 
   // 회원 가입
   @Transactional
@@ -242,5 +247,23 @@ public class UserService {
     long secondsUntilMidnight = duration.getSeconds();
 
     return Duration.ofSeconds(secondsUntilMidnight);
+  }
+
+  public String registerManager(Long id, @Valid RegistManagerRequestDto registManagerRequestDto, MultipartFile file) {
+    User user = userRepository.findByIdOrElseThrow(id);
+    FileDetail image = null;
+    if(file != null && file.isEmpty()){
+      image = s3Service.uploadFile(file);
+    }
+    RegistManager registManager = RegistManager.builder()
+        .user(user)
+        .title(registManagerRequestDto.getTitle())
+        .description(registManagerRequestDto.getDescription())
+        .price(registManagerRequestDto.getPrice())
+        .mainPicture(image != null ? image.getFilePath() : "")
+        .termsAgreement(registManagerRequestDto.getTermsAgreement())
+        .build();
+    registManagerRepository.save(registManager);
+    return "성공";
   }
 }
