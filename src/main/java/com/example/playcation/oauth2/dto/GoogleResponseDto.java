@@ -5,7 +5,7 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class GoogleResponseDto implements BasicOAuth2Dto{
+public class GoogleResponseDto implements BasicOAuth2Dto {
 
   private final Map<String, Object> attribute;
 
@@ -37,6 +37,4 @@ public class GoogleResponseDto implements BasicOAuth2Dto{
   public String getPassword() {
     return Social.DEFAULT_PASSWORD.getPassword();
   }
-
-
 }

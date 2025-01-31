@@ -5,7 +5,7 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class KakaoResponseDto implements BasicOAuth2Dto{
+public class KakaoResponseDto implements BasicOAuth2Dto {
 
   private final Map<String, Object> attribute;
 

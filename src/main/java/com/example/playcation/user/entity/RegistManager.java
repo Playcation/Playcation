@@ -21,7 +21,7 @@ import software.amazon.ion.Decimal;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "`rigist_manager`")
+@Table(name = "`regist_manager`")
 public class RegistManager {
 
   @Id
@@ -32,13 +32,13 @@ public class RegistManager {
   @JoinColumn(name = "user_id")
   private User user;
 
-//  @NotBlank
+  //  @NotBlank
   private String title;
 
-//  @NotBlank
+  //  @NotBlank
   private String description;
 
-//  @NotBlank
+  //  @NotBlank
   private BigDecimal price;
 
   private String mainPicture;
