@@ -61,9 +61,6 @@ public class CouponUserAtomicService {
 
   @Transactional
   public void requestCoupon(Long userId, String couponName) {
-    if (redisTemplate == null) {
-      throw new IllegalStateException("RedisTemplate은 null일 수 없습니다");
-    }
     if (getRemainingCouponCount(couponName) > 0) {
       addQueue(userId, couponName);
       decrementCouponCount(couponName);
