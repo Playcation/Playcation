@@ -31,7 +31,7 @@ public class LibraryService {
   private final LibraryRepository libraryRepository;
   private final GameService gameService;
 
-  // library 생성(중복되는 게임의 추가에 대한 에외처리는 앞서 카드에서 하였기 때문에 생략)
+  // library 생성(중복되는 게임의 추가에 대한 에외처리는 앞서 장바구니에서 하였기 때문에 생략)
   @Transactional
   public void createLibraries(List<Long> gameIds, User user) {
 
