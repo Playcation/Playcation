@@ -3,6 +3,7 @@ package com.example.playcation.gametag.service;
 import com.example.playcation.common.PagingDto;
 import com.example.playcation.exception.DuplicatedException;
 import com.example.playcation.exception.GameTagErrorCode;
+import com.example.playcation.exception.NoAuthorizedException;
 import com.example.playcation.exception.NotFoundException;
 import com.example.playcation.game.dto.GameResponseDto;
 import com.example.playcation.game.entity.Game;
@@ -96,12 +97,12 @@ public class GameTagService {
   }
 
   @Transactional
-  public void deleteGame(Long userId, Long gameTagId) {
+  public void deleteGameTeg(Long userId, Long gameTagId) {
 
     GameTag gameTag = gameTagRepository.findByIdOrElseThrow(gameTagId);
 
     if (!gameTag.getGame().getUser().getId().equals(userId)) {
-      throw new NotFoundException(GameTagErrorCode.GAME_TAG_NOT_FOUND);
+      throw new NoAuthorizedException(GameTagErrorCode.GAME_TAG_NOT_FOUND);
     }
 
     gameTagRepository.delete(gameTag);
