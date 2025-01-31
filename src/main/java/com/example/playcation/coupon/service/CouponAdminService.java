@@ -138,31 +138,6 @@ public class CouponAdminService {
     return CouponResponseDto.toDto(newCoupon);
   }
 
-  // 해당 쿠폰을 이미 받았는지 확인
-  public boolean canIssueCoupon(Long userId, Long couponId) {
-    return couponUserRepository.findByUserIdAndCouponId(userId, couponId).isEmpty();
-  }
-
-  // 사용자에게 쿠폰 발행
-  @Transactional
-  public void issueCoupon(Long userId, Long couponId) {
-    User user = userRepository.findByIdOrElseThrow(userId);
-    Coupon coupon = couponRepository.findByIdOrElseThrow(couponId);
-
-    if (!canIssueCoupon(userId, couponId)) {
-      throw new DuplicatedException(CouponErrorCode.DUPLICATE_ISSUED_COUPON);
-    }
-    // 쿠폰 발급
-    CouponUser couponUser = CouponUser.builder()
-        .user(user)
-        .coupon(coupon)
-        .issuedDate(coupon.getIssuedDate())
-        .expiredDate(coupon.getIssuedDate().plusDays(coupon.getValidDays()))
-        .build();
-
-    couponUserRepository.save(couponUser);
-  }
-
   // 큐에 있는 사용자 목록 가져오기
   private List<String> getUsersFromQueue(String couponName) {
     // Redis ZSet에서 사용자 이메일을 조회
@@ -174,30 +149,62 @@ public class CouponAdminService {
   }
 
   // 큐에 있는 사용자들에게 쿠폰 발행
+  @Transactional
   public void atomicPublish(Long couponId) {
     Coupon coupon = couponRepository.findByIdOrElseThrow(couponId);
 
-    int updatedStock = couponUserService.getRemainingCouponCount(coupon.getName());
-    coupon.updateStock(updatedStock);
-
+    // 사용자 목록 가져오기
     List<String> userIdList = getUsersFromQueue(coupon.getName());
+
+    List<CouponUser> couponUsers = new ArrayList<>();
     for (String userId : userIdList) {
-      issueCoupon(Long.valueOf(userId), couponId);
-      redisTemplate.opsForZSet().remove("coupon:request:" + coupon.getName(), userId);
+      User user = userRepository.findByIdOrElseThrow(Long.valueOf(userId));
+      // 쿠폰 발급
+      CouponUser couponUser = CouponUser.builder()
+          .user(user)
+          .coupon(coupon)
+          .issuedDate(coupon.getIssuedDate())
+          .expiredDate(coupon.getIssuedDate().plusDays(coupon.getValidDays()))
+          .build();
+      couponUsers.add(couponUser);
     }
+    // 한 번에 DB에 저장
+    couponUserRepository.saveAll(couponUsers);
+
+    coupon.updateStock(couponUserService.getRemainingCouponCount(coupon.getName()));
+    couponRepository.save(coupon);
+
+    // Redis에서 한 번에 여러 사용자 제거
+    redisTemplate.opsForZSet().remove("coupon:request:" + coupon.getName(), userIdList.toArray());
   }
 
   // 큐에 있는 사용자들에게 쿠폰 발행 (분산락)
+  @Transactional
   public void lockPublish(Long couponId) {
     Coupon coupon = couponRepository.findByIdOrElseThrow(couponId);
 
-    long updatedStock = redisCouponRepository.getRemainingCouponCount(coupon.getName());
-    coupon.updateStock(updatedStock);
-
+    // 사용자 목록 가져오기
     List<String> userIdList = redisCouponRepository.getUsersFromQueue(coupon.getName());
+
+    List<CouponUser> couponUsers = new ArrayList<>();
+
     for (String userId : userIdList) {
-      issueCoupon(Long.valueOf(userId), couponId);
+      User user = userRepository.findByIdOrElseThrow(Long.valueOf(userId));
+      // 쿠폰 발급
+      CouponUser couponUser = CouponUser.builder()
+          .user(user)
+          .coupon(coupon)
+          .issuedDate(coupon.getIssuedDate())
+          .expiredDate(coupon.getIssuedDate().plusDays(coupon.getValidDays()))
+          .build();
+      couponUsers.add(couponUser);
     }
+    // 한 번에 DB에 저장
+    couponUserRepository.saveAll(couponUsers);
+
+    coupon.updateStock(redisCouponRepository.getRemainingCouponCount(coupon.getName()));
+    couponRepository.save(coupon);
+
     redisCouponRepository.removeUserFromMap(coupon.getName());
   }
 }

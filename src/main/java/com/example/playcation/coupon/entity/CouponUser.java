@@ -39,4 +39,6 @@ public class CouponUser {
   private LocalDate issuedDate;
 
   private LocalDate expiredDate;
+
+
 }

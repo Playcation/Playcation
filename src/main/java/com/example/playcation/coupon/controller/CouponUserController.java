@@ -3,8 +3,11 @@ package com.example.playcation.coupon.controller;
 import com.example.playcation.common.PagingDto;
 import com.example.playcation.common.TokenSettings;
 import com.example.playcation.coupon.dto.CouponUserResponseDto;
+import com.example.playcation.coupon.repository.CouponUserRepository;
 import com.example.playcation.coupon.service.CouponUserAtomicService;
 import com.example.playcation.coupon.service.CouponUserLockService;
+import com.example.playcation.exception.CouponErrorCode;
+import com.example.playcation.exception.DuplicatedException;
 import com.example.playcation.util.JWTUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -24,6 +27,7 @@ public class CouponUserController {
 
   private final CouponUserAtomicService couponUserService;
   private final CouponUserLockService couponUserLockService;
+  private final CouponUserRepository couponUserRepository;
   private final JWTUtil jwtUtil;
 
 
@@ -50,13 +54,14 @@ public class CouponUserController {
   @PostMapping("/request/{couponName}")
   public ResponseEntity<String> requestAtomicCoupon(@PathVariable("couponName") String couponName,
       @RequestHeader(TokenSettings.ACCESS_TOKEN_CATEGORY) String authorizationHeader) {
-    boolean existCoupon = couponUserService.existCoupon(couponName);
-    // 쿠폰 발급 큐에 사용자 추가 시도
-    couponUserService.requestCoupon(jwtUtil.findUserByToken(authorizationHeader), couponName);
+    Long userId = jwtUtil.findUserByToken(authorizationHeader);
 
-    if (!existCoupon) {
-      return new ResponseEntity<>("쿠폰 요청 실패.", HttpStatus.BAD_REQUEST);
+    if (couponUserRepository.existsByUserIdAndCouponName(userId, couponName)) {
+      throw new DuplicatedException(CouponErrorCode.DUPLICATE_ISSUED_COUPON);
     }
+    // 쿠폰 발급 큐에 사용자 추가 시도
+    couponUserService.requestCoupon(userId, couponName);
+
     return new ResponseEntity<>("쿠폰 요청 완료.", HttpStatus.OK);
   }
 
@@ -65,12 +70,13 @@ public class CouponUserController {
   public ResponseEntity<String> requestLockCoupon(
       @PathVariable("couponName") String couponName,
       @RequestHeader(TokenSettings.ACCESS_TOKEN_CATEGORY) String authorizationHeader) {
-    boolean existCoupon = couponUserService.existCoupon(couponName);
-    // 쿠폰 발급 큐에 사용자 추가 시도
-    couponUserLockService.requestCoupon(jwtUtil.findUserByToken(authorizationHeader), couponName);
-    if (!existCoupon) {
-      return new ResponseEntity<>("쿠폰 요청 실패.", HttpStatus.BAD_REQUEST);
+    Long userId = jwtUtil.findUserByToken(authorizationHeader);
+    if (couponUserRepository.existsByUserIdAndCouponName(userId, couponName)) {
+      throw new DuplicatedException(CouponErrorCode.DUPLICATE_ISSUED_COUPON);
     }
+    // 쿠폰 발급 큐에 사용자 추가 시도
+    couponUserLockService.requestCoupon(userId, couponName);
+
     return new ResponseEntity<>("쿠폰 요청 완료.", HttpStatus.OK);
   }
 }

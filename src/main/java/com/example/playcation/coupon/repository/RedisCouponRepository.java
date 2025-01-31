@@ -1,5 +1,7 @@
 package com.example.playcation.coupon.repository;
 
+import com.example.playcation.exception.CouponErrorCode;
+import com.example.playcation.exception.DuplicatedException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -16,9 +18,9 @@ import org.springframework.stereotype.Component;
 public class RedisCouponRepository {
 
   private final RedissonClient redissonClient;
-  private static final String COUPON_COUNT_MAP = "CouponCountMap";
-  private static final String COUPON_REQUEST_USER_MAP = "CouponRequestUserMap";
-  private static final String KEY_COUPON_HEADER = "COUPON:";
+  private final String COUPON_COUNT_MAP = "CouponCountMap";
+  private final String COUPON_REQUEST_USER_MAP = "CouponRequestUserMap";
+  private final String KEY_COUPON_HEADER = "COUPON:";
 
 
   public void addUser(Long userId, String couponName) {
@@ -28,6 +30,16 @@ public class RedisCouponRepository {
     // 사용자 추가 (자동으로 여러 개 저장됨)
     userMap.put(getCouponKeyString(couponName), userId.toString());
 
+  }
+
+  public void findUserFromQueue(Long userId, String couponName) {
+    RSetMultimap<String, String> userMap = redissonClient.getSetMultimap(COUPON_REQUEST_USER_MAP,
+        new StringCodec());
+
+    // 이미 쿠폰을 요청한 사용자 여부 확인
+    if (userMap.get(getCouponKeyString(couponName)).contains(userId.toString())) {
+      throw new DuplicatedException(CouponErrorCode.DUPLICATED_REQUESTED_COUPON);
+    }
   }
 
   public List<String> getUsersFromQueue(String couponName) {

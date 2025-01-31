@@ -4,6 +4,7 @@ import com.example.playcation.exception.InternalServerException;
 import com.example.playcation.exception.InvalidInputException;
 import com.example.playcation.exception.LockErrorCode;
 import java.lang.reflect.Method;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -21,7 +22,9 @@ import org.springframework.stereotype.Component;
 public class DistributedLockAop {
 
   private static final String REDISSON_LOCK_PREFIX = "LOCK:";
-
+  private static final long DEFAULT_WAIT_TIME = 5L;
+  private static final long DEFAULT_LEASE_TIME = 3L;
+  private static final TimeUnit DEFAULT_TIME_UNIT = TimeUnit.SECONDS;
   private final RedissonClient redissonClient;
   private final AopForTransaction aopForTransaction;
 
@@ -38,8 +41,8 @@ public class DistributedLockAop {
     RLock rLock = redissonClient.getLock(key);  // (1)
     String lockName = rLock.getName();
     try {
-      boolean available = rLock.tryLock(distributedLock.waitTime(), distributedLock.leaseTime(),
-          distributedLock.timeUnit());  // (2)
+      boolean available = rLock.tryLock(DEFAULT_WAIT_TIME, DEFAULT_LEASE_TIME,
+          DEFAULT_TIME_UNIT);  // (2)
 
       if (!available) {
         throw new InvalidInputException(LockErrorCode.LOCK_NOT_AVAILABLE);

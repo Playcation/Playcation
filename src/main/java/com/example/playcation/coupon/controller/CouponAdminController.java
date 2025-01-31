@@ -67,7 +67,7 @@ public class CouponAdminController {
   }
 
   @PostMapping("/publish/{couponId}")
-  public ResponseEntity<String> publishAtoomicCoupon(
+  public ResponseEntity<String> publishAtomicCoupon(
       @PathVariable Long couponId) {
     couponAdminService.atomicPublish(couponId);
     return new ResponseEntity<>("발급 완료", HttpStatus.OK);

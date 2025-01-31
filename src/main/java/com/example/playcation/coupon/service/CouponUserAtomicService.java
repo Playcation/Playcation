@@ -3,9 +3,9 @@ package com.example.playcation.coupon.service;
 import com.example.playcation.common.PagingDto;
 import com.example.playcation.coupon.dto.CouponUserResponseDto;
 import com.example.playcation.coupon.entity.CouponUser;
-import com.example.playcation.coupon.repository.CouponRepository;
 import com.example.playcation.coupon.repository.CouponUserRepository;
 import com.example.playcation.exception.CouponErrorCode;
+import com.example.playcation.exception.DuplicatedException;
 import com.example.playcation.exception.NotFoundException;
 import com.example.playcation.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -27,7 +27,6 @@ public class CouponUserAtomicService {
 
   private final CouponUserRepository couponUserRepository;
   private final UserRepository userRepository;
-  private final CouponRepository couponRepository;
   private final RedisTemplate<String, String> redisTemplate;
 
 
@@ -61,6 +60,11 @@ public class CouponUserAtomicService {
 
   @Transactional
   public void requestCoupon(Long userId, String couponName) {
+    Double existingUser = redisTemplate.opsForZSet()
+        .score("coupon:request:" + couponName, userId.toString());
+    if (existingUser != null) {
+      throw new DuplicatedException(CouponErrorCode.DUPLICATED_REQUESTED_COUPON);
+    }
     if (getRemainingCouponCount(couponName) > 0) {
       addQueue(userId, couponName);
       decrementCouponCount(couponName);
@@ -74,16 +78,6 @@ public class CouponUserAtomicService {
       return Integer.parseInt(countStr);
     }
     return 0;
-  }
-
-  public boolean existCoupon(String couponName) {
-    try {
-      // 쿠폰이 존재하면 true 반환
-      couponRepository.findByNameOrElseThrow(couponName);
-      return true;
-    } catch (NotFoundException e) {
-      return false;
-    }
   }
 
   // 쿠폰 수량 감소

@@ -2,6 +2,7 @@ package com.example.playcation.coupon.service;
 
 import com.example.playcation.coupon.repository.RedisCouponRepository;
 import com.example.playcation.redis.distributedLock.DistributedLock;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -13,7 +14,10 @@ public class CouponUserLockService {
 
   private final RedisCouponRepository redisCouponRepository;
 
+  @Transactional
   public void requestCoupon(Long userId, String couponName) {
+
+    redisCouponRepository.findUserFromQueue(userId, couponName);
     if (redisCouponRepository.getRemainingCouponCount(couponName) > 0) {
       addQueue(userId, couponName);
       updateCouponCount(couponName);
