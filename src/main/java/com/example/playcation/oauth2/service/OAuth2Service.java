@@ -8,6 +8,7 @@ import com.example.playcation.exception.NoAuthorizedException;
 import com.example.playcation.exception.UserErrorCode;
 import com.example.playcation.oauth2.dto.BasicOAuth2Dto;
 import com.example.playcation.oauth2.dto.GoogleResponseDto;
+import com.example.playcation.oauth2.dto.KakaoResponseDto;
 import com.example.playcation.oauth2.dto.NaverResponseDto;
 import com.example.playcation.oauth2.dto.OAuth2UserDto;
 import com.example.playcation.oauth2.dto.UserDto;
@@ -53,6 +54,8 @@ public class OAuth2Service extends DefaultOAuth2UserService {
       return new NaverResponseDto(oAuth2User.getAttributes());
     } else if ("GOOGLE".equals(registrationId)) {
       return new GoogleResponseDto(oAuth2User.getAttributes());
+    } else if("KAKAO".equals(registrationId)){
+      return new KakaoResponseDto(oAuth2User.getAttributes());
     }
     return null;
   }
@@ -61,7 +64,6 @@ public class OAuth2Service extends DefaultOAuth2UserService {
   private OAuth2User createNewSocialUser(BasicOAuth2Dto oAuth2Response, String registrationId) {
     User user = User.builder()
         .email(oAuth2Response.getEmail())
-        .password("")
         .name(oAuth2Response.getName())
         .username(oAuth2Response.getName())
         .role(Role.USER)
