@@ -29,4 +29,6 @@ public interface GameRepository extends JpaRepository<Game, Long>, GameRepositor
       throw new NotFoundException(GameErrorCode.GAME_NOT_FOUND);
     }
   }
+
+  boolean existsByTitle(String title);
 }

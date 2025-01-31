@@ -31,9 +31,16 @@ public class CouponAdminController {
   }
 
   @PostMapping
-  public ResponseEntity<CouponResponseDto> createCoupon(
+  public ResponseEntity<CouponResponseDto> createAtomicCoupon(
       @Valid @RequestBody CouponRequestDto requestDto) {
-    CouponResponseDto responseDto = couponAdminService.createCoupon(requestDto);
+    CouponResponseDto responseDto = couponAdminService.createAtomicCoupon(requestDto);
+    return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
+  }
+
+  @PostMapping("/lock")
+  public ResponseEntity<CouponResponseDto> createLockCoupon(
+      @Valid @RequestBody CouponRequestDto requestDto) {
+    CouponResponseDto responseDto = couponAdminService.createLockCoupon(requestDto);
     return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
   }
 
@@ -57,6 +64,20 @@ public class CouponAdminController {
       @PathVariable Long couponId, @Valid @RequestBody CouponRequestDto requestDto) {
     CouponResponseDto responseDto = couponAdminService.updateCoupon(couponId, requestDto);
     return new ResponseEntity<>(responseDto, HttpStatus.OK);
+  }
+
+  @PostMapping("/publish/{couponId}")
+  public ResponseEntity<String> publishAtomicCoupon(
+      @PathVariable Long couponId) {
+    couponAdminService.atomicPublish(couponId);
+    return new ResponseEntity<>("발급 완료", HttpStatus.OK);
+  }
+
+  @PostMapping("/lockpublish/{couponId}")
+  public ResponseEntity<String> publishLockCoupon(
+      @PathVariable Long couponId) {
+    couponAdminService.lockPublish(couponId);
+    return new ResponseEntity<>("발급 완료", HttpStatus.OK);
   }
 
 }

@@ -7,9 +7,10 @@ import java.math.BigDecimal;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+@Repository
 public interface CouponRepository extends JpaRepository<Coupon, Long> {
 
-  boolean existsByNameAndRate(final String name, final BigDecimal rate);
+  boolean existsByNameAndRate(final String name, BigDecimal rate);
 
   default Coupon findByIdOrElseThrow(Long id) {
     Coupon coupon = findById(id).orElseThrow(
@@ -17,5 +18,4 @@ public interface CouponRepository extends JpaRepository<Coupon, Long> {
 
     return coupon;
   }
-
 }
