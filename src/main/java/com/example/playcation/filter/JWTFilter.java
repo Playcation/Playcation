@@ -19,6 +19,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -43,13 +44,14 @@ public class JWTFilter extends OncePerRequestFilter {
   /**
    * 모든 요청에서 JWT 인증을 수행하는 메서드
    *
-   * @param request  HTTP 요청 객체
-   * @param response HTTP 응답 객체
+   * @param request     HTTP 요청 객체
+   * @param response    HTTP 응답 객체
    * @param filterChain 필터 체인 객체
    * @throws ServletException, IOException
    */
   @Override
-  protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+  protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+      FilterChain filterChain)
       throws ServletException, IOException {
 
     String requestUri = request.getRequestURI();
@@ -70,18 +72,31 @@ public class JWTFilter extends OncePerRequestFilter {
       validateToken(accessToken);
     } catch (ExpiredJwtException e) {
       // 쿠키에서 리플레시 토큰 확인하기 -> 유효하면 트큰 재발급 / 아니면 이대로 진행
-      String[] tokens = tokenService.createNewToken(request);
-      String newAccessToken = tokens[0];
-      String newRefreshToken = tokens[1];
-      response.addCookie(jwtUtil.createCookie(TokenSettings.REFRESH_TOKEN_CATEGORY, newRefreshToken));
+      String refreshToken = Arrays.stream(request.getCookies())
+          .filter(cookie -> TokenSettings.REFRESH_TOKEN_CATEGORY.equals(
+              cookie.getName())) // 이름이 일치하는 쿠키 필터링
+          .map(Cookie::getValue) // 쿠키 값을 추출
+          .findFirst() // 첫 번째 값 가져오기
+          .orElse(null); // 없으면 null 반환
+      try {
+        authenticateUser(refreshToken);
+        validateToken(refreshToken);
+        String[] tokens = tokenService.createNewToken(request);
+        String newAccessToken = tokens[0];
+        String newRefreshToken = tokens[1];
+        response.addCookie(
+            jwtUtil.createCookie(TokenSettings.REFRESH_TOKEN_CATEGORY, newRefreshToken));
 
-      response.setStatus(HttpServletResponse.SC_OK); // 302 Found 설정
-      response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-      response.getWriter().write(
-          "{\"token\" : \"" + newAccessToken + "\"}"
-      );
+        response.setStatus(HttpServletResponse.SC_OK); // 302 Found 설정
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.getWriter().write(
+            "{\"token\" : \"" + newAccessToken + "\"}"
+        );
 //      sendErrorResponse(response, "토큰이 만료되었습니다.");
-      return;
+      } catch (Exception exc) {
+        sendErrorResponse(response, "잘못된 리플레시 토큰입니다.");
+        return;
+      }
     } catch (Exception e) {
       sendErrorResponse(response, "잘못된 토큰입니다.");
       return;
@@ -128,7 +143,8 @@ public class JWTFilter extends OncePerRequestFilter {
     Long userId = Long.parseLong(jwtUtil.getUserId(token));
     User user = userRepository.findByIdOrElseThrow(userId);
     CustomUserDetails userDetails = new CustomUserDetails(user);
-    Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+    Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null,
+        userDetails.getAuthorities());
     SecurityContextHolder.getContext().setAuthentication(authentication);
   }
 
@@ -136,7 +152,7 @@ public class JWTFilter extends OncePerRequestFilter {
    * 인증 실패 시 클라이언트에게 에러 응답을 보내는 메서드
    *
    * @param response HTTP 응답 객체
-   * @param message 오류 메시지
+   * @param message  오류 메시지
    * @throws IOException
    */
   private void sendErrorResponse(HttpServletResponse response, String message) throws IOException {

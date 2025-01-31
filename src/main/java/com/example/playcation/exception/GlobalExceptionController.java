@@ -71,11 +71,11 @@ public class GlobalExceptionController {
         return createErrorResponse(HttpStatus.NOT_FOUND, "No Handler Found", "The API you are trying to reach does not exist: " + request.getRequestURI());
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ExceptionResponseDto> handleGenericException(Exception ex) {
-//        return new ResponseEntity<>(new ExceptionResponseDto(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(), "Exception" , "An error occurred: " + ex.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
-        return createErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Exception", "An error occurred: " + ex.getMessage());
-    }
+//    @ExceptionHandler(Exception.class)
+//    public ResponseEntity<ExceptionResponseDto> handleGenericException(Exception ex) {
+////        return new ResponseEntity<>(new ExceptionResponseDto(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(), "Exception" , "An error occurred: " + ex.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+//        return createErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Exception", "An error occurred: " + ex.getMessage());
+//    }
 
     private ResponseEntity<ExceptionResponseDto> createErrorResponse(HttpStatus status, String errorName, String message) {
         ExceptionResponseDto responseDto = new ExceptionResponseDto(

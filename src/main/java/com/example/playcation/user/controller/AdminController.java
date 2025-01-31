@@ -5,6 +5,7 @@ import com.example.playcation.enums.Role;
 import com.example.playcation.tag.Dto.CreatedTagRequestDto;
 import com.example.playcation.tag.Dto.CreatedTagResponseDto;
 import com.example.playcation.tag.service.TagService;
+import com.example.playcation.user.dto.RegistManagerResponseDto;
 import com.example.playcation.user.dto.UserResponseDto;
 import com.example.playcation.user.service.AdminService;
 import com.example.playcation.user.service.UserService;
@@ -42,6 +43,14 @@ public class AdminController {
   public ResponseEntity<CreatedTagResponseDto> createTag(@RequestBody CreatedTagRequestDto requestDto) {
     CreatedTagResponseDto responseDto = tagService.CreateTag(requestDto);
     return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
+  }
+
+  // 메니저 신청한 유저 조회
+  @GetMapping("/regist/managers")
+  public ResponseEntity<PagingDto<RegistManagerResponseDto>> findRegistManagerUsers(
+      @PageableDefault(size = 10, page = 0) Pageable pageable
+  ){
+    return ResponseEntity.ok().body(adminService.findRegistManagerUsers(pageable));
   }
 
   // 모든 유저 조회

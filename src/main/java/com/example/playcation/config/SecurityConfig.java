@@ -47,7 +47,7 @@ public class SecurityConfig {
   private final JWTUtil jwtUtil;
 
   private String[] WHITE_LIST = new String[]{
-      "/", "/email","/mail-check", "/oauth2/**", "*/sign-in", "/oauth2-login", "/refresh", "/error", "/token/refresh", "/h2-console/**"
+      "/", "/email","/mail-check", "/oauth2/**", "*/sign-in", "/oauth2-login", "/refresh", "/error", "/token/refresh", "/h2-console/**", "/api*", "/api-docs/**", "swagger-ui/**"
   };
 
   private String[] ADMIN_LIST = new String[]{

@@ -9,6 +9,7 @@ public enum Social {
   NORMAL("NORMAL"),
   NAVER("NAVER"),
   GOOGLE("GOOGLE"),
+  KAKAO("KAKAO"),
   DEFAULT_PASSWORD("0000");
 
   private String password;
