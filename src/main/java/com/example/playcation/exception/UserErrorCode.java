@@ -15,6 +15,7 @@ public enum UserErrorCode implements ExceptionType {
   // NotFoundException
   NOT_FOUND_USER(HttpStatus.NOT_FOUND, "유저를 찾을 수 없습니다."),
   DELETED_USER(HttpStatus.BAD_REQUEST, "이미 삭제된 회원입니다."),
+  AUTH_NOT_EMAIL(HttpStatus.BAD_REQUEST, "이메일 인증에 실패하였습니다."),
 
   // NoAuthorizedException
   NOT_AUTHORIZED_MANAGER(HttpStatus.UNAUTHORIZED, "유저만 권한을 변경 할 수 있습니다."),

@@ -21,15 +21,13 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.DynamicInsert;
 
 @Entity
 @Table(name = "`game`")
 @Getter
-@DynamicInsert
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
 public class Game extends BaseEntity {
 
   @Id
@@ -58,19 +56,6 @@ public class Game extends BaseEntity {
   private String filePath;
 
   private LocalDateTime deletedAt;
-
-
-  public Game(User user, String title, Category category, BigDecimal price, String description,
-      GameStatus status, String imageUrl, String filePath) {
-    this.user = user;
-    this.title = title;
-    this.category = category;
-    this.price = price;
-    this.description = description;
-    this.status = status;
-    this.imageUrl = imageUrl;
-    this.filePath = filePath;
-  }
 
   public void updateGame(UpdatedGameRequestDto requestDto, String imageUrl, String filePath) {
     this.title = requestDto.getTitle();
