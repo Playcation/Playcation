@@ -57,8 +57,8 @@ public class Coupon {
     this.validDays = requestDto.getValidDays();
   }
 
-  public void updateStock() {
-    this.stock--;
+  public void updateStock(long updatedStock) {
+    this.stock = updatedStock;
   }
 
   // 테스트용 팩토리 메서드
@@ -66,4 +66,5 @@ public class Coupon {
       CouponType type, LocalDate issueDate, Long validDays) {
     return new Coupon(id, name, count, discount, type, issueDate, validDays);
   }
+
 }

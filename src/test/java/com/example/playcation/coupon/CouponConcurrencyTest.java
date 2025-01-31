@@ -4,7 +4,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import com.example.playcation.coupon.entity.Coupon;
 import com.example.playcation.coupon.repository.CouponRepository;
-import com.example.playcation.coupon.service.CouponUserService;
+import com.example.playcation.coupon.service.CouponUserAtomicService;
 import com.example.playcation.enums.CouponType;
 import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
@@ -29,7 +29,7 @@ import org.springframework.test.context.ActiveProfiles;
 class CouponConcurrencyTest {
 
   @Autowired
-  private CouponUserService couponUserService;
+  private CouponUserAtomicService couponUserService;
 
   @Autowired
   private CouponRepository couponRepository;

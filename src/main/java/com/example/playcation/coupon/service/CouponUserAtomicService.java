@@ -23,7 +23,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class CouponUserService {
+public class CouponUserAtomicService {
 
   private final CouponUserRepository couponUserRepository;
   private final UserRepository userRepository;

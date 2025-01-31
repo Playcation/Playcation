@@ -7,6 +7,7 @@ import com.example.playcation.coupon.entity.Coupon;
 import com.example.playcation.coupon.entity.CouponUser;
 import com.example.playcation.coupon.repository.CouponRepository;
 import com.example.playcation.coupon.repository.CouponUserRepository;
+import com.example.playcation.coupon.repository.RedisCouponRepository;
 import com.example.playcation.enums.Role;
 import com.example.playcation.enums.Social;
 import com.example.playcation.exception.CouponErrorCode;
@@ -37,9 +38,9 @@ public class CouponAdminService {
   private final UserRepository userRepository;
   private final CouponRepository couponRepository;
   private final BCryptPasswordEncoder bCryptPasswordEncoder;
-  private final CouponUserService couponUserService;
+  private final CouponUserAtomicService couponUserService;
   private final CouponUserRepository couponUserRepository;
-
+  private final RedisCouponRepository redisCouponRepository;
   private final RedisTemplate<String, String> redisTemplate;
 
   @Transactional
@@ -52,8 +53,28 @@ public class CouponAdminService {
     }
   }
 
+  public CouponResponseDto findCoupon(Long couponId) {
+    Coupon coupon = couponRepository.findByIdOrElseThrow(couponId);
+
+    return CouponResponseDto.toDto(coupon);
+  }
+
+  public PagingDto<CouponResponseDto> findAllCouponsAndPaging(int page, int size) {
+    Pageable pageable = PageRequest.of(page, size, Sort.by(Direction.DESC, "id"));
+
+    Page<Coupon> couponPage = couponRepository.findAll(pageable);
+
+    List<CouponResponseDto> couponDtoList = couponPage.getContent().stream()
+        .map(coupon -> new CouponResponseDto(coupon.getId(), coupon.getName(), coupon.getStock(),
+            coupon.getRate(), coupon.getCouponType(), coupon.getIssuedDate(),
+            coupon.getValidDays()))
+        .toList();
+
+    return new PagingDto<>(couponDtoList, couponPage.getTotalElements());
+  }
+
   @Transactional
-  public CouponResponseDto createCoupon(CouponRequestDto requestDto) {
+  public CouponResponseDto createAtomicCoupon(CouponRequestDto requestDto) {
     boolean couponExists = couponRepository.existsByNameAndRate(
         requestDto.getName(),
         requestDto.getRate()
@@ -78,24 +99,30 @@ public class CouponAdminService {
     return CouponResponseDto.toDto(coupon);
   }
 
-  public CouponResponseDto findCoupon(Long couponId) {
-    Coupon coupon = couponRepository.findByIdOrElseThrow(couponId);
+  @Transactional
+  public CouponResponseDto createLockCoupon(CouponRequestDto requestDto) {
+    boolean couponExists = couponRepository.existsByNameAndRate(
+        requestDto.getName(),
+        requestDto.getRate()
+    );
+
+    if (couponExists) {
+      throw new DuplicatedException(CouponErrorCode.DUPLICATE_COUPON);
+    }
+    Coupon coupon = Coupon.builder()
+        .name(requestDto.getName())
+        .stock(requestDto.getStock())
+        .rate(requestDto.getRate())
+        .couponType(requestDto.getCouponType())
+        .issuedDate(LocalDate.now())
+        .validDays(requestDto.getValidDays())
+        .build();
+
+    redisCouponRepository.setCouponCount(requestDto.getName(), requestDto.getStock());
+
+    couponRepository.save(coupon);
 
     return CouponResponseDto.toDto(coupon);
-  }
-
-  public PagingDto<CouponResponseDto> findAllCouponsAndPaging(int page, int size) {
-    Pageable pageable = PageRequest.of(page, size, Sort.by(Direction.DESC, "id"));
-
-    Page<Coupon> couponPage = couponRepository.findAll(pageable);
-
-    List<CouponResponseDto> couponDtoList = couponPage.getContent().stream()
-        .map(coupon -> new CouponResponseDto(coupon.getId(), coupon.getName(), coupon.getStock(),
-            coupon.getRate(), coupon.getCouponType(), coupon.getIssuedDate(),
-            coupon.getValidDays()))
-        .toList();
-
-    return new PagingDto<>(couponDtoList, couponPage.getTotalElements());
   }
 
   @Transactional
@@ -105,6 +132,8 @@ public class CouponAdminService {
     newCoupon.updateCoupon(requestDto);
 
     couponRepository.save(newCoupon);
+    couponUserService.setCouponCount(newCoupon.getName(), newCoupon.getStock());
+    redisCouponRepository.setCouponCount(newCoupon.getName(), newCoupon.getStock());
 
     return CouponResponseDto.toDto(newCoupon);
   }
@@ -121,7 +150,7 @@ public class CouponAdminService {
     Coupon coupon = couponRepository.findByIdOrElseThrow(couponId);
 
     if (!canIssueCoupon(userId, couponId)) {
-      throw new DuplicatedException(CouponErrorCode.DUPLICATE_COUPON);
+      throw new DuplicatedException(CouponErrorCode.DUPLICATE_ISSUED_COUPON);
     }
     // 쿠폰 발급
     CouponUser couponUser = CouponUser.builder()
@@ -145,13 +174,30 @@ public class CouponAdminService {
   }
 
   // 큐에 있는 사용자들에게 쿠폰 발행
-  @Transactional
-  public void publish(Long couponId) {
+  public void atomicPublish(Long couponId) {
     Coupon coupon = couponRepository.findByIdOrElseThrow(couponId);
+
+    int updatedStock = couponUserService.getRemainingCouponCount(coupon.getName());
+    coupon.updateStock(updatedStock);
+
     List<String> userIdList = getUsersFromQueue(coupon.getName());
     for (String userId : userIdList) {
       issueCoupon(Long.valueOf(userId), couponId);
-      redisTemplate.opsForZSet().remove("coupon:request:" + couponId, userId);
+      redisTemplate.opsForZSet().remove("coupon:request:" + coupon.getName(), userId);
     }
+  }
+
+  // 큐에 있는 사용자들에게 쿠폰 발행 (분산락)
+  public void lockPublish(Long couponId) {
+    Coupon coupon = couponRepository.findByIdOrElseThrow(couponId);
+
+    long updatedStock = redisCouponRepository.getRemainingCouponCount(coupon.getName());
+    coupon.updateStock(updatedStock);
+
+    List<String> userIdList = redisCouponRepository.getUsersFromQueue(coupon.getName());
+    for (String userId : userIdList) {
+      issueCoupon(Long.valueOf(userId), couponId);
+    }
+    redisCouponRepository.removeUserFromMap(coupon.getName());
   }
 }
