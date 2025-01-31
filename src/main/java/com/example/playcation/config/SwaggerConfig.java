@@ -8,6 +8,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * 스웨거 설정
+ * @link http://localhost:8080/swagger-ui/index.html#/
+ */
 @RequiredArgsConstructor
 @Configuration
 public class SwaggerConfig {
