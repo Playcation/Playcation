@@ -3,6 +3,7 @@ package com.example.playcation.order.controller;
 import com.example.playcation.common.PagingDto;
 import com.example.playcation.common.TokenSettings;
 import com.example.playcation.game.dto.GameSimpleResponseDto;
+import com.example.playcation.order.dto.OrderProceedResponseDto;
 import com.example.playcation.order.dto.OrderResponseDto;
 import com.example.playcation.order.dto.RefundRequestDto;
 import com.example.playcation.order.dto.RefundResponseDto;
@@ -10,6 +11,7 @@ import com.example.playcation.order.service.OrderUserService;
 import com.example.playcation.util.JWTUtil;
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,15 +33,28 @@ public class OrderUserController {
   private final JWTUtil jwtUtil;
 
   /**
-   * 현재 로그인한 유저의 장바구니로 주문 생성
+   * 현재 로그인한 유저의 장바구니로 주문 정보 검색
    */
-  @PostMapping
-  public ResponseEntity<OrderResponseDto> createOrder(
+  @GetMapping("/proceed")
+  public ResponseEntity<OrderProceedResponseDto> createOrder(
       @RequestHeader(TokenSettings.ACCESS_TOKEN_CATEGORY) String authorizationHeader
   ) {
-    OrderResponseDto responseDto = orderService.createOrder(
+    OrderProceedResponseDto dto = orderService.createOrder(
         jwtUtil.findUserByToken(authorizationHeader));
-    return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
+    return new ResponseEntity<>(dto, HttpStatus.OK);
+  }
+
+  /**
+   * 결제에 성공한 주문 건에 대한 주문 정보 저장
+   */
+  @PostMapping("/success")
+  public ResponseEntity<OrderResponseDto> completeOrder(
+      @RequestHeader(TokenSettings.ACCESS_TOKEN_CATEGORY) String authorizationHeader,
+      @RequestParam UUID orderId
+  ) {
+    OrderResponseDto dto = orderService.completeOrder(
+        jwtUtil.findUserByToken(authorizationHeader), orderId);
+    return new ResponseEntity<>(dto, HttpStatus.CREATED);
   }
 
   /**
@@ -50,7 +65,7 @@ public class OrderUserController {
   @GetMapping("/{orderId}")
   public ResponseEntity<OrderResponseDto> findOrder(
       @RequestHeader(TokenSettings.ACCESS_TOKEN_CATEGORY) String authorizationHeader,
-      @PathVariable Long orderId
+      @PathVariable UUID orderId
   ) {
     OrderResponseDto responseDto = orderService.findOrder(
         jwtUtil.findUserByToken(authorizationHeader), orderId);
@@ -83,7 +98,7 @@ public class OrderUserController {
   @PostMapping("/{orderId}/refund")
   public ResponseEntity<RefundResponseDto> refundOrder(
       @Valid @RequestBody RefundRequestDto requestDto,
-      @PathVariable Long orderId,
+      @PathVariable UUID orderId,
       @RequestHeader(TokenSettings.ACCESS_TOKEN_CATEGORY) String authorizationHeader
   ) {
     RefundResponseDto responseDto = orderService.refundOrder(
