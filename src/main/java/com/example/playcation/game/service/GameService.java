@@ -6,6 +6,7 @@ import com.example.playcation.category.repository.CategoryRepository;
 import com.example.playcation.common.PagingDto;
 import com.example.playcation.enums.GameStatus;
 import com.example.playcation.enums.ImageRole;
+import com.example.playcation.exception.DuplicatedException;
 import com.example.playcation.exception.GameErrorCode;
 import com.example.playcation.exception.NoAuthorizedException;
 import com.example.playcation.game.dto.CreatedGameRequestDto;
@@ -61,6 +62,11 @@ public class GameService {
       MultipartFile gameFile) {
 
     Category category = categoryRepository.findByIdOrElseThrow(requestDto.getCategoryId());
+
+    // title 중복 체크
+    if (gameRepository.existsByTitle(requestDto.getTitle())) {
+      throw new DuplicatedException(GameErrorCode.DUPLICATE_GAME_TITLE);
+    }
 
     User user = userRepository.findByIdOrElseThrow(id);
     FileDetail mainFileDetail = s3Service.uploadFile(mainImage);
@@ -130,8 +136,13 @@ public class GameService {
 
     Game game = gameRepository.findByIdOrElseThrow(gameId);
 
+
     if (!game.getUser().getId().equals(userId)) {
       throw new NoAuthorizedException(GameErrorCode.DOES_NOT_MATCH);
+    }
+
+    if (gameRepository.existsByTitle(requestDto.getTitle())) {
+      throw new DuplicatedException(GameErrorCode.DUPLICATE_GAME_TITLE);
     }
 
     FileDetail mainFileDetail = handleFileUpdate(game, ImageRole.MAIN_IMAGE, mainImage);
@@ -166,10 +177,6 @@ public class GameService {
     // 삭제하는 게임 id를 가지고 있는 게임 태그를 hard delete
     List<GameTag> gameTagList = gameTagRepository.findGameTagsByGameId(gameId);
     gameTagRepository.deleteAll(gameTagList);
-
-    // 삭제하는 게임 id를 가지고 있는 라이브러리를 hard delete
-    List<Library> libraryList = libraryRepository.findLibraryByGameId(gameId);
-    libraryRepository.deleteAll(libraryList);
 
     List<Review> reviewList = reviewRepository.findReviewByGameId(game.getId());
     reviewRepository.deleteAll(reviewList);

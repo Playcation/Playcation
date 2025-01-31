@@ -1,6 +1,7 @@
 package com.example.playcation.gametag.service;
 
 import com.example.playcation.common.PagingDto;
+import com.example.playcation.exception.DuplicatedException;
 import com.example.playcation.exception.GameTagErrorCode;
 import com.example.playcation.exception.NotFoundException;
 import com.example.playcation.game.dto.GameResponseDto;
@@ -38,6 +39,10 @@ public class GameTagService {
     Tag tag = tagRepository.findByIdOrElseThrow(requestDto.getTagId());
 
     Game game = gameRepository.findByIdOrElseThrow(requestDto.getGameId());
+
+    if (gameTagRepository.existsByGameIdAndTagId(game.getId(), tag.getId())) {
+      throw new DuplicatedException(GameTagErrorCode.DUPLICATE_GAME_TAG);
+    }
 
     GameTag gameTag = GameTag.builder()
         .tag(tag)
