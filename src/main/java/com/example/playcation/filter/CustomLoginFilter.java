@@ -49,14 +49,16 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
    * @throws AuthenticationException 인증 실패 시 예외 발생
    */
   @Override
-  public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
+  public Authentication attemptAuthentication(HttpServletRequest request,
+      HttpServletResponse response) throws AuthenticationException {
     try {
       ObjectMapper objectMapper = new ObjectMapper();
       Map<String, String> loginData = objectMapper.readValue(request.getInputStream(), Map.class);
       String email = loginData.get("email");
       String password = loginData.get("password");
 
-      return authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password, null));
+      return authenticationManager.authenticate(
+          new UsernamePasswordAuthenticationToken(email, password, null));
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -67,13 +69,14 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
    * <p>- JWT 액세스 및 리프레시 토큰을 생성하여 응답 헤더 및 쿠키에 저장</p>
    * <p>- Redis에 리프레시 토큰 저장</p>
    *
-   * @param request  HTTP 요청 객체
-   * @param response HTTP 응답 객체
-   * @param chain 필터 체인
+   * @param request        HTTP 요청 객체
+   * @param response       HTTP 응답 객체
+   * @param chain          필터 체인
    * @param authentication 인증 정보 (사용자 ID 및 권한 포함)
    */
   @Override
-  protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication)
+  protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,
+      FilterChain chain, Authentication authentication)
       throws IOException {
     CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
     String userId = customUserDetails.getUserId().toString();

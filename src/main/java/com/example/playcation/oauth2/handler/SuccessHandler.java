@@ -29,7 +29,8 @@ public class SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
   private String frontUrl;
 
   @Override
-  public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
+  public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
+      Authentication authentication)
       throws IOException, ServletException {
 
     // 사용자 정보 가져오기
