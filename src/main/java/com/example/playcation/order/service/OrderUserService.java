@@ -96,7 +96,7 @@ public class OrderUserService {
     Order savedOrder = orderRepository.save(order);
     orderDetailService.createOrderDetailsInCart(cartItems, savedOrder);
 
-    return new OrderProceedResponseDto(cartItems, total);
+    return new OrderProceedResponseDto(savedOrder.getId(), cartItems, total);
   }
 
   /**
