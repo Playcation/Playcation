@@ -2,17 +2,13 @@ package com.example.playcation.coupon.service;
 
 import com.example.playcation.common.PagingDto;
 import com.example.playcation.coupon.dto.CouponUserResponseDto;
-import com.example.playcation.coupon.entity.Coupon;
 import com.example.playcation.coupon.entity.CouponUser;
-import com.example.playcation.coupon.repository.CouponRepository;
 import com.example.playcation.coupon.repository.CouponUserRepository;
 import com.example.playcation.exception.CouponErrorCode;
-import com.example.playcation.exception.InvalidInputException;
+import com.example.playcation.exception.DuplicatedException;
 import com.example.playcation.exception.NotFoundException;
-import com.example.playcation.user.entity.User;
 import com.example.playcation.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
-import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,11 +23,10 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class CouponUserService {
+public class CouponUserAtomicService {
 
   private final CouponUserRepository couponUserRepository;
   private final UserRepository userRepository;
-  private final CouponRepository couponRepository;
   private final RedisTemplate<String, String> redisTemplate;
 
 
@@ -58,29 +53,44 @@ public class CouponUserService {
     return new PagingDto<>(couponDtoList, couponUserPage.getTotalElements());
   }
 
-  @Transactional
-  public CouponUserResponseDto getCoupon(Long userId, Long couponId) {
-    // 쿠폰 조회 및 재고 확인
-    Coupon coupon = couponRepository.findByIdOrElseThrow(couponId);
-    User user = userRepository.findByIdOrElseThrow(userId);
-
-    if (coupon.getStock() <= 0) {
-      throw new InvalidInputException(CouponErrorCode.COUPON_OUT_OF_STOCK);
-    }
-
-    // 쿠폰 재고 감소
-    coupon.updateStock();
-
-    // 쿠폰 발급
-    CouponUser couponUser = CouponUser.builder()
-        .user(user)
-        .coupon(coupon)
-        .issuedDate(coupon.getIssuedDate())
-        .expiredDate(coupon.getIssuedDate().plusDays(coupon.getValidDays()))
-        .build();
-
-    couponUserRepository.save(couponUser);
-
-    return CouponUserResponseDto.toDto(couponUser);
+  // 쿠폰 수량 설정
+  public void setCouponCount(String couponName, Long count) {
+    redisTemplate.opsForValue().set("coupon:count:" + couponName, String.valueOf(count));
   }
+
+  @Transactional
+  public void requestCoupon(Long userId, String couponName) {
+    Double existingUser = redisTemplate.opsForZSet()
+        .score("coupon:request:" + couponName, userId.toString());
+    if (existingUser != null) {
+      throw new DuplicatedException(CouponErrorCode.DUPLICATED_REQUESTED_COUPON);
+    }
+    if (getRemainingCouponCount(couponName) > 0) {
+      addQueue(userId, couponName);
+      decrementCouponCount(couponName);
+    }
+  }
+
+  // 남은 쿠폰 수량 가져오기
+  public int getRemainingCouponCount(String couponName) {
+    String countStr = redisTemplate.opsForValue().get("coupon:count:" + couponName);
+    if (countStr != null) {
+      return Integer.parseInt(countStr);
+    }
+    return 0;
+  }
+
+  // 쿠폰 수량 감소
+  @Transactional
+  public void decrementCouponCount(String couponName) {
+    redisTemplate.opsForValue().decrement("coupon:count:" + couponName);
+  }
+
+  @Transactional
+  public void addQueue(Long userId, String couponName) {
+    long now = System.currentTimeMillis();
+    redisTemplate.opsForZSet().add("coupon:request:" + couponName, String.valueOf(userId), now);
+  }
+
+
 }

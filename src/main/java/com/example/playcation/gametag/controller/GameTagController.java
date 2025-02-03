@@ -41,7 +41,7 @@ public class GameTagController {
   @DeleteMapping("/{gameTagId}")
   public ResponseEntity<String> deleteGameTag(@RequestHeader(TokenSettings.ACCESS_TOKEN_CATEGORY) String authorizationHeader, @PathVariable Long gameTagId) {
     Long userId = jwtUtil.findUserByToken(authorizationHeader);
-    gameTagService.deleteGame(userId, gameTagId);
+    gameTagService.deleteGameTeg(userId, gameTagId);
     return new ResponseEntity<>("삭제 완료되었습니다", HttpStatus.OK);
   }
 }

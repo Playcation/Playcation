@@ -1,6 +1,5 @@
-package com.example.playcation.coupon.entity;
+package com.example.playcation.user.entity;
 
-import com.example.playcation.user.entity.User;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -9,36 +8,41 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.time.LocalDate;
-import lombok.AccessLevel;
+import jakarta.validation.constraints.NotBlank;
+import java.math.BigDecimal;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import software.amazon.ion.Decimal;
 
-@Entity
 @Getter
-@Table(name = "`coupon_user`")
+@Entity
 @Builder
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor(access = AccessLevel.PROTECTED)
-public class CouponUser {
+@NoArgsConstructor
+@AllArgsConstructor
+@Table(name = "`regist_manager`")
+public class RegistManager {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "`user_id`")
+  @JoinColumn(name = "user_id")
   private User user;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "`coupon_id`")
-  private Coupon coupon;
+  //  @NotBlank
+  private String title;
 
-  private LocalDate issuedDate;
+  //  @NotBlank
+  private String description;
 
-  private LocalDate expiredDate;
+  //  @NotBlank
+  private BigDecimal price;
 
+  private String mainPicture;
+
+  private Boolean termsAgreement;
 
 }

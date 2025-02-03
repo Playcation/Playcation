@@ -35,11 +35,12 @@ public class CustomLogoutFilter extends GenericFilterBean {
    *
    * @param request  HTTP 요청 객체
    * @param response HTTP 응답 객체
-   * @param chain 필터 체인 객체
+   * @param chain    필터 체인 객체
    * @throws ServletException, IOException
    */
   @Override
-  public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+  public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+      throws IOException, ServletException {
     if (request instanceof HttpServletRequest && response instanceof HttpServletResponse) {
       doLogoutFilter((HttpServletRequest) request, (HttpServletResponse) response, chain);
     } else {
@@ -50,12 +51,13 @@ public class CustomLogoutFilter extends GenericFilterBean {
   /**
    * 로그아웃 요청인지 확인하고 처리하는 메서드
    *
-   * @param request HTTP 요청 객체
-   * @param response HTTP 응답 객체
+   * @param request     HTTP 요청 객체
+   * @param response    HTTP 응답 객체
    * @param filterChain 필터 체인 객체
    * @throws IOException, ServletException
    */
-  private void doLogoutFilter(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
+  private void doLogoutFilter(HttpServletRequest request, HttpServletResponse response,
+      FilterChain filterChain) throws IOException, ServletException {
     if (!isLogoutRequest(request)) {
       filterChain.doFilter(request, response);
       return;
@@ -75,24 +77,26 @@ public class CustomLogoutFilter extends GenericFilterBean {
 
   /**
    * 로그아웃 요청인지 / POST 요청인지 확인하는 메서드
-   * 
+   *
    * @param request
-   * @return ture 로그아웃 / POST 요청<p></p>
-   *         false 로그아웃이 아니거나 POST 요청이 아닐 시
+   * @return ture 로그아웃 / POST 요청<p></p> false 로그아웃이 아니거나 POST 요청이 아닐 시
    */
   private boolean isLogoutRequest(HttpServletRequest request) {
-    return "/logout".equals(request.getRequestURI()) && "POST".equalsIgnoreCase(request.getMethod());
+    return "/logout".equals(request.getRequestURI()) && "POST".equalsIgnoreCase(
+        request.getMethod());
   }
 
   /**
    * 쿠키에서 refresh token을 추출하는 메서드
-   * 
+   *
    * @param request HTTP 요청 객체
    * @return refresh token, 없으면 null
    */
   private String extractRefreshToken(HttpServletRequest request) {
     Cookie[] cookies = request.getCookies();
-    if (cookies == null) return null;
+    if (cookies == null) {
+      return null;
+    }
 
     for (Cookie cookie : cookies) {
       if (TokenSettings.REFRESH_TOKEN_CATEGORY.equals(cookie.getName())) {
@@ -103,13 +107,11 @@ public class CustomLogoutFilter extends GenericFilterBean {
   }
 
   /**
-   * 토큰의 유효성 검사
-   * 발급자, 만료기간 검사
+   * 토큰의 유효성 검사 발급자, 만료기간 검사
    *
-   * @param token 발급된 토큰
+   * @param token    발급된 토큰
    * @param response HTTP 응답 객체
-   * @return true 정상적인 토큰,<p></p>
-   *         false 만료 혹은 유효하지 않은 발급자
+   * @return true 정상적인 토큰,<p></p> false 만료 혹은 유효하지 않은 발급자
    * @throws IOException
    */
   private boolean validateToken(String token, HttpServletResponse response) throws IOException {
@@ -132,7 +134,7 @@ public class CustomLogoutFilter extends GenericFilterBean {
    * 저장된 refresh token을 삭제하는 메서드
    *
    * @param refreshToken 저장된 refresh token
-   * @param response HTTP 응답 객체
+   * @param response     HTTP 응답 객체
    */
   private void performLogout(String refreshToken, HttpServletResponse response) {
     String userId = jwtUtil.getUserId(refreshToken);

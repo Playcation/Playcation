@@ -4,9 +4,9 @@ package com.example.playcation.game.service;
 import com.example.playcation.category.entity.Category;
 import com.example.playcation.category.repository.CategoryRepository;
 import com.example.playcation.common.PagingDto;
-import com.example.playcation.config.S3Config;
 import com.example.playcation.enums.GameStatus;
 import com.example.playcation.enums.ImageRole;
+import com.example.playcation.exception.DuplicatedException;
 import com.example.playcation.exception.GameErrorCode;
 import com.example.playcation.exception.NoAuthorizedException;
 import com.example.playcation.game.dto.CreatedGameRequestDto;
@@ -19,6 +19,8 @@ import com.example.playcation.gametag.entity.GameTag;
 import com.example.playcation.gametag.repository.GameTagRepository;
 import com.example.playcation.library.entity.Library;
 import com.example.playcation.library.repository.LibraryRepository;
+import com.example.playcation.review.entity.Review;
+import com.example.playcation.review.repository.ReviewRepository;
 import com.example.playcation.s3.entity.FileDetail;
 import com.example.playcation.s3.entity.GameFile;
 import com.example.playcation.s3.repository.FileDetailRepository;
@@ -50,9 +52,8 @@ public class GameService {
   private final S3Service s3Service;
   private final GameFileRepository gameFileRepository;
   private final FileDetailRepository fileDetailRepository;
-  private final S3Config s3Config;
   private final CategoryRepository categoryRepository;
-//  private final ReviewRepository reviewRepository;
+  private final ReviewRepository reviewRepository;
 
   // 게임 생성
   @Transactional
@@ -61,6 +62,11 @@ public class GameService {
       MultipartFile gameFile) {
 
     Category category = categoryRepository.findByIdOrElseThrow(requestDto.getCategoryId());
+
+    // title 중복 체크
+    if (gameRepository.existsByTitle(requestDto.getTitle())) {
+      throw new DuplicatedException(GameErrorCode.DUPLICATE_GAME_TITLE);
+    }
 
     User user = userRepository.findByIdOrElseThrow(id);
     FileDetail mainFileDetail = s3Service.uploadFile(mainImage);
@@ -130,8 +136,13 @@ public class GameService {
 
     Game game = gameRepository.findByIdOrElseThrow(gameId);
 
+
     if (!game.getUser().getId().equals(userId)) {
       throw new NoAuthorizedException(GameErrorCode.DOES_NOT_MATCH);
+    }
+
+    if (gameRepository.existsByTitle(requestDto.getTitle())) {
+      throw new DuplicatedException(GameErrorCode.DUPLICATE_GAME_TITLE);
     }
 
     FileDetail mainFileDetail = handleFileUpdate(game, ImageRole.MAIN_IMAGE, mainImage);
@@ -167,12 +178,8 @@ public class GameService {
     List<GameTag> gameTagList = gameTagRepository.findGameTagsByGameId(gameId);
     gameTagRepository.deleteAll(gameTagList);
 
-    // 삭제하는 게임 id를 가지고 있는 라이브러리를 hard delete
-    List<Library> libraryList = libraryRepository.findLibraryByGameId(gameId);
-    libraryRepository.deleteAll(libraryList);
-
-//    List<Review> reviewList = reviewRepository.findReviewByGame(game);
-//    reviewRepository.deleteAll(reviewList);
+    List<Review> reviewList = reviewRepository.findReviewByGameId(game.getId());
+    reviewRepository.deleteAll(reviewList);
 
     gameRepository.save(game);
   }

@@ -5,32 +5,30 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class GoogleResponseDto implements BasicOAuth2Dto {
+public class KakaoResponseDto implements BasicOAuth2Dto {
 
   private final Map<String, Object> attribute;
 
   @Override
   public String getProvider() {
-
-    return Social.GOOGLE.name();
+    return Social.KAKAO.name();
   }
 
   @Override
   public String getProviderId() {
-
-    return attribute.get("sub").toString();
+    return attribute.get("id").toString();
   }
 
   @Override
   public String getEmail() {
-
-    return attribute.get("email").toString();
+    Map<String, Object> kakaoAccount = (Map<String, Object>) attribute.get("kakao_account");
+    return kakaoAccount.get("email").toString();
   }
 
   @Override
   public String getName() {
-
-    return attribute.get("name").toString();
+    Map<String, Object> kakaoAccount = (Map<String, Object>) attribute.get("properties");
+    return kakaoAccount.get("nickname").toString();
   }
 
   @Override

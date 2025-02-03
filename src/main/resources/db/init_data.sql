@@ -3,6 +3,36 @@ USE playcation;
 INSERT INTO user (email, password, name, role, social)
 VALUES ('choLuckUser@choLuckUser.com', 'password', 'name', 'USER', 'NORMAL');
 
+DROP PROCEDURE IF EXISTS InsertUsers;
+CREATE PROCEDURE InsertUsers()
+BEGIN
+    DECLARE i INT DEFAULT 1;
+
+    WHILE i <= 10 DO
+            INSERT INTO user (email, password, name, role, social)
+            VALUES (CONCAT('user', i, '@user.com'), 'password', 'name', 'USER', 'NORMAL');
+
+            SET i = i + 1; -- 반복 변수 증가
+        END WHILE;
+END;
+
+CALL InsertUsers();
+
+DROP PROCEDURE IF EXISTS InsertRegist;
+CREATE PROCEDURE InsertRegist()
+BEGIN
+    DECLARE i INT DEFAULT 1;
+
+    WHILE i <= 10 DO
+            INSERT INTO rigist_manager (user_id, description, mainPicture, title, price)
+            VALUES (i, CONCAT(i, ' description'), '', CONCAT('title', i), 1000 * i);
+
+            SET i = i + 1; -- 반복 변수 증가
+        END WHILE;
+END;
+
+CALL InsertRegist();
+
 INSERT INTO category (categoryName)
 VALUES ('rpg');
 
@@ -18,32 +48,32 @@ VALUES ('action rpg');
 INSERT INTO category (categoryName)
 VALUES ('fps');
 
-INSERT INTO game (title, description, category_id, user_id, price, imageUrl, status)
-VALUES ('game1', 'description1', 1, 1, 10000, '', 'ON_SAL');
+DROP PROCEDURE IF EXISTS InsertGames;
+CREATE PROCEDURE InsertGames()
+BEGIN
+    DECLARE i INT DEFAULT 1;
 
-INSERT INTO game (title, description, category_id, user_id, price, imageUrl, status)
-VALUES ('game2', 'description2', 1, 1, 20000, '', 'ON_SAL');
+    WHILE i <= 150 DO
+            INSERT INTO game (title, description, category_id, user_id, price, filePath, imageUrl, status, deletedAt)
+            VALUES (CONCAT('game', i), CONCAT('description', i), 1, 1, 10000 + (i * 1000), '', '', 'ON_SAL', null);
 
-INSERT INTO game (title, description, category_id, user_id, price, imageUrl, status)
-VALUES ('game3', 'description2', 1, 1, 20000, '', 'ON_SAL');
+            SET i = i + 1; -- 반복 변수 증가
+        END WHILE;
+END;
 
-INSERT INTO game (title, description, category_id, user_id, price, imageUrl, status)
-VALUES ('game4', 'description2', 2, 1, 20000, '', 'ON_SAL');
-
-INSERT INTO game (title, description, category_id, user_id, price, imageUrl, status)
-VALUES ('game5', 'description2', 2, 1, 20000, '', 'ON_SAL');
-
-INSERT INTO library (user_id, game_id, favourite)
-VALUES (1, 1, FALSE);
+CALL InsertGames();
 
 INSERT INTO library (user_id, game_id, favourite)
-VALUES (1, 2, FALSE);
+VALUES (1, 1, 0);
 
 INSERT INTO library (user_id, game_id, favourite)
-VALUES (1, 3, FALSE);
+VALUES (1, 2, 0);
 
 INSERT INTO library (user_id, game_id, favourite)
-VALUES (1, 4, FALSE);
+VALUES (1, 3, 0);
 
 INSERT INTO library (user_id, game_id, favourite)
-VALUES (1, 5, FALSE);
+VALUES (1, 4, 0);
+
+INSERT INTO library (user_id, game_id, favourite)
+VALUES (1, 5, 0);

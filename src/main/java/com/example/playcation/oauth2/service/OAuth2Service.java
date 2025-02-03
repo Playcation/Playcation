@@ -8,6 +8,7 @@ import com.example.playcation.exception.NoAuthorizedException;
 import com.example.playcation.exception.UserErrorCode;
 import com.example.playcation.oauth2.dto.BasicOAuth2Dto;
 import com.example.playcation.oauth2.dto.GoogleResponseDto;
+import com.example.playcation.oauth2.dto.KakaoResponseDto;
 import com.example.playcation.oauth2.dto.NaverResponseDto;
 import com.example.playcation.oauth2.dto.OAuth2UserDto;
 import com.example.playcation.oauth2.dto.UserDto;
@@ -39,12 +40,15 @@ public class OAuth2Service extends DefaultOAuth2UserService {
 
     // 소셜 로그인 응답 객체 가져오기
     BasicOAuth2Dto oAuth2Response = getOAuth2Response(registrationId, oAuth2User);
-    if (oAuth2Response == null) return null;
+    if (oAuth2Response == null) {
+      return null;
+    }
 
     String email = oAuth2Response.getEmail();
     User existData = userRepository.findByEmail(email).orElse(null);
 
-    return (existData == null) ? createNewSocialUser(oAuth2Response, registrationId) : updateExistingUser(existData, registrationId);
+    return (existData == null) ? createNewSocialUser(oAuth2Response, registrationId)
+        : updateExistingUser(existData, registrationId);
   }
 
   // 소셜 로그인 응답 객체 생성 메서드 (Google, Naver 구분)
@@ -53,6 +57,8 @@ public class OAuth2Service extends DefaultOAuth2UserService {
       return new NaverResponseDto(oAuth2User.getAttributes());
     } else if ("GOOGLE".equals(registrationId)) {
       return new GoogleResponseDto(oAuth2User.getAttributes());
+    } else if ("KAKAO".equals(registrationId)) {
+      return new KakaoResponseDto(oAuth2User.getAttributes());
     }
     return null;
   }
@@ -61,7 +67,6 @@ public class OAuth2Service extends DefaultOAuth2UserService {
   private OAuth2User createNewSocialUser(BasicOAuth2Dto oAuth2Response, String registrationId) {
     User user = User.builder()
         .email(oAuth2Response.getEmail())
-        .password("")
         .name(oAuth2Response.getName())
         .username(oAuth2Response.getName())
         .role(Role.USER)
@@ -77,17 +82,18 @@ public class OAuth2Service extends DefaultOAuth2UserService {
 
   // 기존 유저 업데이트 메서드 (소셜 플랫폼 갱신)
   private OAuth2User updateExistingUser(User existData, String registrationId) {
-    if(existData.getDeletedAt() != null){
+    if (existData.getDeletedAt() != null) {
       throw new DuplicatedException(UserErrorCode.EMAIL_EXIST);
     }
-    if(!existData.getSocial().name().equals(registrationId)){
-      if(!existData.getSocial().equals(Social.NORMAL)) {
+    if (!existData.getSocial().name().equals(registrationId)) {
+      if (!existData.getSocial().equals(Social.NORMAL)) {
         throw new NoAuthorizedException(UserErrorCode.EXIST_SOCIAL);
       }
       existData.updateSocial(Social.valueOf(registrationId.toUpperCase()));
       userRepository.save(existData);
     }
 
-    return new OAuth2UserDto(new UserDto(existData.getEmail(), existData.getName(), existData.getRole()));
+    return new OAuth2UserDto(
+        new UserDto(existData.getEmail(), existData.getName(), existData.getRole()));
   }
 }
