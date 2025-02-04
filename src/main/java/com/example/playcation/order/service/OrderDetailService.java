@@ -5,6 +5,7 @@ import com.example.playcation.enums.OrderStatus;
 import com.example.playcation.game.entity.Game;
 import com.example.playcation.game.repository.GameRepository;
 import com.example.playcation.library.service.LibraryService;
+import com.example.playcation.order.entity.Order;
 import com.example.playcation.order.entity.OrderDetail;
 import com.example.playcation.order.repository.OrderDetailRepository;
 import java.util.ArrayList;
@@ -21,22 +22,22 @@ public class OrderDetailService {
   private final GameRepository gameRepository;
 
   /**
-   * 장바구니 내 아이템들로 OrderDetail 생성(아직 주문 부여X). 유효하지 않은 값을 포함할 시 예외
+   * 장바구니 내 아이템들로 OrderDetail 생성(아직 주문 부여X)
    *
    * @param items 장바구니 아이템 리스트
-   * @return {@code items}를 OrderDetail 로 변환한 리스트
+   * @param order 주문 번호
    */
   @Transactional
-  public List<OrderDetail> createOrderDetailsInCart(List<CartGameResponseDto> items) {
+  public void createOrderDetailsInCart(List<CartGameResponseDto> items, Order order) {
 
     List<Long> ids = items.stream().map(CartGameResponseDto::getId).toList();
-    List<Game> games = gameRepository.findAllByIdIn(ids)
-        .stream().filter(Game::isDeleted).toList();
+    List<Game> games = gameRepository.findAllByIdIn(ids);
 
     List<OrderDetail> orderDetails = new ArrayList<>();
     for (int i = 0; i < items.size(); i++) {
       orderDetails.add(
           OrderDetail.builder()
+              .order(order)
               .game(games.get(i))
               .price(items.get(i).getPrice())
               .status(OrderStatus.SUCCESS)
@@ -44,6 +45,6 @@ public class OrderDetailService {
       );
     }
 
-    return orderDetailRepository.saveAll(orderDetails);
+    orderDetailRepository.saveAll(orderDetails);
   }
 }

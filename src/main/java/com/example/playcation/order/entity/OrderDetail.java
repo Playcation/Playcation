@@ -52,10 +52,6 @@ public class OrderDetail {
   @JoinColumn(name = "`refund_id`")
   private Refund refund;
 
-  public void assignOrder(Order order) {
-    this.order = order;
-  }
-
   public void updateStatus(OrderStatus status) {
     this.status = status;
   }
