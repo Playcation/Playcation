@@ -11,7 +11,11 @@ import com.example.playcation.exception.InvalidInputException;
 import com.example.playcation.exception.NoAuthorizedException;
 import com.example.playcation.exception.OrderErrorCode;
 import com.example.playcation.game.dto.GameSimpleResponseDto;
+import com.example.playcation.game.entity.Game;
+import com.example.playcation.game.repository.GameRepository;
 import com.example.playcation.library.service.LibraryService;
+import com.example.playcation.order.dto.OrderDetailResponseDto;
+import com.example.playcation.order.dto.OrderProceedResponseDto;
 import com.example.playcation.order.dto.OrderResponseDto;
 import com.example.playcation.order.dto.RefundRequestDto;
 import com.example.playcation.order.dto.RefundResponseDto;
@@ -24,10 +28,12 @@ import com.example.playcation.order.repository.RefundRepository;
 import com.example.playcation.user.entity.User;
 import com.example.playcation.user.repository.UserRepository;
 import com.example.playcation.user.service.UserService;
+import jakarta.mail.MessagingException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -46,6 +52,7 @@ public class OrderUserService {
   private final UserRepository userRepository;
   private final OrderDetailRepository orderDetailRepository;
   private final RefundRepository refundRepository;
+  private final GameRepository gameRepository;
 
   private final CartService cartService;
   private final OrderDetailService orderDetailService;
@@ -55,54 +62,66 @@ public class OrderUserService {
   private final OrderEmailService orderEmailService;
 
   /**
-   * 주문 생성(결제)
+   * 결제를 위한 주문 정보 생성
    *
    * @param userId 현재 로그인한 유저 id
    */
   @Transactional
-  public OrderResponseDto createOrder(Long userId) {
+  public OrderProceedResponseDto createOrder(Long userId) {
 
     List<CartGameResponseDto> cartItems = cartService.findCartItems(userId);
     if (cartItems.isEmpty()) {
       throw new InvalidInputException(OrderErrorCode.EMPTY_CART);
     }
 
-    User findUser = userRepository.findByIdOrElseThrow(userId);
+    // 장바구니 내 게임 유효성 검사
+    List<Long> ids = cartItems.stream().map(CartGameResponseDto::getId).toList();
+    List<Game> games = gameRepository.findAllByIdIn(ids);
+    for (Game g : games) {
+      if(g.isDeleted()) {
+        throw new InvalidInputException(OrderErrorCode.INVALID_ITEM_INCLUDED);
+      }
+    }
 
-    // 주문 상세 내역 생성 및 장바구니 내 게임 유효성 검사
-    List<OrderDetail> details = orderDetailService.createOrderDetailsInCart(cartItems);
-    BigDecimal total = details.stream().map(OrderDetail::getPrice)
+    BigDecimal total = cartItems.stream().map(CartGameResponseDto::getPrice)
         .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-    // ************************
-    // TODO: 결제 요청
-    // ************************
+    User findUser = userRepository.findByIdOrElseThrow(userId);
 
     Order order = Order.builder()
         .user(findUser)
         .totalPrice(total)
+        .status(OrderStatus.IN_PROGRESS)
         .build();
-
     Order savedOrder = orderRepository.save(order);
-    for (OrderDetail o : details) {
-      o.assignOrder(savedOrder);
-    }
-    orderDetailRepository.saveAll(details);
+    orderDetailService.createOrderDetailsInCart(cartItems, savedOrder);
+
+    return new OrderProceedResponseDto(savedOrder.getId().toString(), cartItems, total);
+  }
+
+  /**
+   * 결제 완료된 주문의 정보를 저장
+   */
+  public OrderResponseDto completeOrder(Long userId, String orderId) {
 
     cartService.removeCart(userId);
-    List<Long> gameIds = cartItems.stream().map(CartGameResponseDto::getId).toList();
-    libraryService.createLibraries(gameIds, findUser);
+
+    List<OrderDetail> details = orderDetailRepository.findAllByOrderId(UUID.fromString(orderId));
+    Order order = details.get(0).getOrder();
+
+    List<Long> gameIds = details.stream().map(d -> d.getGame().getId()).toList();
+    libraryService.createLibraries(gameIds, order.getUser());
+    order.successStatus();
 
     try {
       // 이메일 발송(주문, 주문 상세내역)
-      orderEmailService.sendOrderConfirmationEmail(savedOrder, details);
-    } catch (Exception e) {
+      orderEmailService.sendOrderConfirmationEmail(order, details);
+    } catch (MessagingException e) {
       // 예외 로그
-      log.error("주문 확인 이메일 전송에 실패했습니다. 주문 ID: {}", savedOrder.getId(), e);
+      log.error("주문 확인 이메일 전송에 실패했습니다. 주문 ID: {}", order.getId(), e);
     }
 
-
-    return OrderResponseDto.toDto(savedOrder, details);
+    return OrderResponseDto.toDto(order, details);
   }
 
   /**
@@ -111,7 +130,7 @@ public class OrderUserService {
    * @param userId  현재 로그인한 유저 id
    * @param orderId 조회할 주문 식별자
    */
-  public OrderResponseDto findOrder(Long userId, Long orderId) {
+  public OrderResponseDto findOrder(Long userId, UUID orderId) {
 
     Order findOrder = orderRepository.findByIdOrElseThrow(orderId);
     User findUser = userRepository.findByIdOrElseThrow(userId);
@@ -154,13 +173,13 @@ public class OrderUserService {
    * @apiNote 주문일로부터 2일 이내인 주문만 환불 가능, 비밀번호 체크.<br>주문 내역 페이지에서 환불 진행.
    */
   @Transactional
-  public RefundResponseDto refundOrder(Long userId, Long orderId, RefundRequestDto dto) {
+  public RefundResponseDto refundOrder(Long userId, UUID orderId, RefundRequestDto dto) {
 
     Order findOrder = orderRepository.findByIdOrElseThrow(orderId);
-    if(!orderRepository.existsByIdAndUserId(orderId, userId)) {
+    if (!orderRepository.existsByIdAndUserId(orderId, userId)) {
       throw new InvalidInputException(OrderErrorCode.NO_AUTHORIZED_ORDER);
     }
-    if(!orderDetailRepository.existsByIdAndOrderId(dto.getOrderDetailId(), orderId)) {
+    if (!orderDetailRepository.existsByIdAndOrderId(dto.getOrderDetailId(), orderId)) {
       throw new InvalidInputException(OrderErrorCode.NO_EXIST_ORDER_DETAIL);
     }
     if (findOrder.getCreatedAt().isBefore(LocalDateTime.now().minusDays(2))) {

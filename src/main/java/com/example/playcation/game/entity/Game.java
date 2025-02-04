@@ -76,6 +76,6 @@ public class Game extends BaseEntity {
    * 게임이 삭제되었는지 여부를 반환
    */
   public boolean isDeleted() {
-    return (this.deletedAt == null);
+    return (this.deletedAt != null);
   }
 }

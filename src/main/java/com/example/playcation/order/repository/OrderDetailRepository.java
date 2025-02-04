@@ -6,6 +6,7 @@ import com.example.playcation.exception.OrderErrorCode;
 import com.example.playcation.order.entity.Order;
 import com.example.playcation.order.entity.OrderDetail;
 import java.util.List;
+import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,7 +16,7 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Long> 
   /**
    * 주문 id와 연결된 모든 주문 상세를 찾음
    */
-  List<OrderDetail> findAllByOrderId(Long orderId);
+  List<OrderDetail> findAllByOrderId(UUID orderId);
 
   /**
    * 주문 id 목록에 해당하는 모든 주문 상세를 찾음
@@ -34,5 +35,5 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Long> 
         new NotFoundException(OrderErrorCode.NOT_FOUND_ORDER_DETAIL));
   }
 
-  boolean existsByIdAndOrderId(Long id, Long orderId);
+  boolean existsByIdAndOrderId(Long id, UUID orderId);
 }

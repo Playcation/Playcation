@@ -18,6 +18,7 @@ import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -34,12 +35,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class Order extends BaseEntity {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+  @GeneratedValue(strategy = GenerationType.UUID)
+  private UUID id;
 
   @ManyToOne(fetch = FetchType.LAZY)
   private User user;
 
   private BigDecimal totalPrice;
 
+  @Enumerated(value = EnumType.STRING)
+  private OrderStatus status;
+
+  public void successStatus() {
+    this.status = OrderStatus.SUCCESS;
+  }
+
+  public void expireStatus() {
+    this.status = OrderStatus.EXPIRED;
+  }
 }
