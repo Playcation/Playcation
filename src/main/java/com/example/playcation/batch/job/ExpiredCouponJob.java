@@ -1,8 +1,8 @@
 package com.example.playcation.batch.job;
 
-import com.example.playcation.coupon.entity.CouponUser;
 import com.example.playcation.coupon.repository.CouponUserRepository;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,10 +11,9 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
+import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.data.RepositoryItemReader;
-import org.springframework.batch.item.data.RepositoryItemWriter;
 import org.springframework.batch.item.data.builder.RepositoryItemReaderBuilder;
-import org.springframework.batch.item.data.builder.RepositoryItemWriterBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.Sort.Direction;
@@ -44,7 +43,7 @@ public class ExpiredCouponJob {
   public Step firstStep() {
 
     return new StepBuilder("findCouponUserAndDelete", jobRepository)
-        .<CouponUser, CouponUser>chunk(10, platformTransactionManager)
+        .<Long, Long>chunk(100, platformTransactionManager)
         .allowStartIfComplete(true)
         .reader(reader())
         .writer(writer(couponUserRepository))
@@ -52,12 +51,12 @@ public class ExpiredCouponJob {
   }
 
   @Bean
-  public RepositoryItemReader<CouponUser> reader() {
+  public RepositoryItemReader<Long> reader() {
 
-    return new RepositoryItemReaderBuilder<CouponUser>()
+    return new RepositoryItemReaderBuilder<Long>()
         .name("findCouponUserAndDelete")
         .pageSize(10)
-        .methodName("findAllByExpiredDateIsBefore")
+        .methodName("findAllIdsByExpiredDateIsBefore")
         .arguments(LocalDate.now())
         .sorts(Map.of("id", Direction.ASC))
         .repository(couponUserRepository)
@@ -65,12 +64,9 @@ public class ExpiredCouponJob {
   }
 
   @Bean
-  public RepositoryItemWriter<CouponUser> writer(CouponUserRepository couponUserRepository) {
+  public ItemWriter<Long> writer(CouponUserRepository couponUserRepository) {
 
-    return new RepositoryItemWriterBuilder<CouponUser>()
-        .repository(couponUserRepository)
-        .methodName("delete")
-        .build();
+    return items -> couponUserRepository.deleteAllByIdInBatch(new ArrayList<>(items.getItems()));
   }
 }
 
