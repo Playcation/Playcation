@@ -46,4 +46,11 @@ public class Order extends BaseEntity {
   @Enumerated(value = EnumType.STRING)
   private OrderStatus status;
 
+  public void successStatus() {
+    this.status = OrderStatus.SUCCESS;
+  }
+
+  public void expireStatus() {
+    this.status = OrderStatus.EXPIRED;
+  }
 }

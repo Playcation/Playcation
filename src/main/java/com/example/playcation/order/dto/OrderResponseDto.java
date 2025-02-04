@@ -15,7 +15,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class OrderResponseDto {
 
-  private final UUID id;
+  private final String id;
 
   private final List<OrderDetailResponseDto> games;
 
@@ -25,11 +25,10 @@ public class OrderResponseDto {
 
   public static OrderResponseDto toDto(Order order, List<OrderDetail> orderDetails) {
     return new OrderResponseDto(
-        order.getId(),
+        order.getId().toString(),
         orderDetails.stream().map(OrderDetailResponseDto::toDto).toList(),
         order.getTotalPrice(),
         order.getCreatedAt()
     );
   }
-
 }

@@ -50,7 +50,7 @@ public class OrderUserController {
   @PostMapping("/success")
   public ResponseEntity<OrderResponseDto> completeOrder(
       @RequestHeader(TokenSettings.ACCESS_TOKEN_CATEGORY) String authorizationHeader,
-      @RequestParam UUID orderId
+      @RequestParam String orderId
   ) {
     OrderResponseDto dto = orderService.completeOrder(
         jwtUtil.findUserByToken(authorizationHeader), orderId);

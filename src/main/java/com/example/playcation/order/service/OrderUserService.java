@@ -96,21 +96,22 @@ public class OrderUserService {
     Order savedOrder = orderRepository.save(order);
     orderDetailService.createOrderDetailsInCart(cartItems, savedOrder);
 
-    return new OrderProceedResponseDto(savedOrder.getId(), cartItems, total);
+    return new OrderProceedResponseDto(savedOrder.getId().toString(), cartItems, total);
   }
 
   /**
    * 결제 완료된 주문의 정보를 저장
    */
-  public OrderResponseDto completeOrder(Long userId, UUID orderId) {
+  public OrderResponseDto completeOrder(Long userId, String orderId) {
 
     cartService.removeCart(userId);
 
-    List<OrderDetail> details = orderDetailRepository.findAllByOrderId(orderId);
+    List<OrderDetail> details = orderDetailRepository.findAllByOrderId(UUID.fromString(orderId));
     Order order = details.get(0).getOrder();
 
     List<Long> gameIds = details.stream().map(d -> d.getGame().getId()).toList();
     libraryService.createLibraries(gameIds, order.getUser());
+    order.successStatus();
 
     try {
       // 이메일 발송(주문, 주문 상세내역)
