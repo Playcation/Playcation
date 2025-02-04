@@ -24,7 +24,7 @@ BEGIN
     DECLARE i INT DEFAULT 1;
 
     WHILE i <= 10 DO
-            INSERT INTO rigist_manager (user_id, description, mainPicture, title, price)
+            INSERT INTO regist_manager (user_id, description, mainPicture, title, price)
             VALUES (i, CONCAT(i, ' description'), '', CONCAT('title', i), 1000 * i);
 
             SET i = i + 1; -- 반복 변수 증가
@@ -53,7 +53,7 @@ CREATE PROCEDURE InsertGames()
 BEGIN
     DECLARE i INT DEFAULT 1;
 
-    WHILE i <= 150 DO
+    WHILE i <= 10 DO
             INSERT INTO game (title, description, category_id, user_id, price, filePath, imageUrl, status, deletedAt)
             VALUES (CONCAT('game', i), CONCAT('description', i), 1, 1, 10000 + (i * 1000), '', '', 'ON_SAL', null);
 
