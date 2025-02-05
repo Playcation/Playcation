@@ -98,6 +98,10 @@ public class User extends BaseEntity {
     return this.equals(game.getUser());
   }
 
+  public void updateGrade(Grade grade) {
+    this.grade = grade;
+  }
+
   /**
    * 회원 탈퇴 후 30일이 지난 계정을 영구 삭제
    */

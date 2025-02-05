@@ -55,7 +55,7 @@ public class ExpiredCouponJob {
 
     return new RepositoryItemReaderBuilder<Long>()
         .name("findCouponUserAndDelete")
-        .pageSize(10)
+        .pageSize(100)
         .methodName("findAllIdsByExpiredDateIsBefore")
         .arguments(LocalDate.now())
         .sorts(Map.of("id", Direction.ASC))
