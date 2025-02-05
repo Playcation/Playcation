@@ -11,7 +11,7 @@ on:
   # https://github.com/marketplace/actions/build-and-push-docker-images
 jobs:
   docker-build-and-push:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}  # 🔹 test.yml이 성공한 경우에만 실행
+    #if: ${{ github.event.workflow_run.conclusion == 'success' }}  # 🔹 test.yml이 성공한 경우에만 실행
     runs-on: ubuntu-latest
     steps:
       -
