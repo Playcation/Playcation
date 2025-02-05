@@ -4,7 +4,7 @@ on:
   workflow_run:
     workflows: ["GitHub Actions Demo"]  # test.yml에서 정의한 workflow name과 동일하게 설정해야 함
     branches:
-      - main  # 🔹 main 브랜치에서만 실행되도록 설정
+      - feature-userController3  # 🔹 main 브랜치에서만 실행되도록 설정
     types:
       - completed  # test.yml이 완료된 후 실행됨
 
