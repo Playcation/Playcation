@@ -11,10 +11,18 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "`library`")
-public class Library{
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class Library extends BaseEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,5 +34,9 @@ public class Library{
   @ManyToOne(fetch = FetchType.LAZY)
   private Game game;
 
-  private Boolean isFavourite;
+  private Boolean favourite;
+
+  public void updateFavourite(boolean Favourite) {
+    this.favourite = Favourite;
+  }
 }
