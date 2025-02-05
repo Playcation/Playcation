@@ -102,6 +102,7 @@ public class OrderUserService {
   /**
    * 결제 완료된 주문의 정보를 저장
    */
+  @Transactional
   public OrderResponseDto completeOrder(Long userId, String orderId) {
 
     cartService.removeCart(userId);

@@ -10,6 +10,7 @@ import com.example.playcation.exception.DuplicatedException;
 import com.example.playcation.exception.NoAuthorizedException;
 import com.example.playcation.game.entity.Game;
 import com.example.playcation.game.repository.GameRepository;
+import com.example.playcation.library.repository.LibraryRepository;
 import com.example.playcation.user.entity.User;
 import com.example.playcation.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -24,6 +25,7 @@ public class CartService {
   private final GameRepository gameRepository;
   private final CartRepository cartRepository;
   private final UserRepository userRepository;
+  private final LibraryRepository libraryRepository;
 
   /**
    * 장바구니 내 게임 리스트 조회 Service 메서드
@@ -64,6 +66,10 @@ public class CartService {
     // 이미 회원의 장바구니에 게임이 존재하는지 확인
     if (cartRepository.findByUserIdAndGameId(userId, gameId).isPresent()) {
       throw new DuplicatedException(CartErrorCode.GAME_ALREADY_IN_CART);
+    }
+    // 이미 가지고 있는 게임인지 확인
+    if(libraryRepository.existsByUserIdAndGameId(user.getId(), game.getId())){
+      throw new DuplicatedException(CartErrorCode.GAME_ALREADY_IN_LIBRARY);
     }
 
     // 해당 회원의 장바구니에 게임 추가
