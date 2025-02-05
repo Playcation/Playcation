@@ -45,7 +45,6 @@ public class PaymentServiceImpl implements PaymentService {
     payment.updateUser(user);
     return paymentRepository.save(payment);
   }
-
   @Override
   public PaymentSuccessDto tossPaymentSuccess(String paymentKey, String orderId,
       BigDecimal amount) {

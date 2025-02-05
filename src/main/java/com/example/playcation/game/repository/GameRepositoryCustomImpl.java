@@ -50,7 +50,7 @@ public class GameRepositoryCustomImpl implements GameRepositoryCustom {
   }
 
   private BooleanExpression eqTitle(String title) {
-    return title != null ? QGame.game.title.eq(title) : null;
+    return title != null ? QGame.game.title.like("%" + title + "%") : null;
   }
 
   private BooleanExpression eqCategory(Long categoryId) {

@@ -47,7 +47,7 @@ public class SecurityConfig {
   private final JWTUtil jwtUtil;
 
   private String[] WHITE_LIST = new String[]{
-      "/", "/email","/mail-check", "/oauth2/**", "*/sign-in", "/oauth2-login", "/refresh", "/error", "/token/refresh", "/h2-console/**", "/api*", "/api-docs/**", "swagger-ui/**"
+      "/", "/email","/mail-check", "/oauth2/**", "*/sign-in", "/oauth2-login", "/refresh", "/error", "/token/refresh", "/h2-console/**", "/api*", "/api-docs/**", "swagger-ui/**", "v3/**"
   };
 
   private String[] ADMIN_LIST = new String[]{
@@ -122,7 +122,6 @@ public class SecurityConfig {
         .userInfoEndpoint((userInfoEndpointConfig) ->
             userInfoEndpointConfig.userService(oAuth2Service))
         .successHandler(successHandler));
-//        .failureHandler(failureHandler));
 
     http.authorizeHttpRequests((auth) -> auth
         .requestMatchers(HttpMethod.OPTIONS,"/**").permitAll()
