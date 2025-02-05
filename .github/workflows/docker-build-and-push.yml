@@ -51,7 +51,8 @@ jobs:
             sudo docker run -d -p 8080:8080 \
                 -e DB_USERNAME=${{secrets.DB_USERNAME}} \
                 -e DB_PASSWORD=${{secrets.DB_PASSWORD}} \
-                -e DB_URL=${{secrets.DB_URL}} \
+                -e DB_URL_1=${{secrets.DB_URL_1}} \
+                -e DB_URL_2=${{secrets.DB_URL_2}} \
                 -e GOOGLE_CLIENT_ID=${{secrets.GOOGLE_CLIENT_ID}} \
                 -e GOOGLE_CLIENT_SECRET=${{secrets.GOOGLE_CLIENT_SECRET}} \
                 -e JWT_KEY=${{secrets.JWT_KEY}} \
