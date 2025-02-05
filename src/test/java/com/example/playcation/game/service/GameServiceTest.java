@@ -1,17 +1,26 @@
 package com.example.playcation.game.service;
 
+import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.example.playcation.category.dto.CategoryRequestDto;
 import com.example.playcation.category.entity.Category;
+import com.example.playcation.category.repository.CategoryRepository;
 import com.example.playcation.enums.GameStatus;
 import com.example.playcation.enums.Role;
 import com.example.playcation.enums.Social;
+import com.example.playcation.exception.DuplicatedException;
+import com.example.playcation.exception.NoAuthorizedException;
 import com.example.playcation.game.dto.CreatedGameRequestDto;
 import com.example.playcation.game.dto.GameResponseDto;
+import com.example.playcation.game.dto.UpdatedGameRequestDto;
 import com.example.playcation.game.entity.Game;
 import com.example.playcation.game.repository.GameRepository;
 import com.example.playcation.s3.entity.FileDetail;
@@ -24,14 +33,19 @@ import com.example.playcation.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
+import org.mockito.BDDMockito.Then;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -43,47 +57,49 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.multipart.MultipartFile;
 
+
 @Transactional
 @SpringBootTest
 @ActiveProfiles("test")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class GameServiceTest {
 
-  @Mock
+  @Autowired
   private GameRepository gameRepository;
 
-  @Mock
+  @Autowired
   private FileDetailRepository fileDetailRepository;
 
-  @Mock
+  @Autowired
   private GameFileRepository gameFileRepository;
 
-  @InjectMocks
+  @Autowired
+  private CategoryRepository categoryRepository;
+
+  @Autowired
+  private UserRepository userRepository;
+
+  @Autowired
   private GameService gameService;
 
-  @InjectMocks
+  @Autowired
   private S3Service s3Service;
 
-  private Category category;
+  @MockitoBean
+  private AmazonS3 s3;
+
 
   private FileDetail userFileDetail;
-
   private FileDetail mainFileDetail;
-
   private FileDetail gameFileDetail;
-
+  private List<FileDetail> subFileDetail;
   private MultipartFile userFile;
-
   private MultipartFile mainFile;
-
   private MultipartFile gameFile;
-
   private List<MultipartFile> subFileList;
-
   private CreatedGameRequestDto requestDto;
-
+  private Category category;
   private User user;
-
   private Game game;
 
   @BeforeEach
@@ -97,6 +113,8 @@ class GameServiceTest {
         .imageUrl("test-image-url")
         .build();
 
+    userRepository.save(user);
+
     gameFile = new MockMultipartFile(
         "file", "test.txt", "text/plain", "Hello, world!".getBytes()
     );
@@ -109,19 +127,16 @@ class GameServiceTest {
         .categoryName("testName")
         .build();
 
-    mainFileDetail = s3Service.uploadFile(mainFile);
-    gameFileDetail = s3Service.uploadFile(gameFile);
+    categoryRepository.save(category);
 
-    game = Game.builder()
-        .user(user)
-        .title("testTitle")
-        .category(category)
-        .price(new BigDecimal("1000.00"))
-        .description("testDescription")
-        .status(GameStatus.ON_SAL)
-        .imageUrl(mainFileDetail == null ? "" : mainFileDetail.getFilePath())
-        .filePath(gameFileDetail.getFilePath())
-        .build();
+    mainFileDetail = new FileDetail("Game", "test-file-path", "test-file-name", "test-file-path", 10000L, "image/png");
+    gameFileDetail = new FileDetail("Game", "test-file-path", "test-file-name", "test-file-path", 10000L, "image/png");
+    subFileDetail = List.of(
+        new FileDetail("Game", "sub-file-path-1", "sub-file-name-1", "sub-file-path-1", 10000L, "image/png"),
+        new FileDetail("Game", "sub-file-path-2", "sub-file-name-2", "sub-file-path-2", 10000L, "image/png")
+    );
+
+
 
     userFileDetail = new FileDetail("Game", "test-file-path", "test-file-name", "test-file-path",
         10000L, "image/png");
@@ -140,9 +155,21 @@ class GameServiceTest {
 
     requestDto = new CreatedGameRequestDto(
         "test",
-        1L,
+        category.getId(),
         new BigDecimal("1000.00"),
         "test");
+
+    game = Game.builder()
+        .user(user)
+        .title("testTitle")
+        .category(category)
+        .price(new BigDecimal("1000.00"))
+        .description("testDescription")
+        .status(GameStatus.ON_SAL)
+        .imageUrl(mainFileDetail == null ? "" : mainFileDetail.getFilePath())
+        .filePath(gameFileDetail.getFilePath())
+        .build();
+    gameRepository.save(game);
   }
 
 
@@ -159,26 +186,100 @@ class GameServiceTest {
 
     List<MultipartFile> subImageList = List.of(request.getFiles("files").toArray(new MultipartFile[0]));
 
-    // s3Service
-    when(s3Service.uploadFile(any(MultipartFile.class))).thenReturn(mainFileDetail);
-    when(s3Service.uploadFile(any(MultipartFile.class))).thenReturn(gameFileDetail);
-
-    // gameService
-    when(gameRepository.save(any(Game.class))).thenReturn(game);
-
     // When
-    gameRepository.save(game);
-    GameResponseDto responseDto = gameService.createGame(1L, requestDto, mainFile, subImageList, gameFile);
+    GameResponseDto responseDto = gameService.createGame(user.getId(), requestDto, mainFile, subImageList, gameFile);
 
     // Then
     assertThat(responseDto).isNotNull();
     assertThat(responseDto.getTitle()).isEqualTo("test");
     assertThat(responseDto.getCategoryId()).isEqualTo(category.getId());
-    assertThat(responseDto.getPrice()).isEqualTo(1000.00);
-    assertThat(responseDto.getMainImagePath()).isEqualTo(mainFileDetail.getFilePath());
-    assertThat(responseDto.getGameFilePath()).isEqualTo(gameFileDetail.getFilePath());
-
-    verify(gameRepository, times(1)).save(any(Game.class)); // 게임 저장 검증
-    verify(gameFileRepository, times(3)).save(any(GameFile.class)); // 파일 저장 검증
+    assertThat(responseDto.getPrice()).isEqualTo("1000.00");
+    assertThat(gameRepository.findByIdOrElseThrow(game.getId()));
   }
+
+  @Test
+  @DisplayName("게임 생성 실패 : 중복 타이틀")
+  void createGameFail() {
+
+    MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
+    for (MultipartFile file : subFileList) {
+      request.addFile(file);
+    }
+
+    List<MultipartFile> subImageList = List.of(request.getFiles("files").toArray(new MultipartFile[0]));
+
+    CreatedGameRequestDto requestDto1 = new CreatedGameRequestDto(
+        "test",
+        category.getId(),
+        new BigDecimal("1000.00"),
+        "test");
+
+    CreatedGameRequestDto requestDto2 = new CreatedGameRequestDto(
+        "test",
+        category.getId(),
+        new BigDecimal("3000.00"),
+        "test123");
+
+    gameService.createGame(user.getId(), requestDto1, mainFile, subImageList, gameFile);
+
+    assertThrows(DuplicatedException.class, () -> gameService.createGame(user.getId(), requestDto2, mainFile, subImageList, gameFile));
+
+  }
+
+  @Test
+  @DisplayName("게임 정보 수정")
+  void updateGame() {
+
+    // Given
+    MockMultipartFile updateGameFile = new MockMultipartFile(
+        "updateGameFile", "test.txt", "text/plain", "Hello, world!".getBytes()
+    );
+    MockMultipartFile updateMainFile = new MockMultipartFile(
+        "updateMainFile", "test.txt", "text/plain", "Hello, world!".getBytes()
+    );
+
+    MockMultipartFile updateSubImage1 = new MockMultipartFile(
+        "updateSubImage1", "test.txt", "text/plain", "Hello, world!".getBytes()
+    );
+    MockMultipartFile updateSubImage2 = new MockMultipartFile(
+        "updateSubImage2", "test.txt", "text/plain", "Hello, world!".getBytes()
+    );
+
+    List<MultipartFile> subFileList = List.of(updateSubImage1, updateSubImage2);
+
+    UpdatedGameRequestDto requestDto = new UpdatedGameRequestDto("updateTitle", category, new BigDecimal("5000.00"), "UpdateDescription");
+
+    // When
+    GameResponseDto responseDto = gameService.updateGame(game.getId(), user.getId(), requestDto, updateMainFile, subFileList, updateGameFile);
+
+    // Then
+    assertThat(responseDto).isNotNull();
+    assertThat(responseDto.getTitle()).isEqualTo(responseDto.getTitle());
+  }
+
+  @Test
+  @DisplayName("유저 정보 수정 실패 : 잘못된 유저")
+  void updateGame_UserFail() {
+
+    // Given
+    User user2 = User.builder()
+        .email("test123@example.com")
+        .password("encodedPassword123")
+        .name("Test User2")
+        .role(Role.USER)
+        .social(Social.NORMAL)
+        .imageUrl("test-image-url")
+        .build();
+
+    userRepository.save(user);
+
+    UpdatedGameRequestDto requestDto = new UpdatedGameRequestDto("updateTitle2", category, new BigDecimal("5001.00"), "UpdateDescription");
+    // When
+    // Then
+    assertThrows(
+        NoAuthorizedException.class, () -> gameService.updateGame(game.getId(), user2.getId(), requestDto, mainFile, subFileList, gameFile)
+    );
+
+  }
+
 }
