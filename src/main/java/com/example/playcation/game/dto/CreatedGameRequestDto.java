@@ -14,14 +14,10 @@ public class CreatedGameRequestDto {
 
   private String description;
 
-  private String image;
-
-  public CreatedGameRequestDto(String title, Long categoryId, BigDecimal price, String description,
-      String image) {
+  public CreatedGameRequestDto(String title, Long categoryId, BigDecimal price, String description) {
     this.title = title;
     this.categoryId = categoryId;
     this.price = price;
     this.description = description;
-    this.image = image;
   }
 }
