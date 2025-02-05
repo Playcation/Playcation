@@ -104,8 +104,8 @@ class UserServiceIntegrationTest {
     UserResponseDto response = userService.signUp(requestDto, file);
 
     // Then
-//    assertThat(response.getEmail()).isEqualTo(user.getEmail());
-    assertThat(response.getEmail()).isEqualTo(0);
+    assertThat(response.getEmail()).isEqualTo(user.getEmail());
+//    assertThat(response.getEmail()).isEqualTo(0);
   }
 
   @Test

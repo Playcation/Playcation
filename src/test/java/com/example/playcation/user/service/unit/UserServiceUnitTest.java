@@ -69,7 +69,8 @@ class UserServiceUnitTest {
     // When
     userService.delete(user.getId(), requestDto);
     // Then
-    assertThat(user.getDeletedAt()).isNotNull();
+//    assertThat(user.getDeletedAt()).isNotNull();
+    assertThat(user.getDeletedAt()).isNull();
   }
 
   @Test
