@@ -58,6 +58,7 @@ jobs:
                 -e NAVER_CLIENT_ID=${{secrets.NAVER_CLIENT_ID}} \
                 -e NAVER_CLIENT_SECRET=${{secrets.NAVER_CLIENT_SECRET}} \
                 -e REDIS_HOST=${{secrets.REDIS_HOST}} \
+                -e REDIS_PASSWORD=${{secrets.REDIS_PASSWORD}} \
                 -e S3_ACCESSKEY=${{secrets.S3_ACCESSKEY}} \
                 -e S3_GAME_BUCKET=${{secrets.S3_GAME_BUCKET}} \
                 -e S3_IMAGE_BUCKET=${{secrets.S3_IMAGE_BUCKET}} \
