@@ -16,7 +16,7 @@ jobs:
         uses: actions/checkout@v4  # 레포지토리 코드 가져오기
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: 'temurin'  # OpenJDK 배포판 사용
           java-version: '17'  # JDK 17 설정
