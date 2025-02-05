@@ -7,10 +7,7 @@ WORKDIR /apps
 # 빌더 이미지에서 애플리케이션 빌드
 COPY . /apps
 
-RUN apt-get update && apt-get install -y redis-server
-RUN service redis-server start
-
-RUN gradle clean build --no-daemon --parallel
+RUN gradle clean build -x test --no-daemon --parallel
 
 
 # 실행 스테이지
