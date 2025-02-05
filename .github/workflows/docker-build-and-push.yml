@@ -1,12 +1,23 @@
 name: docker multi-stage build
 
+#on:
+#  workflow_run:
+#    workflows: ["GitHub Actions Demo"]  # test.yml에서 정의한 workflow name과 동일하게 설정해야 함
+#    branches:
+#      - main  # 🔹 main 브랜치에서만 실행되도록 설정
+#    types:
+#      - completed  # test.yml이 완료된 후 실행됨
+
 on:
   push:
-    branches: [ feature-userController3 ] # 해당 branch에 push 되었을 경우
+    branches:
+      - feature-userController3  # 🔹 특정 브랜치에서만 실행
 
   # https://github.com/marketplace/actions/build-and-push-docker-images
 jobs:
   docker-build-and-push:
+#    if: ${{ github.event.workflow_run.conclusion == 'success' }}  # 🔹 test.yml이 성공한 경우에만 실행
+    if: github.event_name == 'push' && github.ref == 'refs/heads/feature-userController3'  # 🔹 push 이벤트 + feature-userController3 브랜치일 때만 실행
     runs-on: ubuntu-latest
     steps:
       -

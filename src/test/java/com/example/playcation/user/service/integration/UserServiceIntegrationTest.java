@@ -105,6 +105,7 @@ class UserServiceIntegrationTest {
 
     // Then
     assertThat(response.getEmail()).isEqualTo(user.getEmail());
+//    assertThat(response.getEmail()).isEqualTo(0);
   }
 
   @Test
