@@ -71,4 +71,6 @@ jobs:
                 -e TOSS_SECRETE_KEY=${{secrets.TOSS_SECRETE_KEY}} \
                 -e REDISSON_HOST=${{secrets.REDISSON_HOST}} \
                 -e REDISSON_PASSWORD=${{secrets.REDISSON_PASSWORD}} \
+                -e BACKEND_URL=${{secrets.BACKEND_URL}} \
+                -e FRONT_URL=${{secrets.FRONT_URL}} \
                 ${{ vars.DOCKERHUB_USERNAME }}/${{ vars.DOCKER_IMAGE_TAG_NAME }}:latest
