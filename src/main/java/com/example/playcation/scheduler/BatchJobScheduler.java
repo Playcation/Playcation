@@ -22,7 +22,7 @@ public class BatchJobScheduler {
    * 유효 기간이 지난 쿠폰을 삭제하는 job<br>
    * 매일 정각에 실행
    */
-  // @Scheduled(cron = "10 * * * * *", zone = "Asia/Seoul")
+//   @Scheduled(cron = "10 * * * * *", zone = "Asia/Seoul")
   public void runDeleteExpiredUserJob() throws Exception {
 
     jobLauncher.run(jobRegistry.getJob("deleteExpiredCouponUser"), new JobParameters());
