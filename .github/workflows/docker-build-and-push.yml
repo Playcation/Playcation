@@ -81,8 +81,8 @@ jobs:
                 -e SPRING_MAIL_USERNAME=${{secrets.SPRING_MAIL_USERNAME}} \
                 -e TOSS_CLIENT_KEY=${{secrets.TOSS_CLIENT_KEY}} \
                 -e TOSS_SECRETE_KEY=${{secrets.TOSS_SECRETE_KEY}} \
-                -e REDISSON_HOST=${{secrets.REDISSON_HOST}} \
-                -e REDISSON_PASSWORD=${{secrets.REDISSON_PASSWORD}} \
+                -e REDISSON_HOST=${{secrets.REDISSION_HOST}} \
+                -e REDISSON_PASSWORD=${{secrets.REDISSION_PASSWORD}} \
                 -e BACKEND_URL=${{secrets.BACKEND_URL}} \
                 -e FRONT_URL=${{secrets.FRONT_URL}} \
                 ${{ vars.DOCKERHUB_USERNAME }}/${{ vars.DOCKER_IMAGE_TAG_NAME }}:latest
