@@ -35,7 +35,7 @@ import org.springframework.test.context.ActiveProfiles;
 @Transactional
 @SpringBootTest
 @ActiveProfiles("test")
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+//@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class SuccessHandlerTest {
 
   @Autowired
