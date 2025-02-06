@@ -39,7 +39,9 @@ jobs:
         run: chmod +x gradlew  # Gradle wrapper 실행 가능하도록 설정
 
       - name: Run tests with Gradle
-        run: ./gradlew test
+        run: |
+          export REDIS_HOST=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' redis)
+          ./gradlew test
 #        env:
 #          TESTCONTAINERS_RYUK_DISABLED: true  # Ryuk 비활성화 (권장)
 #          TESTCONTAINERS_CHECKS_DISABLE: true # Testcontainers 실행 최적화
