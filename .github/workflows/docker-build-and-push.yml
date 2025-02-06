@@ -12,7 +12,7 @@ on:
 jobs:
   docker-build-and-push:
     #    if: ${{ github.event.workflow_run.conclusion == 'success' }}  # 🔹 test.yml이 성공한 경우에만 실행
-    if: github.event_name == 'pull_request' && github.ref == 'main'  # 🔹 push 이벤트 + feature-userController3 브랜치일 때만 실행
+#    if: github.event_name == 'push' && github.ref == 'main'  # 🔹 push 이벤트 + main 브랜치일 때만 실행
     runs-on: ubuntu-latest
     steps:
       -
