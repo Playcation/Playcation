@@ -15,8 +15,6 @@ public class CouponUserResponseDto {
 
   private final String name;
 
-  private final Long stock;
-
   private final BigDecimal rate;
 
   private final CouponType couponType;
@@ -25,15 +23,17 @@ public class CouponUserResponseDto {
 
   private final LocalDate expiredDate;
 
+  private final String eventTitle;
+
   public static CouponUserResponseDto toDto(CouponUser couponUser) {
     return new CouponUserResponseDto(
         couponUser.getCoupon().getId(),
         couponUser.getCoupon().getName(),
-        couponUser.getCoupon().getStock(),
         couponUser.getCoupon().getRate(),
         couponUser.getCoupon().getCouponType(),
         couponUser.getIssuedDate(),
-        couponUser.getExpiredDate()
+        couponUser.getExpiredDate(),
+        couponUser.getEventTitle()
     );
   }
 }

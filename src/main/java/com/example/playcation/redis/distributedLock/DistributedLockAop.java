@@ -22,8 +22,8 @@ import org.springframework.stereotype.Component;
 public class DistributedLockAop {
 
   private static final String REDISSON_LOCK_PREFIX = "LOCK:";
-  private static final long DEFAULT_WAIT_TIME = 5L;
-  private static final long DEFAULT_LEASE_TIME = 3L;
+  private static final long DEFAULT_WAIT_TIME = 15L;
+  private static final long DEFAULT_LEASE_TIME = 10L;
   private static final TimeUnit DEFAULT_TIME_UNIT = TimeUnit.SECONDS;
   private final RedissonClient redissonClient;
   private final AopForTransaction aopForTransaction;

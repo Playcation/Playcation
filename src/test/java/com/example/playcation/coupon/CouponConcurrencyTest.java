@@ -6,6 +6,7 @@ import com.example.playcation.coupon.entity.Coupon;
 import com.example.playcation.coupon.repository.CouponRepository;
 import com.example.playcation.coupon.service.CouponUserAtomicService;
 import com.example.playcation.enums.CouponType;
+import com.example.playcation.event.entity.Event;
 import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -41,19 +42,20 @@ class CouponConcurrencyTest {
 
   @BeforeEach
   void setUp() {
-    coupon = Coupon.createForTest(1L, "TestCoupon", (long) 100, BigDecimal.valueOf(10),
+    Event event = new Event(1L, "CHRISTMAS", "크리스마스 깜짝 이벤트!");
+    coupon = Coupon.createForTest(1L, "TestCoupon", 100L, BigDecimal.valueOf(10),
         CouponType.PERCENT,
-        LocalDate.now(), (long) 10);
+        LocalDate.now(), (long) 10, event);
   }
 
   @Test
-  @DisplayName("100명 큐에 100명 넣기")
+  @DisplayName("Atomic 테스트")
   void ConcurrencyTest() throws InterruptedException {
-    int numThreads = 100;
+    int numThreads = 1000;
     AtomicInteger successCount = new AtomicInteger();
     final CountDownLatch countDownLatch = new CountDownLatch(numThreads);
     ExecutorService executorService = Executors.newFixedThreadPool(numThreads);
-    couponUserService.setCouponCount(coupon.getName(), (long) numThreads);
+    couponUserService.setCouponCount(coupon.getName(), 100L);
 
     for (int i = 0; i < numThreads; i++) {
       int number = i + 1;
@@ -73,7 +75,7 @@ class CouponConcurrencyTest {
     executorService.shutdown();
 
     String remainingCoupons = redisTemplate.opsForValue().get("coupon:count:TestCoupon");
-    System.out.println("\n\n[테스트 결과] 성공 요청 수: " + successCount.get());
+    System.out.println("\n\n[Atomic 테스트 결과] 성공 요청 수: " + successCount.get());
     System.out.println("[Redis에 남은 쿠폰 수량] " + remainingCoupons);
 
     assertThat(Integer.parseInt(remainingCoupons)).isEqualTo(0); // 남은 쿠폰은 0이어야 함
