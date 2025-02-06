@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 @Getter
 @RequiredArgsConstructor
 public enum CouponErrorCode implements ExceptionType {
+  EVENT_NOT_FOUND("이벤트를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
   COUPON_NOT_FOUND("쿠폰을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
   COUPON_OUT_OF_STOCK("쿠폰 재고가 없습니다.", HttpStatus.CONFLICT),
   NO_AUTHORIZED_COUPON("ADMIN은 발급받을 수 없습니다.", HttpStatus.FORBIDDEN),
