@@ -1,9 +1,12 @@
 package com.example.playcation.scheduler;
 
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.context.annotation.Configuration;
@@ -26,5 +29,16 @@ public class BatchJobScheduler {
   public void runDeleteExpiredUserJob() throws Exception {
 
     jobLauncher.run(jobRegistry.getJob("deleteExpiredCouponUser"), new JobParameters());
+  }
+
+//  @Scheduled(cron = "0 0 2 1 * *", zone = "Asia/Seoul")
+  public void runGradeEvaluationJob() throws Exception {
+
+    // LocalDate.now().getMonth().toString()
+    JobParameters jobParameters = new JobParametersBuilder()
+        .addString("month", LocalDateTime.now().toString())
+        .toJobParameters();
+
+    jobLauncher.run(jobRegistry.getJob("GradeEvaluationJob"), jobParameters);
   }
 }
