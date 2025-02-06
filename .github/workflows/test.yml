@@ -41,3 +41,4 @@ jobs:
         env:
           TESTCONTAINERS_RYUK_DISABLED: true  # Ryuk 비활성화 (권장)
           TESTCONTAINERS_CHECKS_DISABLE: true # Testcontainers 실행 최적화
+          TESTCONTAINERS_HOST_OVERRIDE: "tcp://localhost:2375"
