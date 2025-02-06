@@ -9,6 +9,7 @@ import com.example.playcation.oauth2.service.OAuth2Service;
 import com.example.playcation.token.service.TokenService;
 import com.example.playcation.user.repository.UserRepository;
 import com.example.playcation.util.JWTUtil;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
@@ -101,7 +102,7 @@ public class SecurityConfig {
 
     http.cors(corsCustomizer -> corsCustomizer.configurationSource(request -> {
       CorsConfiguration config = new CorsConfiguration();
-      config.addAllowedOrigin(frontUrl);
+      config.setAllowedOriginPatterns(List.of("*")); // 모든 패턴
       config.addAllowedMethod("*");
       config.addAllowedHeader("*");
       config.setAllowCredentials(true);

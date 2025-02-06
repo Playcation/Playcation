@@ -1,12 +1,15 @@
 name: docker multi-stage build
 
 on:
-  push:
-    branches: [ main ] # 해당 branch에 push 되었을 경우
+  pull_request:
+    branches:
+      - main  # 🔹 특정 브랜치에서만 실행
 
   # https://github.com/marketplace/actions/build-and-push-docker-images
 jobs:
   docker-build-and-push:
+    #    if: ${{ github.event.workflow_run.conclusion == 'success' }}  # 🔹 test.yml이 성공한 경우에만 실행
+    if: github.event_name == 'pull_request' && github.ref == 'main'  # 🔹 push 이벤트 + feature-userController3 브랜치일 때만 실행
     runs-on: ubuntu-latest
     steps:
       -
@@ -25,7 +28,7 @@ jobs:
         name: Build and push
         uses: docker/build-push-action@v6
         with:
-          file: ./docker/Dockerfile
+          file: ./Dockerfile
           push: true
           tags: ${{ vars.DOCKERHUB_USERNAME }}/${{ vars.DOCKER_IMAGE_TAG_NAME }}:latest
   # Ec2 에 배포
@@ -46,12 +49,14 @@ jobs:
               sudo docker stop $CONTAINER_ID
               sudo docker rm $CONTAINER_ID
             fi
+            echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u ${{ vars.DOCKERHUB_USERNAME }} --password-stdin
 
             sudo docker pull ${{ vars.DOCKERHUB_USERNAME }}/${{ vars.DOCKER_IMAGE_TAG_NAME }}:latest
             sudo docker run -d -p 8080:8080 \
                 -e DB_USERNAME=${{secrets.DB_USERNAME}} \
                 -e DB_PASSWORD=${{secrets.DB_PASSWORD}} \
-                -e DB_URL=${{secrets.DB_URL}} \
+                -e DB_URL_1=${{secrets.DB_URL_1}} \
+                -e DB_URL_2=${{secrets.DB_URL_2}} \
                 -e GOOGLE_CLIENT_ID=${{secrets.GOOGLE_CLIENT_ID}} \
                 -e GOOGLE_CLIENT_SECRET=${{secrets.GOOGLE_CLIENT_SECRET}} \
                 -e JWT_KEY=${{secrets.JWT_KEY}} \
@@ -68,6 +73,8 @@ jobs:
                 -e SPRING_MAIL_USERNAME=${{secrets.SPRING_MAIL_USERNAME}} \
                 -e TOSS_CLIENT_KEY=${{secrets.TOSS_CLIENT_KEY}} \
                 -e TOSS_SECRETE_KEY=${{secrets.TOSS_SECRETE_KEY}} \
-                -e REDISSON_HOST=${{secrets.REDISSON_HOST}} \
-                -e REDISSON_PASSWORD=${{secrets.REDISSON_PASSWORD}} \
+                -e REDISSON_HOST=${{secrets.REDISSION_HOST}} \
+                -e REDISSON_PASSWORD=${{secrets.REDISSION_PASSWORD}} \
+                -e BACKEND_URL=${{secrets.BACKEND_URL}} \
+                -e FRONT_URL=${{secrets.FRONT_URL}} \
                 ${{ vars.DOCKERHUB_USERNAME }}/${{ vars.DOCKER_IMAGE_TAG_NAME }}:latest

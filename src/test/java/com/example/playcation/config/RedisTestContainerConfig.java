@@ -2,6 +2,7 @@ package com.example.playcation.config;
 
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -17,14 +18,16 @@ public class RedisTestContainerConfig {
   static {
     redisContainer = new GenericContainer<>(
         DockerImageName.parse("redis:7.4.2"))
-        .withExposedPorts(6380);
+        .withExposedPorts(6379);
     redisContainer.start();
+    System.setProperty("spring.redis.host", redisContainer.getHost());
+    System.setProperty("spring.redis.port", redisContainer.getFirstMappedPort().toString());
   }
 
   @Bean
   public RedisConnectionFactory redisConnectionFactory() {
     return new LettuceConnectionFactory(redisContainer.getHost(),
-        redisContainer.getMappedPort(6380));
+        redisContainer.getMappedPort(6379));
   }
 
   @Bean
