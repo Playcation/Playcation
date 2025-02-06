@@ -60,28 +60,28 @@ jobs:
 
             sudo docker pull ${{ vars.DOCKERHUB_USERNAME }}/${{ vars.DOCKER_IMAGE_TAG_NAME }}:latest
             sudo docker run -d -p 8080:8080 \
-                -e DB_USERNAME=${{secrets.DB_USERNAME}} \
-                -e DB_PASSWORD=${{secrets.DB_PASSWORD}} \
-                -e DB_URL_1=${{secrets.DB_URL_1}} \
-                -e DB_URL_2=${{secrets.DB_URL_2}} \
-                -e GOOGLE_CLIENT_ID=${{secrets.GOOGLE_CLIENT_ID}} \
-                -e GOOGLE_CLIENT_SECRET=${{secrets.GOOGLE_CLIENT_SECRET}} \
-                -e JWT_KEY=${{secrets.JWT_KEY}} \
-                -e NAVER_CLIENT_ID=${{secrets.NAVER_CLIENT_ID}} \
-                -e NAVER_CLIENT_SECRET=${{secrets.NAVER_CLIENT_SECRET}} \
-                -e REDIS_HOST=${{secrets.REDIS_HOST}} \
-                -e REDIS_PASSWORD=${{secrets.REDIS_PASSWORD}} \
-                -e S3_ACCESSKEY=${{secrets.S3_ACCESSKEY}} \
-                -e S3_GAME_BUCKET=${{secrets.S3_GAME_BUCKET}} \
-                -e S3_IMAGE_BUCKET=${{secrets.S3_IMAGE_BUCKET}} \
-                -e S3_SECRETKEY=${{secrets.S3_SECRETKEY}} \
-                -e SPRING_MAIL_HOST=${{secrets.SPRING_MAIL_HOST}} \
-                -e SPRING_MAIL_PASSWORD=${{secrets.SPRING_MAIL_PASSWORD}} \
-                -e SPRING_MAIL_USERNAME=${{secrets.SPRING_MAIL_USERNAME}} \
-                -e TOSS_CLIENT_KEY=${{secrets.TOSS_CLIENT_KEY}} \
-                -e TOSS_SECRETE_KEY=${{secrets.TOSS_SECRETE_KEY}} \
-                -e REDISSON_HOST=${{secrets.REDISSON_HOST}} \
-                -e REDISSON_PASSWORD=${{secrets.REDISSON_PASSWORD}} \
-                -e BACKEND_URL=${{secrets.BACKEND_URL}} \
-                -e FRONT_URL=${{secrets.FRONT_URL}} \
+                export DB_USERNAME=${{secrets.DB_USERNAME}} \
+                export DB_PASSWORD=${{secrets.DB_PASSWORD}} \
+                export DB_URL_1=${{secrets.DB_URL_1}} \
+                export DB_URL_2=${{secrets.DB_URL_2}} \
+                export GOOGLE_CLIENT_ID=${{secrets.GOOGLE_CLIENT_ID}} \
+                export GOOGLE_CLIENT_SECRET=${{secrets.GOOGLE_CLIENT_SECRET}} \
+                export JWT_KEY=${{secrets.JWT_KEY}} \
+                export NAVER_CLIENT_ID=${{secrets.NAVER_CLIENT_ID}} \
+                export NAVER_CLIENT_SECRET=${{secrets.NAVER_CLIENT_SECRET}} \
+                export REDIS_HOST=${{secrets.REDIS_HOST}} \
+                export REDIS_PASSWORD=${{secrets.REDIS_PASSWORD}} \
+                export S3_ACCESSKEY=${{secrets.S3_ACCESSKEY}} \
+                export S3_GAME_BUCKET=${{secrets.S3_GAME_BUCKET}} \
+                export S3_IMAGE_BUCKET=${{secrets.S3_IMAGE_BUCKET}} \
+                export S3_SECRETKEY=${{secrets.S3_SECRETKEY}} \
+                export SPRING_MAIL_HOST=${{secrets.SPRING_MAIL_HOST}} \
+                export SPRING_MAIL_PASSWORD=${{secrets.SPRING_MAIL_PASSWORD}} \
+                export SPRING_MAIL_USERNAME=${{secrets.SPRING_MAIL_USERNAME}} \
+                export TOSS_CLIENT_KEY=${{secrets.TOSS_CLIENT_KEY}} \
+                export TOSS_SECRETE_KEY=${{secrets.TOSS_SECRETE_KEY}} \
+                export REDISSON_HOST=${{secrets.REDISSON_HOST}} \
+                export REDISSON_PASSWORD=${{secrets.REDISSON_PASSWORD}} \
+                export BACKEND_URL=${{secrets.BACKEND_URL}} \
+                export FRONT_URL=${{secrets.FRONT_URL}} \
                 ${{ vars.DOCKERHUB_USERNAME }}/${{ vars.DOCKER_IMAGE_TAG_NAME }}:latest
