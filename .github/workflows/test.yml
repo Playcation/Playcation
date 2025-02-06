@@ -3,7 +3,7 @@ name: Redis Test with Testcontainers
 on:
   push:
     branches:
-      - feature-userController3
+      - develop
   pull_request:
     branches:
       - main
