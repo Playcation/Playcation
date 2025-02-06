@@ -10,6 +10,8 @@ import com.example.playcation.coupon.repository.CouponUserRepository;
 import com.example.playcation.coupon.repository.RedisCouponRepository;
 import com.example.playcation.enums.Role;
 import com.example.playcation.enums.Social;
+import com.example.playcation.event.entity.Event;
+import com.example.playcation.event.repository.EventRepository;
 import com.example.playcation.exception.CouponErrorCode;
 import com.example.playcation.exception.DuplicatedException;
 import com.example.playcation.user.entity.User;
@@ -41,6 +43,7 @@ public class CouponAdminService {
   private final CouponUserAtomicService couponUserService;
   private final CouponUserRepository couponUserRepository;
   private final RedisCouponRepository redisCouponRepository;
+  private final EventRepository eventRepository;
   private final RedisTemplate<String, String> redisTemplate;
 
   @Transactional
@@ -59,15 +62,15 @@ public class CouponAdminService {
     return CouponResponseDto.toDto(coupon);
   }
 
-  public PagingDto<CouponResponseDto> findAllCouponsAndPaging(int page, int size) {
+  public PagingDto<CouponResponseDto> findAllCouponsAndPaging(long eventId, int page, int size) {
     Pageable pageable = PageRequest.of(page, size, Sort.by(Direction.DESC, "id"));
 
-    Page<Coupon> couponPage = couponRepository.findAll(pageable);
+    Page<Coupon> couponPage = couponRepository.findByEventId(eventId, pageable);
 
     List<CouponResponseDto> couponDtoList = couponPage.getContent().stream()
         .map(coupon -> new CouponResponseDto(coupon.getId(), coupon.getName(), coupon.getStock(),
             coupon.getRate(), coupon.getCouponType(), coupon.getIssuedDate(),
-            coupon.getValidDays()))
+            coupon.getValidDays(), coupon.getEvent().getId()))
         .toList();
 
     return new PagingDto<>(couponDtoList, couponPage.getTotalElements());
@@ -79,10 +82,10 @@ public class CouponAdminService {
         requestDto.getName(),
         requestDto.getRate()
     );
-
     if (couponExists) {
       throw new DuplicatedException(CouponErrorCode.DUPLICATE_COUPON);
     }
+    Event event = eventRepository.findByIdOrElseThrow(requestDto.getEventId());
     Coupon coupon = Coupon.builder()
         .name(requestDto.getName())
         .stock(requestDto.getStock())
@@ -90,6 +93,7 @@ public class CouponAdminService {
         .couponType(requestDto.getCouponType())
         .issuedDate(LocalDate.now())
         .validDays(requestDto.getValidDays())
+        .event(event)
         .build();
 
     couponUserService.setCouponCount(coupon.getName(), requestDto.getStock());
@@ -105,10 +109,10 @@ public class CouponAdminService {
         requestDto.getName(),
         requestDto.getRate()
     );
-
     if (couponExists) {
       throw new DuplicatedException(CouponErrorCode.DUPLICATE_COUPON);
     }
+    Event event = eventRepository.findByIdOrElseThrow(requestDto.getEventId());
     Coupon coupon = Coupon.builder()
         .name(requestDto.getName())
         .stock(requestDto.getStock())
@@ -116,6 +120,7 @@ public class CouponAdminService {
         .couponType(requestDto.getCouponType())
         .issuedDate(LocalDate.now())
         .validDays(requestDto.getValidDays())
+        .event(event)
         .build();
 
     redisCouponRepository.setCouponCount(requestDto.getName(), requestDto.getStock());
@@ -128,8 +133,8 @@ public class CouponAdminService {
   @Transactional
   public CouponResponseDto updateCoupon(Long couponId, CouponRequestDto requestDto) {
     Coupon newCoupon = couponRepository.findByIdOrElseThrow(couponId);
-
-    newCoupon.updateCoupon(requestDto);
+    Event event = eventRepository.findByIdOrElseThrow(requestDto.getEventId());
+    newCoupon.updateCoupon(requestDto, event);
 
     couponRepository.save(newCoupon);
     couponUserService.setCouponCount(newCoupon.getName(), newCoupon.getStock());
@@ -140,6 +145,7 @@ public class CouponAdminService {
 
   // 큐에 있는 사용자 목록 가져오기
   private List<String> getUsersFromQueue(String couponName) {
+
     // Redis ZSet에서 사용자 이메일을 조회
     Set<String> userIdList = redisTemplate.opsForZSet()
         .range("coupon:request:" + couponName, 0, -1);
@@ -156,7 +162,7 @@ public class CouponAdminService {
     // 사용자 목록 가져오기
     List<String> userIdList = getUsersFromQueue(coupon.getName());
 
-    List<CouponUser> couponUsers = new ArrayList<>();
+    List<CouponUser> atomicCouponUsers = new ArrayList<>();
     for (String userId : userIdList) {
       User user = userRepository.findByIdOrElseThrow(Long.valueOf(userId));
       // 쿠폰 발급
@@ -165,11 +171,12 @@ public class CouponAdminService {
           .coupon(coupon)
           .issuedDate(coupon.getIssuedDate())
           .expiredDate(coupon.getIssuedDate().plusDays(coupon.getValidDays()))
+          .eventTitle(coupon.getEvent().getTitle())
           .build();
-      couponUsers.add(couponUser);
+      atomicCouponUsers.add(couponUser);
     }
     // 한 번에 DB에 저장
-    couponUserRepository.saveAll(couponUsers);
+    couponUserRepository.saveAll(atomicCouponUsers);
 
     coupon.updateStock(couponUserService.getRemainingCouponCount(coupon.getName()));
     couponRepository.save(coupon);
@@ -196,6 +203,7 @@ public class CouponAdminService {
           .coupon(coupon)
           .issuedDate(coupon.getIssuedDate())
           .expiredDate(coupon.getIssuedDate().plusDays(coupon.getValidDays()))
+          .eventTitle(coupon.getEvent().getTitle())
           .build();
       couponUsers.add(couponUser);
     }

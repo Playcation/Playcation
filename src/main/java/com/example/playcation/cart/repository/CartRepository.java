@@ -22,4 +22,5 @@ public interface CartRepository extends JpaRepository<Cart, Long> {
         .orElseThrow(() -> new NotFoundException(CartErrorCode.NO_GAME_IN_CART));
   }
 
+  int countByUserId(Long userId);
 }
