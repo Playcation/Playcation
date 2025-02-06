@@ -1,15 +1,18 @@
 name: docker multi-stage build
 
 on:
+  push:
+    branches:
+      - main  # 🔹 main 브랜치에 push될 때 실행
   pull_request:
     branches:
-      - main  # 🔹 특정 브랜치에서만 실행
+      - main  # 🔹 PR이 생성될 때 실행
 
   # https://github.com/marketplace/actions/build-and-push-docker-images
 jobs:
   docker-build-and-push:
     #    if: ${{ github.event.workflow_run.conclusion == 'success' }}  # 🔹 test.yml이 성공한 경우에만 실행
-    if: github.event_name == 'pull_request' && github.ref == 'main'  # 🔹 push 이벤트 + feature-userController3 브랜치일 때만 실행
+#    if: github.event_name == 'push' && github.ref == 'main'  # 🔹 push 이벤트 + main 브랜치일 때만 실행
     runs-on: ubuntu-latest
     steps:
       -
