@@ -60,7 +60,7 @@ jobs:
             echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u ${{ vars.DOCKERHUB_USERNAME }} --password-stdin
 
             sudo docker pull ${{ vars.DOCKERHUB_USERNAME }}/${{ vars.DOCKER_IMAGE_TAG_NAME }}:latest
-            sudo docker run -d -p 8080:8080 \
+            sudo docker run -d -p 8080:8080 --name playcation \
                 -e DB_USERNAME=${{secrets.DB_USERNAME}} \
                 -e DB_PASSWORD=${{secrets.DB_PASSWORD}} \
                 -e DB_URL_1=${{secrets.DB_URL_1}} \
