@@ -13,6 +13,7 @@ RUN gradle clean build -x test --no-daemon --parallel
 # OpenJDK 17 slim 기반 이미지 사용
 FROM amazoncorretto:17.0.14
 
+
 # 이미지에 레이블 추가
 LABEL type="application"
 
@@ -20,6 +21,7 @@ LABEL type="application"
 WORKDIR /apps
 
 # 애플리케이션 jar 파일을 컨테이너로 복사
+
 COPY --from=builder /apps/build/libs/*-SNAPSHOT.jar /apps/app.jar
 
 # 애플리케이션이 사용할 포트 노출
