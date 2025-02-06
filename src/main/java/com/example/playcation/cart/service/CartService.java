@@ -99,4 +99,9 @@ public class CartService {
     // 요청한 회원 id와 일치하는 장바구니 모두 삭제
     cartRepository.deleteAllByUserId(userId);
   }
+
+  // 장바구니 개수 반환
+  public int getCartCount(Long userId) {
+    return cartRepository.countByUserId(userId);
+  }
 }
