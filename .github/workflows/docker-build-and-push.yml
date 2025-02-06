@@ -40,6 +40,7 @@ jobs:
 #          push: true
 #          tags: ${{ vars.DOCKERHUB_USERNAME }}/${{ vars.DOCKER_IMAGE_TAG_NAME }}:latest
     # Docker Image 빌드
+    - uses: actions/checkout@v3
     - name: Build the Docker image
       run: docker build . --file docker/Dockerfile --tag ${{ vars.DOCKERHUB_USERNAME }}/${{ vars.DOCKER_IMAGE_TAG_NAME }}:latest
 
