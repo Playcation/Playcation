@@ -18,4 +18,6 @@ public interface LibraryRepository extends JpaRepository<Library, Long>, Library
 
   // 특정 사용자가 특정 게임을 소유하고 있는지
   Optional<Library> findByUserIdAndGameId(Long userId, Long gameId);
+
+  boolean existsByUserIdAndGameId(Long userId, Long gameId);
 }

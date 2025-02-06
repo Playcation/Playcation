@@ -9,6 +9,7 @@ import com.example.playcation.oauth2.service.OAuth2Service;
 import com.example.playcation.token.service.TokenService;
 import com.example.playcation.user.repository.UserRepository;
 import com.example.playcation.util.JWTUtil;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
@@ -47,7 +48,7 @@ public class SecurityConfig {
   private final JWTUtil jwtUtil;
 
   private String[] WHITE_LIST = new String[]{
-      "/", "/email","/mail-check", "/oauth2/**", "*/sign-in", "/oauth2-login", "/refresh", "/error", "/token/refresh", "/h2-console/**", "/api*", "/api-docs/**", "swagger-ui/**"
+      "/", "/email","/mail-check", "/oauth2/**", "*/sign-in", "/oauth2-login", "/refresh", "/error", "/token/refresh", "/h2-console/**", "/api*", "/api-docs/**", "swagger-ui/**", "v3/**"
   };
 
   private String[] ADMIN_LIST = new String[]{
@@ -101,7 +102,7 @@ public class SecurityConfig {
 
     http.cors(corsCustomizer -> corsCustomizer.configurationSource(request -> {
       CorsConfiguration config = new CorsConfiguration();
-      config.addAllowedOrigin(frontUrl);
+      config.setAllowedOriginPatterns(List.of("*")); // 모든 패턴
       config.addAllowedMethod("*");
       config.addAllowedHeader("*");
       config.setAllowCredentials(true);
@@ -122,7 +123,6 @@ public class SecurityConfig {
         .userInfoEndpoint((userInfoEndpointConfig) ->
             userInfoEndpointConfig.userService(oAuth2Service))
         .successHandler(successHandler));
-//        .failureHandler(failureHandler));
 
     http.authorizeHttpRequests((auth) -> auth
         .requestMatchers(HttpMethod.OPTIONS,"/**").permitAll()
