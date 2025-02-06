@@ -40,5 +40,7 @@ public class CouponUser {
 
   private LocalDate expiredDate;
 
+  private String eventTitle;
+
 
 }

@@ -50,11 +50,12 @@ public class CouponAdminController {
     return new ResponseEntity<>(responseDto, HttpStatus.OK);
   }
 
-  @GetMapping
+  @GetMapping("/event/{eventId}")
   public ResponseEntity<PagingDto<CouponResponseDto>> findAllCouponsAndPaging(
       @RequestParam(defaultValue = "0") int page,
-      @RequestParam(defaultValue = "10") int size) {
-    PagingDto<CouponResponseDto> coupons = couponAdminService.findAllCouponsAndPaging(page, size);
+      @RequestParam(defaultValue = "10") int size, @PathVariable Long eventId) {
+    PagingDto<CouponResponseDto> coupons = couponAdminService.findAllCouponsAndPaging(eventId, page,
+        size);
 
     return new ResponseEntity<>(coupons, HttpStatus.OK);
   }

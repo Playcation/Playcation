@@ -25,6 +25,8 @@ public class CouponResponseDto {
 
   private final Long validDays;
 
+  private final Long eventId;
+
 
   public static CouponResponseDto toDto(Coupon coupon) {
     return new CouponResponseDto(
@@ -34,7 +36,8 @@ public class CouponResponseDto {
         coupon.getRate(),
         coupon.getCouponType(),
         coupon.getIssuedDate(),
-        coupon.getValidDays()
+        coupon.getValidDays(),
+        coupon.getEvent().getId()
     );
   }
 }

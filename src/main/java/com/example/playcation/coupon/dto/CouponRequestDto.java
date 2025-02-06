@@ -17,13 +17,15 @@ public class CouponRequestDto {
 
   private Long validDays;
 
+  private Long eventId;
 
   public CouponRequestDto(String name, Long stock, BigDecimal rate,
-      CouponType couponType, Long validDays) {
+      CouponType couponType, Long validDays, Long eventId) {
     this.name = name;
     this.stock = stock;
     this.rate = rate;
     this.couponType = couponType;
     this.validDays = validDays;
+    this.eventId = eventId;
   }
 }
