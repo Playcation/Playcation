@@ -11,11 +11,11 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewRep
 
   boolean existsByLibraryId(Long libraryId);
 
-
   default Review findByIdOrElseThrow(Long reviewId) {
     return findById(reviewId)
         .orElseThrow(() -> new NotFoundException(ReviewErrorCode.NOT_FOUND_REVIEW));
   }
 
   List<Review> findReviewByGameId(Long id);
+
 }
