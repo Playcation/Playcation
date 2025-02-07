@@ -3,33 +3,26 @@
 
 ![Image](https://github.com/user-attachments/assets/c167ea8f-a383-450f-b668-c6ba43c312f3)
 <br />
-  <h1>Playcation 게임 판매 플랫폼</h1>
+  <h1> 🎮 Playcation 게임 판매 플랫폼 🎮</h1>
   <br />
 </div>
-
-<br/>
-
-## 💡 화면 구성
-|  메인 #1  | 프로필 #2 |
-|:-------:|:-----:|
-|    -    |   -   |
-
-|  장바구니 #3  |  리뷰 #4  |
-|:---------:|:-------:|
-|     -     |    -    |
 
 
 <br/>
 
 ## 💁🏻‍ 프로젝트 소개
 
-### 주제 선정 배경 및 기획의도
+### 🎮 주제 선정 배경 및 기획의도
+
+```
 저희 팀은 팀원 모두가 게임에 관심이 많았기에 게임과 관련된 프로젝트를 진행하기를 원하였고
 게이머들과 게임을 연결해주는 게임 판매 플랫폼을 만들기로 결정하였습니다
+```
+
 
 <br/>
 
-### Playcation: 게임 판매 플랫폼
+### 🎮 Playcation: 게임 판매 플랫폼
 이 프로젝트는 게임을 사고 팔 수 있는 이커머스 플랫폼을 만드는 것입니다.  
 스팀처럼 게임을 사고, 평점과 리뷰를 남길 수 있으며, 관리자가 할인 이벤트(쿠폰발급)를 열 수 있는 시스템도 계획하고 있습니다.
 
@@ -84,7 +77,7 @@
 
 <br/>
 
-## 프로젝트 구조
+## 📂 프로젝트 구조
 
 ```
 📦 playcation-project
@@ -109,7 +102,7 @@
 <br/>
 
 
-## 프로젝트 아키텍처
+## 🗂️ 프로젝트 아키텍처
 
 <details><summary> 와이어프레임
 </summary>
@@ -131,11 +124,12 @@
 *Write here!*
 </details>
 
+
 <br/>
 
 
 ## 🛠️ 아키텍쳐 설계도
-![no-image](https://user-images.githubusercontent.com/80824750/208294567-738dd273-e137-4bbf-8307-aff64258fe03.png)
+![Image](https://github.com/user-attachments/assets/dbfe1a00-5ed8-47a9-aae3-54f7558c71d8)
 
 
 
@@ -143,24 +137,24 @@
 
 ## 🔔 핵심 기능
 
-### 선착순 쿠폰 발급
+### 🌟 선착순 쿠폰 발급
 - 쿠폰 재고 및 사용자 대기열 동시성 처리
 
-### VIP 혜택
+### 🌟 VIP 혜택
 - 매 월 1일 마다 구매 기록을 통해 VIP 등급 갱신
 - 등급에 따른 포인트 지급
 
-### 결제
+### 🌟 결제
 - 장바구니에 있는 게임을 결제
 
-### 실시간 알림 / 이메일
+### 🌟 실시간 알림 / 이메일
 - 게임 구매시 결제 완료 이메일
 - 이메일 인증 코드 발송
 - 게임 리뷰 생성시 게임 등록자에게 실시간 알림
 
 <br />
 
-## Key Summary
+## 🔑 Key Summary
 
 <details>
 <summary>조회 인덱싱</summary>
@@ -187,7 +181,7 @@
 <br />
 <br />
 
-## 기술적 의사 결정
+## 📚 기술적 의사 결정
 
 <details>
 <summary>실시간 알림 Redis</summary>
@@ -395,13 +389,66 @@ Lettuce의 spin lock은 루프를 통해 지속적인 리소스를 가지고 있
 <br />
 <br />
 
-## 트러블 슈팅
+## 💣 트러블 슈팅
 
 
 <details><summary> SSE
 </summary>
 
-*Write here!*
+## 문제 발생
+
+리뷰 생성 후 알림은 Redis로 한 번 발송되어야 하지만, <br> 서버에서 동일한 메시지가 2번 수신되어 중복 처리가 발생하고, 이로 인해서 클라이언트로의 알림 전달에 문제가 발생함
+
+## 시행 착오
+
+1. 한 사용자(동일 사용자)가 리뷰 생성을 했을 때, 메시지 수신이 2번되어 있는 것을 확인
+2. RedisPublisher과 RedisSubscriber의 메시지 처리 로직에는 디버깅을 통해 문제가 없음을 확인함
+3. 아래 코드에서 RedisSubscriber의 onMessage 메서드를 확인했음
+
+```
+@Override
+  public void onMessage(Message message, byte[] pattern) {
+    String payload = new String(message.getBody());
+    System.out.println("Redis에서 받은 메시지: " + payload);
+
+    Long userId = extractUserIdFromMessage(payload);
+    String notificationMessage = extractNotificationMessage(payload);
+
+
+
+    // 해당 사용자의 모든 SSE Emitter에 메시지 전송
+    List<SseEmitter> emitters = sseEmitterRegistry.getEmitters(userId);
+    for (SseEmitter emitter : emitters) {
+      try {
+        System.out.println(" SSE 전송 시작: " + notificationMessage);
+        emitter.send(SseEmitter.event().name("newReview").data(notificationMessage));
+        System.out.println(" SSE 전송 완료: " + notificationMessage);
+      } catch (Exception e) {
+        System.err.println(" SSE 전송 실패: " + e.getMessage());
+        sseEmitterRegistry.removeEmitter(userId, emitter);
+      }
+    }
+  }
+```
+- 디버깅 결과, SSE 연결 부분에서 동일 사용자에 대해 여러 개의 SseEmitter가 등록되어 있는 것이 중복 수신의 원인임을 파악
+
+## 해결 방안
+
+동일 사용자에 대해 중복된 SSE 연결이 존재하지 않도록, 새로운 연결을 생성하기 전에 기존에 등록된 SSE 연결들을 모두 제거하도록 코드를 추가
+
+```
+    // 기존 SSE 연결이 있다면 먼저 제거
+    List<SseEmitter> existingEmitters = sseEmitterRegistry.getEmitters(userId);
+    for (SseEmitter existingEmitter : existingEmitters) {
+      sseEmitterRegistry.removeEmitter(userId, existingEmitter); 
+    }
+```
+- 새로운 SSE 연결을 생성하기 전에, SSE 연결을 관리하는 sseEmitterRegistry에서
+  해당 사용자(userId)에 대해 이미 등록된 모든 SseEmitter 목록을 조회함.
+- 조회된 모든 기존 연결을 제거하여 중복 등록을 방지함.
+- Redis에서 한 번 발행된 메시지가 동일 사용자에게 중복 전송되는 문제를 해결함.
+
+
 </details>
 
 
@@ -443,7 +490,6 @@ Reader가 반환하는 값을 id로 변경하고, delete 대신 deleteAllInBatch
 
 ## 문제 발생
 
---- 
 Access Token과 Refresh Token이 프론트에서 잘 전달 되지 않는 문제가 발생하였습니다.
 
 초기에는 Access Token을 Response Header를 Json형식으로 Response에 대입하여 응답하였습니다.
@@ -454,7 +500,6 @@ Resfresh Toekn을 Cookies에 포함하도록 설정하였습니다.
 
 ## 시행착오
 
---- 
 1. Access Token을 Cookies에 포함하여 응답
     - 브라우저로 전송이 되는 것을 확인하였습니다.
     - 하지만 쿠키는 자동으로 서버로 전송되기 때문에 CSRF( Cross-Site Request Forgery ) 공격에 취약할 수 있습니다.
@@ -467,7 +512,6 @@ Resfresh Toekn을 Cookies에 포함하도록 설정하였습니다.
 
 ## 해결방안
 
----
 최종적으로 Access Token을 Response Body에 Json형식으로 전달하는 것을 선택하였습니다.
 
 - 민감한 정보가 URL에 노출되지 않기 때문에 보안성이 높습니다.
@@ -480,14 +524,12 @@ Resfresh Toekn을 Cookies에 포함하도록 설정하였습니다.
 
 ## 문제 발생
 
---- 
 1. 게임 수정 기능에서 파일이 null이거나 공백일 경우 상황에 맞는 반환값이 다르게 나가야하는데 한 메서드에 모두 담기에는 메서드가 너무 길어짐
 2. 게임 생성, 수정시 서브 이미지의 타입이 List임으로 uploadFile을 사용하지 못함
 3. 게임 생성,수정후 반환값으로 해당 게임이 가지고 있는 filePath를 반환해야 하는데 게임 entity가 서브 이미지의 주소를 가지고 있지 않아 반환이 불가능하였음
 
 ## 해결 방안
 
----
 1. 파일을 업로드하는 기능을 따로 빼서 메서드로 만들어줌으로서 게임 수정 메서드가 무거워지는 문제와 메서드로 만들면서 다른 메서드에서 사용이 가능해지면서 재사용성이 증가함
 2. List타입을 받아서 업로드하는 uploadFiles를 만들어서 List타입의 파일도 업로드가 가능하게 변경
 3. 서브 이미지 리스트를 반복문을 통해 filePath를 뽑아서 List형태로 반환하게 만들어 게임과 함께 DTO로 반환하여 해결
@@ -499,12 +541,10 @@ Resfresh Toekn을 Cookies에 포함하도록 설정하였습니다.
 
 ## 문제 발생
 
----
 동시성 제어 코드를 적용했음에도 불구하고 재고량이 음수값이 되는 경우가 Atomic, 분산 락 두 상황 모두 발생하였습니다.
 
 ## 시행 착오
 
----
 1. **Atomic에서의 재고량 중복 감소 해결 과정**  
 getRemainingCouponCount()와 decrementCouponCount() 사이의 시간차로 인해 여러 요청이 동시에 감소하는 상황이 일부 발생한 것이었습니다.
 ```
@@ -529,7 +569,6 @@ getRemainingCouponCount()와 updateCouponCount() 사이의 시간차로 인해 �
 
 ## 해결 방안
 
----
 1. **Atomic에서의 재고량 중복 감소 해결 방안**  
 **[Lua Script 적용]**  
 재고 감소와 남은 재고 확인을 **동시에 수행**하여 재고량 **음수 방지**하고 Redis 내부에서 원자적으로 실행하도록 하였습니다. 또한, 재고 소진 상태를 반영하여 불필요한 Redis 요청을 줄이기 위해 재고가 0이 되면 sold_out 키의 value를 1로 바꾸고 즉시 차단하도록 하였습니다.
@@ -576,13 +615,13 @@ getRemainingCouponCount()와 updateCouponCount() 사이의 시간차로 인해 �
 <br />
 <br />
 
-## 소감
-|                                                                                                     | 소감 |
-|:---------------------------------------------------------------------------------------------------:|:--:|
-| ![Image](https://github.com/user-attachments/assets/3450a7d4-42cc-4329-b5cf-c2ca8c82127f) <br> 이서준  |팀원들과 일정 공유가 중요하다는 것을 알게되었고, 원하는 기능이 모두 마무리되어 뿌듯합니다.|
-|  ![Image](https://github.com/user-attachments/assets/eed84f54-5a47-47cf-a105-b8867e37c527) <br> 김민  |관심있던 분야의 플랫폼을 만드는 게 즐거웠고, 유지보수를 위한 설계의 어려움을 직접 겪은 경험이 앞으로 도움이 될 것 같습니다.|
-| ![Image](https://github.com/user-attachments/assets/41d06a4e-10ce-474f-906e-1f64e3d252e7)  <br> 강준혁 |이번 프로젝트를 진행하면서 팀원과의 소통이 얼마나 중요한지 다시 한번 깨달았습니다.|
-| ![Image](https://github.com/user-attachments/assets/71dd3054-af8b-4451-8af2-67fa3d2d827c)  <br> 진하빈 |평소 이용하기만 했던 플랫폼을 직접 제작해보며 로직을 확인할 수 있어 좋았고, 팀원들과 함께 고민하고 해결하는 과정에서 많이 배울 수 있었습니다.|
-| ![Image](https://github.com/user-attachments/assets/d17b5f68-50b5-4464-a4c2-47c4f62de187)  <br> 하진이 |평소 관심있던 분야의 플랫폼을 만들 수 있어서 좋았고, 목표로하던 기능까지 마무리 할 수 있어서 좋았습니다. |
+## ❤️‍🔥 소감
+|                                                                                                     |                                           소감                                           |
+|:---------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------:|
+| ![Image](https://github.com/user-attachments/assets/3450a7d4-42cc-4329-b5cf-c2ca8c82127f) <br> 이서준  |                팀원들과 일정 공유가 중요하다는 것을 알게되었고, <br> 원하는 기능이 모두 마무리되어 뿌듯합니다.                |
+|  ![Image](https://github.com/user-attachments/assets/eed84f54-5a47-47cf-a105-b8867e37c527) <br> 김민  |      관심있던 분야의 플랫폼을 만드는 게 즐거웠고, <br> 유지보수를 위한 설계의 어려움을 직접 겪은 경험이 앞으로 도움이 될 것 같습니다.      |
+| ![Image](https://github.com/user-attachments/assets/41d06a4e-10ce-474f-906e-1f64e3d252e7)  <br> 강준혁 |                  이번 프로젝트를 진행하면서 <br> 팀원과의 소통이 얼마나 중요한지 다시 한번 깨달았습니다.                   |
+| ![Image](https://github.com/user-attachments/assets/71dd3054-af8b-4451-8af2-67fa3d2d827c)  <br> 진하빈 | 평소 이용하기만 했던 플랫폼을 직접 제작해보며 로직을 확인할 수 있어 좋았고, <br> 팀원들과 함께 고민하고 해결하는 과정에서 많이 배울 수 있었습니다. |
+| ![Image](https://github.com/user-attachments/assets/d17b5f68-50b5-4464-a4c2-47c4f62de187)  <br> 하진이 |           평소 관심있던 분야의 플랫폼을 만들 수 있어서 좋았고, <br> 목표로하던 기능까지 마무리 할 수 있어서 좋았습니다.            |
 
 
