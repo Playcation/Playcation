@@ -7,7 +7,7 @@ WORKDIR /apps
 # 빌더 이미지에서 애플리케이션 빌드
 COPY . /apps
 
-RUN gradle clean build -x test --no-daemon --parallel
+RUN gradle clean build --no-daemon --parallel
 
 # 실행 스테이지
 # OpenJDK 17 slim 기반 이미지 사용

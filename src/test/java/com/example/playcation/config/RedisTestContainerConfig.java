@@ -21,7 +21,9 @@ public class RedisTestContainerConfig {
         .withExposedPorts(6379);
     redisContainer.start();
     System.setProperty("spring.redis.host", redisContainer.getHost());
-    System.setProperty("spring.redis.port", redisContainer.getFirstMappedPort().toString());
+    System.setProperty("spring.data.redis.port", redisContainer.getFirstMappedPort().toString());
+    System.setProperty("spring.data.redisson.port", redisContainer.getFirstMappedPort().toString());
+    System.setProperty("spring.data.redisson.password", "");
   }
 
   @Bean
