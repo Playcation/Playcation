@@ -1,18 +1,13 @@
 <div align="center">
-  <br />
 
-![Image](https://github.com/user-attachments/assets/c167ea8f-a383-450f-b668-c6ba43c312f3)
-<br />
-  <h1> 🎮 Playcation 게임 판매 플랫폼 🎮</h1>
-  <br />
+![Image](https://github.com/user-attachments/assets/deee05b6-047a-4141-9b80-27fcb867bfa6)
 </div>
 
+<h1> 🎮 Playcation 게임 판매 플랫폼</h1>
+</br>
 
-<br/>
+#### 🎮 주제 선정 배경 및 기획의도
 
-## 💁🏻‍ 프로젝트 소개
-
-### 🎮 주제 선정 배경 및 기획의도
 
 ```
 저희 팀은 팀원 모두가 게임에 관심이 많았기에 게임과 관련된 프로젝트를 진행하기를 원하였고
@@ -22,9 +17,28 @@
 
 <br/>
 
-### 🎮 Playcation: 게임 판매 플랫폼
-이 프로젝트는 게임을 사고 팔 수 있는 이커머스 플랫폼을 만드는 것입니다.  
-스팀처럼 게임을 사고, 평점과 리뷰를 남길 수 있으며, 관리자가 할인 이벤트(쿠폰발급)를 열 수 있는 시스템도 계획하고 있습니다.
+#### 🎮 한 줄 소개
+```
+“최고의 게임들을 한 번의 클릭으로 – 당신의 새로운 게이밍 여정을 여는 플랫폼.”
+```
+<details><summary> 더보기
+</summary>
+
+```
+당신의 주말은 어떤 의미를 가지고 있나요?  
+바쁜 일상 속 멈춰야 할 순간, 삶의 균형을 찾아야 할 때, 우리는 새로운 세계로의 초대장을 건넵니다.  
+저희 플랫폼은 단순한 게임 판매를 넘어, 몰입과 여유의 가치를 제공합니다.  
+매혹적인 서사와 치밀한 전략, 감각적인 미학이 조화를 이루는 게임들로 가득 찬 이 공간에서 당신은 일상에서 벗어나 자신만의 새로운 이야기를 써내려갈 수 있습니다.  
+  
+지루함과 반복에서 벗어나고 싶다면,  
+고요함 속에 스며든 설렘을 찾고 싶다면,  
+  
+지금 이 순간, 클릭 한 번으로 무한한 가능성을 열어보세요.  
+우리가 제공하는 것은 단지 상품이 아닙니다.  
+당신의 주말을 한층 더 깊고, 넓고, 풍요롭게 채워줄 경험입니다.  
+함께 떠나볼까요? 쉼과 게임, 그 경이로운 교차점으로.  
+```
+</details>
 
 
 <br/>
@@ -169,10 +183,10 @@
 </summary>
 
 - **데이터 정합성 측면**
-  - Atomic으로 진행할 때 소규모의 동시성 제어 테스트 결과 97% 성공률을 보여 일부 요청이 제대로 처리되지 않음을 확인하였습니다.
-  - DistributedLock(분산락)을 적용하여 소규모 동시성 제어 시 99-100%의 성공률로 개선할 수 있었습니다.
+    - Atomic으로 진행할 때 소규모의 동시성 제어 테스트 결과 97% 성공률을 보여 일부 요청이 제대로 처리되지 않음을 확인하였습니다.
+    - DistributedLock(분산락)을 적용하여 소규모 동시성 제어 시 99-100%의 성공률로 개선할 수 있었습니다.
 - **속도 측면**
-  - Atomic 처리 시간은 8006ms 이었으나 분산 락 처리 시 약 2배 이상의 시간이 소요되었습니다.
+    - Atomic 처리 시간은 8006ms 이었으나 분산 락 처리 시 약 2배 이상의 시간이 소요되었습니다.
 
 **쿠폰 감소**는 **빠르게 처리**해야 하므로 Atomic 연산을 사용하여 성능을 극대화하고, **사용자 대기열**은 **데이터 일관성**이 중요하므로 분산락을 활용하여 정합성을 유지하도록 함께 사용하였습니다.
 </details>
@@ -334,9 +348,9 @@ JWT 단일 토큰 방식의 보안 문제를 보완하기 위해 **이중 토큰
 한정된 수량의 쿠폰을 많은 사용자들이 동시에 요청하는 상황에서의 속도와 안정성을 보장하기 위해 도입하게 되었습니다.
 
 - 쿠폰 재고 관리
-  - 쿠폰 요청 시 재고 차감
+    - 쿠폰 요청 시 재고 차감
 - 사용자 대기열 관리
-  - 요청 순서 관리
+    - 요청 순서 관리
 
 ---
 
@@ -405,7 +419,7 @@ Lettuce의 spin lock은 루프를 통해 지속적인 리소스를 가지고 있
 2. RedisPublisher과 RedisSubscriber의 메시지 처리 로직에는 디버깅을 통해 문제가 없음을 확인함
 3. 아래 코드에서 RedisSubscriber의 onMessage 메서드를 확인했음
 
-```
+```java
 @Override
   public void onMessage(Message message, byte[] pattern) {
     String payload = new String(message.getBody());
@@ -436,7 +450,7 @@ Lettuce의 spin lock은 루프를 통해 지속적인 리소스를 가지고 있
 
 동일 사용자에 대해 중복된 SSE 연결이 존재하지 않도록, 새로운 연결을 생성하기 전에 기존에 등록된 SSE 연결들을 모두 제거하도록 코드를 추가
 
-```
+```java
     // 기존 SSE 연결이 있다면 먼저 제거
     List<SseEmitter> existingEmitters = sseEmitterRegistry.getEmitters(userId);
     for (SseEmitter existingEmitter : existingEmitters) {
@@ -455,14 +469,12 @@ Lettuce의 spin lock은 루프를 통해 지속적인 리소스를 가지고 있
 <details><summary> Spring Batch
 </summary>
 
-### 문제 발생
+## 문제 발생
 
----
 만료된 쿠폰을 삭제하는 배치 작업에서 writer의 메서드를 delete로 사용하고 있었습니다. 작동은 잘 되지만, **delete는 데이터를 하나씩 조회 후 삭제하므로 chunk 단위로 넘기는 이점이 줄어드는 게 아닌지** 고민이 생겼습니다. 따라서 `deleteAllInBatch()`를 사용하는 방법과 `delete()`를 사용하는 두 가지 방법을 비교해보기로 했습니다.
 
-### 과정
+## 과정
 
----
 1. deleteAllInBatch 적용을 위한 `CustomItemWriter` 작성
    만료된 쿠폰을 삭제하는 잡의 chunk는 <CouponUser, CouponUser>로 IO가 구성되어 있었습니다. 다만 deleteAllInBatch를 사용하기 위해서는 List<Long>이 필요하기 때문에 Id 값으로 처리하고자 커스텀 writer 클래스를 생성했습니다.
 
@@ -478,9 +490,8 @@ Lettuce의 spin lock은 루프를 통해 지속적인 리소스를 가지고 있
 
 기존에 `delete`를 사용한 잡은 실행시 find 후 delete를 한 데이터마다 반복하는 것을 콘솔 로그를 통해 확인했습니다. 하지만 `deleteAllInBatch` 사용시 삭제 작업에는 쿼리가 하나만 날아가게 됩니다.
 
-### 결론
+## 결론
 
----
 Reader가 반환하는 값을 id로 변경하고, delete 대신 deleteAllInBatch를 사용하여 반복되는 쿼리 전송 개수를 chunk 단위로 줄였습니다.
 </details>
 
@@ -546,23 +557,23 @@ Resfresh Toekn을 Cookies에 포함하도록 설정하였습니다.
 ## 시행 착오
 
 1. **Atomic에서의 재고량 중복 감소 해결 과정**  
-getRemainingCouponCount()와 decrementCouponCount() 사이의 시간차로 인해 여러 요청이 동시에 감소하는 상황이 일부 발생한 것이었습니다.
-```
+   getRemainingCouponCount()와 decrementCouponCount() 사이의 시간차로 인해 여러 요청이 동시에 감소하는 상황이 일부 발생한 것이었습니다.
+```java
   if (getRemainingCouponCount(couponName) > 0) {
       addQueue(userId, couponName);
       decrementCouponCount(couponName);
 ```
 
 2. **DistributedLock(분산 락)에서의 재고량 중복 감소 해결 과정**  
-getRemainingCouponCount()와 updateCouponCount() 사이의 시간차로 인해 여러 요청이 동시에 감소하는 상황이 일부 발생한 것이었습니다. 또한, 재고 감소에 분산 락을 적용하는 것은 불필요한 성능 저하 요인이라고 판단하였습니다.
-```
+   getRemainingCouponCount()와 updateCouponCount() 사이의 시간차로 인해 여러 요청이 동시에 감소하는 상황이 일부 발생한 것이었습니다. 또한, 재고 감소에 분산 락을 적용하는 것은 불필요한 성능 저하 요인이라고 판단하였습니다.
+```java
   if (redisCouponRepository.getRemainingCouponCount(couponName) > 0) {
       addQueue(userId, couponName);
       updateCouponCount(couponName);
   }
 ```
 
-```
+```java
     RMap<String, Long> countMap = redissonClient.getMap(COUPON_COUNT_MAP, new LongCodec());
     countMap.addAndGet(getCouponKeyString(couponName), -1);
 ```
@@ -570,9 +581,9 @@ getRemainingCouponCount()와 updateCouponCount() 사이의 시간차로 인해 �
 ## 해결 방안
 
 1. **Atomic에서의 재고량 중복 감소 해결 방안**  
-**[Lua Script 적용]**  
-재고 감소와 남은 재고 확인을 **동시에 수행**하여 재고량 **음수 방지**하고 Redis 내부에서 원자적으로 실행하도록 하였습니다. 또한, 재고 소진 상태를 반영하여 불필요한 Redis 요청을 줄이기 위해 재고가 0이 되면 sold_out 키의 value를 1로 바꾸고 즉시 차단하도록 하였습니다.
-```
+   **[Lua Script 적용]**  
+   재고 감소와 남은 재고 확인을 **동시에 수행**하여 재고량 **음수 방지**하고 Redis 내부에서 원자적으로 실행하도록 하였습니다. 또한, 재고 소진 상태를 반영하여 불필요한 Redis 요청을 줄이기 위해 재고가 0이 되면 sold_out 키의 value를 1로 바꾸고 즉시 차단하도록 하였습니다.
+```java
   public Long decrementIfAvailable(String couponName) {
     String luaScript =
         "if tonumber(redis.call('get', KEYS[1])) > 0 then " +
@@ -591,7 +602,7 @@ getRemainingCouponCount()와 updateCouponCount() 사이의 시간차로 인해 �
 
 2. **DistributedLock(분산 락)에서의 재고량 중복 감소 해결 방안**
 1) getRemaingCouponCount로 재고 소진 예외를 미리 처리하고 쿠폰 요청을 수행하도록 변경하였습니다.
-```
+```java
   if (redisCouponRepository.getRemainingCouponCount(couponName) <= 0) {
       throw new OutOfStockException(CouponErrorCode.COUPON_OUT_OF_STOCK);
   }
@@ -624,4 +635,17 @@ getRemainingCouponCount()와 updateCouponCount() 사이의 시간차로 인해 �
 | ![Image](https://github.com/user-attachments/assets/71dd3054-af8b-4451-8af2-67fa3d2d827c)  <br> 진하빈 | 평소 이용하기만 했던 플랫폼을 직접 제작해보며 로직을 확인할 수 있어 좋았고, <br> 팀원들과 함께 고민하고 해결하는 과정에서 많이 배울 수 있었습니다. |
 | ![Image](https://github.com/user-attachments/assets/d17b5f68-50b5-4464-a4c2-47c4f62de187)  <br> 하진이 |           평소 관심있던 분야의 플랫폼을 만들 수 있어서 좋았고, <br> 목표로하던 기능까지 마무리 할 수 있어서 좋았습니다.            |
 
+
+
+
+<br/>
+
+## 💡 화면 구성
+|  메인 #1  | 프로필 #2 |
+|:-------:|:-----:|
+|    -    |   -   |
+
+|  장바구니 #3  |  리뷰 #4  |
+|:---------:|:-------:|
+|     -     |    -    |
 
