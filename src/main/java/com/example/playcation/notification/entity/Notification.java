@@ -27,8 +27,6 @@ public class Notification extends BaseEntity {
 
   private String contents;        // 채팅 메시지 내용 또는 댓글 내용
 
-  private String roomId;
-
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "review_id")
   private Review review;
