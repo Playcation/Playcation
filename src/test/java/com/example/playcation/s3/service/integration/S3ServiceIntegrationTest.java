@@ -9,6 +9,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.example.playcation.config.RedisTestContainerConfig;
 import com.example.playcation.exception.InvalidInputException;
 import com.example.playcation.exception.NotFoundException;
 import com.example.playcation.s3.entity.FileDetail;
@@ -23,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.annotation.DirtiesContext;
@@ -32,7 +34,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @Transactional
-@SpringBootTest
+@SpringBootTest(classes = {
+    RedisTestContainerConfig.class
+}, webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class S3ServiceIntegrationTest {

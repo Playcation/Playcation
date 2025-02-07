@@ -13,6 +13,7 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.example.playcation.category.dto.CategoryRequestDto;
 import com.example.playcation.category.entity.Category;
 import com.example.playcation.category.repository.CategoryRepository;
+import com.example.playcation.config.RedisTestContainerConfig;
 import com.example.playcation.enums.GameStatus;
 import com.example.playcation.enums.Role;
 import com.example.playcation.enums.Social;
@@ -49,6 +50,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.mock.web.MockMultipartHttpServletRequest;
 import org.springframework.test.annotation.DirtiesContext;
@@ -59,7 +61,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 
 @Transactional
-@SpringBootTest
+@SpringBootTest(classes = {
+    RedisTestContainerConfig.class
+}, webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class GameServiceTest {

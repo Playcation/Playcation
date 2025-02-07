@@ -2,6 +2,7 @@ package com.example.playcation.coupon;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
+import com.example.playcation.config.RedisTestContainerConfig;
 import com.example.playcation.coupon.entity.Coupon;
 import com.example.playcation.coupon.repository.CouponRepository;
 import com.example.playcation.coupon.service.CouponUserAtomicService;
@@ -19,14 +20,17 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 
 @Transactional
+@SpringBootTest(classes = {
+    RedisTestContainerConfig.class
+}, webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-@SpringBootTest
 class CouponConcurrencyTest {
 
   @Autowired
