@@ -2,9 +2,11 @@ package com.example.playcation.config;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
+import java.net.ServerSocket;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import java.io.IOException;
@@ -13,6 +15,7 @@ import redis.embedded.RedisServer;
 
 @EnableRedisRepositories
 @TestConfiguration
+@Profile("test")
 public class EmbeddedRedisConfig {
 
   private RedisServer redisServer;
@@ -23,14 +26,17 @@ public class EmbeddedRedisConfig {
   @Value("${spring.data.redis.host}")
   private String host;
 
-  public EmbeddedRedisConfig() throws IOException {
-    port = 6370;
-    this.redisServer = new RedisServer(port);
-  }
-
   @PostConstruct
   public void postConstruct() throws IOException {
-    redisServer.start();
+    port = findAvailablePort();
+    redisServer = RedisServer.newRedisServer().port(6370).setting("maxmemory 128M").build();
+    try {
+      redisServer.start();
+    } catch (Exception e) {
+      redisServer.stop();
+      redisServer.start();
+    }
+
   }
 
   @PreDestroy
@@ -50,5 +56,18 @@ public class EmbeddedRedisConfig {
     RedisTemplate<String, String> template = new RedisTemplate<>();
     template.setConnectionFactory(connectionFactory);
     return template;
+  }
+
+  @Bean
+  public int testPort() {
+    return this.port;
+  }
+
+  private int findAvailablePort() {
+    try (ServerSocket socket = new ServerSocket(0)) {
+      return socket.getLocalPort();
+    } catch (IOException e) {
+      throw new RuntimeException("❌ Failed to find an available port for Redis", e);
+    }
   }
 }

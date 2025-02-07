@@ -3,7 +3,7 @@ package com.example.playcation.oauth2.handler;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.playcation.config.EmbeddedRedisConfig;
-import com.example.playcation.config.EmbeddedRedissonConfig;
+//import com.example.playcation.config.EmbeddedRedissonConfig;
 import com.example.playcation.config.RedissonConfig;
 import jakarta.servlet.ServletException;
 import java.util.List;
@@ -36,11 +36,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @Transactional
 @SpringBootTest(classes = {
-    EmbeddedRedisConfig.class,
-    EmbeddedRedissonConfig.class
+    EmbeddedRedisConfig.class
 }, webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 //@Import({EmbeddedRedisConfig.class, EmbeddedRedissonConfig.class})
@@ -58,6 +58,9 @@ class SuccessHandlerTest {
 
   @Autowired
   private JWTUtil jwtUtil;
+
+  @Autowired
+  private int testPort;
 
   private Authentication authentication;
 
