@@ -2,21 +2,14 @@ package com.example.playcation.review.controller;
 
 
 import com.example.playcation.common.TokenSettings;
-import com.example.playcation.review.dto.CreatedReviewRequestDto;
-import com.example.playcation.review.dto.CreatedReviewResponseDto;
-import com.example.playcation.review.dto.ReviewLikeResponseDto;
 import com.example.playcation.review.service.ReviewLikeService;
 import com.example.playcation.util.JWTUtil;
-import jakarta.servlet.http.HttpSession;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;

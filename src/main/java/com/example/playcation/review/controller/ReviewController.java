@@ -40,6 +40,7 @@ public class ReviewController {
     Long userId = jwtUtil.findUserByToken(authorizationHeader);
     CreatedReviewResponseDto reviewResponseDto = reviewService.createReview(userId, gameId,
         reviewRequestDto);
+
     return new ResponseEntity<>(reviewResponseDto, HttpStatus.CREATED);
   }
 
