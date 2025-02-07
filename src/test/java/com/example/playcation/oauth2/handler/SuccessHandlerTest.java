@@ -2,6 +2,9 @@ package com.example.playcation.oauth2.handler;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.example.playcation.config.EmbeddedRedisConfig;
+import com.example.playcation.config.EmbeddedRedissonConfig;
+import com.example.playcation.config.RedissonConfig;
 import jakarta.servlet.ServletException;
 import java.util.List;
 import com.example.playcation.common.TokenSettings;
@@ -22,6 +25,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -33,8 +38,12 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 
 @Transactional
-@SpringBootTest
+@SpringBootTest(classes = {
+    EmbeddedRedisConfig.class,
+    EmbeddedRedissonConfig.class
+}, webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
+//@Import({EmbeddedRedisConfig.class, EmbeddedRedissonConfig.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class SuccessHandlerTest {
 
@@ -86,6 +95,7 @@ class SuccessHandlerTest {
     assertThat(response.getHeader("Set-Cookie")).isNotNull();
     assertThat(response.getHeader("Location")).isNotNull();
     String storedToken = redisTemplate.opsForValue().get(TokenSettings.REFRESH_TOKEN_CATEGORY + "1");
+    System.out.println("Redis Keys: " + redisTemplate.keys("*"));
     assertThat(storedToken).isNotNull();
   }
 }

@@ -13,7 +13,7 @@ public class RedissonConfig {
   @Value("${spring.data.redisson.host}")
   private String host;
 
-  @Value("6379")
+  @Value("${spring.data.redisson.port}")
   private int port;
 
   @Value("${spring.data.redisson.password}")
