@@ -3,7 +3,7 @@
 ![Image](https://github.com/user-attachments/assets/deee05b6-047a-4141-9b80-27fcb867bfa6)
 </div>
 
-<h1> 🎮 Playcation: 게임 판매 플랫폼</h1>
+# 🎮 [Playcation](https://playcation.store): 게임 판매 플랫폼
 
 ## 💡 화면 구성
 |                                                  메인 #1                                                   |                                                  로그인 #2                                                   |
