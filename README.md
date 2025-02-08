@@ -504,7 +504,7 @@ Lettuce의 spin lock은 루프를 통해 지속적인 리소스를 가지고 있
 
 
 <details>
-<summary><h3> 🔎 Spring Batch : `deleteAllInBatch()`와`delete()` 두 가지 방법 비교 </h3></summary>
+<summary><h3> 🔎 Batch : `deleteAllInBatch()`와`delete()` 두 가지 방법 비교 </h3></summary>
 
 ## 문제 발생
 
@@ -534,7 +534,7 @@ Reader가 반환하는 값을 id로 변경하고, delete 대신 deleteAllInBatch
 
 
 <details>
-<summary><h3> 🔎 Spring Security : Access Token과 Refresh Token이 프론트에서 전달 되지 않는 문제 </h3></summary>
+<summary><h3> 🔎 Security : Access Token과 Refresh Token이 프론트에서 전달 되지 않는 문제 </h3></summary>
 
 ## 문제 발생
 
@@ -568,7 +568,7 @@ Resfresh Toekn을 Cookies에 포함하도록 설정하였습니다.
 
 
 <details>
-<summary><h3> 🔎 게임 : 게임 생성,수정시 나타나는 오류들에 대해 </h3></summary>
+<summary><h3> 🔎 게임 : 게임 생성/수정: 파일 유효성, 리스트 이미지 처리 및 filePath 반환 문제 </h3></summary>
 
 ## 문제 발생
 
@@ -585,7 +585,7 @@ Resfresh Toekn을 Cookies에 포함하도록 설정하였습니다.
 
 
 <details>
-<summary><h3> 🔎 동시성 처리 : 동시성 제어 코드를 적용했음에도 재고량이 음수값이 되는 경우가 Atomic, 분산 락 두 상황 모두 발생 </h3></summary>
+<summary><h3> 🔎 동시성 처리 : 동시성 제어 적용에도 Atomic, 분산 락 모두 재고량 음수값 발생 </h3></summary>
 
 ## 문제 발생
 
