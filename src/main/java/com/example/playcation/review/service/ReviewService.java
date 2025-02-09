@@ -15,6 +15,7 @@ import com.example.playcation.review.dto.CreatedReviewRequestDto;
 import com.example.playcation.review.dto.CreatedReviewResponseDto;
 import com.example.playcation.review.dto.UpdatedReviewRequestDto;
 import com.example.playcation.review.entity.Review;
+import com.example.playcation.review.repository.ReviewLikeRepository;
 import com.example.playcation.review.repository.ReviewRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,7 @@ public class ReviewService {
   public final GameRepository gameRepository;
   public final LibraryRepository libraryRepository;
   private final NotificationService notificationService;
+  private final ReviewLikeRepository reviewLikeRepository;
 
   // 리뷰 생성
   @Transactional
@@ -99,6 +101,7 @@ public class ReviewService {
   // 리뷰 삭제
   @Transactional
   public void deleteReview(Long userId, Long gameId, Long reviewId) {
+
     // 게임이 존재하는지, 리뷰가 있는지
     gameRepository.existsByIdOrElseThrow(gameId);
     Review review = reviewRepository.findByIdOrElseThrow(reviewId);
@@ -107,7 +110,12 @@ public class ReviewService {
     if (!(review.getLibrary().getUser().getId().equals(userId))) {
       throw new NoAuthorizedException(ReviewErrorCode.NOT_AUTHOR_OF_REVIEW_GAME);
     }
+
+    // 리뷰에 연결된 좋아요 데이터 삭제
+    reviewLikeRepository.deleteByReviewId(reviewId);
+
     reviewRepository.delete(review);
+    System.out.println("리뷰 삭제 완료 : reivewId = " + reviewId);
   }
 }
 
