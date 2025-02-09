@@ -12,6 +12,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -21,15 +22,14 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.DynamicInsert;
 
 @Entity
-@Table(name = "`game`")
+@Table(name = "`game`",
+    indexes = {@Index(name = "title_index", columnList = "title")})
 @Getter
-@DynamicInsert
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
 public class Game extends BaseEntity {
 
   @Id
@@ -59,19 +59,6 @@ public class Game extends BaseEntity {
 
   private LocalDateTime deletedAt;
 
-
-  public Game(User user, String title, Category category, BigDecimal price, String description,
-      GameStatus status, String imageUrl, String filePath) {
-    this.user = user;
-    this.title = title;
-    this.category = category;
-    this.price = price;
-    this.description = description;
-    this.status = status;
-    this.imageUrl = imageUrl;
-    this.filePath = filePath;
-  }
-
   public void updateGame(UpdatedGameRequestDto requestDto, String imageUrl, String filePath) {
     this.title = requestDto.getTitle();
     this.category = requestDto.getCategory();
@@ -89,6 +76,6 @@ public class Game extends BaseEntity {
    * 게임이 삭제되었는지 여부를 반환
    */
   public boolean isDeleted() {
-    return (this.deletedAt == null);
+    return (this.deletedAt != null);
   }
 }

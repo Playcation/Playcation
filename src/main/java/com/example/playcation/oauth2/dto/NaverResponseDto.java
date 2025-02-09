@@ -1,5 +1,6 @@
 package com.example.playcation.oauth2.dto;
 
+import com.example.playcation.enums.Social;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 
@@ -14,7 +15,7 @@ public class NaverResponseDto implements BasicOAuth2Dto{
 
   @Override
   public String getProvider() {
-    return "naver";
+    return Social.NAVER.name();
   }
 
   @Override
@@ -30,5 +31,10 @@ public class NaverResponseDto implements BasicOAuth2Dto{
   @Override
   public String getName() {
     return attribute.get("name").toString();
+  }
+
+  @Override
+  public String getPassword() {
+    return Social.DEFAULT_PASSWORD.getPassword();
   }
 }

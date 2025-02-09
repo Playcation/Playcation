@@ -9,6 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.time.LocalDate;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -34,5 +35,12 @@ public class CouponUser {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "`coupon_id`")
   private Coupon coupon;
+
+  private LocalDate issuedDate;
+
+  private LocalDate expiredDate;
+
+  private String eventTitle;
+
 
 }

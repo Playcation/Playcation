@@ -84,4 +84,13 @@ public class CartController {
     cartService.removeCart(userId); // cart는 hard delete 됨
     return new ResponseEntity<>("장바구니 삭제 완료", HttpStatus.OK);
   }
+
+  // 🚀 장바구니 개수 조회 API
+  @GetMapping("/count")
+  public ResponseEntity<Integer> getCartCount(
+      @RequestHeader(TokenSettings.ACCESS_TOKEN_CATEGORY) String authorizationHeader) {
+    Long userId = jwtUtil.findUserByToken(authorizationHeader);
+    int count = cartService.getCartCount(userId);
+    return new ResponseEntity<>(count, HttpStatus.OK);
+  }
 }

@@ -3,23 +3,15 @@ package com.example.playcation.oauth2.handler;
 import com.example.playcation.common.TokenSettings;
 import com.example.playcation.enums.Role;
 import com.example.playcation.oauth2.dto.OAuth2UserDto;
-import com.example.playcation.token.entity.RefreshToken;
 import com.example.playcation.user.entity.User;
 import com.example.playcation.user.repository.UserRepository;
 import com.example.playcation.util.JWTUtil;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.time.Duration;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
@@ -33,8 +25,12 @@ public class SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
   private final UserRepository userRepository;
   private final JWTUtil jwtUtil;
 
+  @Value("${spring.profiles.front_url}")
+  private String frontUrl;
+
   @Override
-  public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
+  public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
+      Authentication authentication)
       throws IOException, ServletException {
 
     // 사용자 정보 가져오기
@@ -57,10 +53,12 @@ public class SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
     // refresh token 쿠키 설정
     response.addCookie(jwtUtil.createCookie(TokenSettings.REFRESH_TOKEN_CATEGORY, refreshToken));
 
-    String redirectUrl = UriComponentsBuilder.fromUriString("http://localhost:5173/redirect")
+    // access token을 프론트로 전달
+    String redirectUrl = UriComponentsBuilder.fromUriString(frontUrl + "/redirect") // http://localhost:3000/redirect
         .queryParam("token", accessToken)
         .build().toUriString();
 
+    // url을 프론트로 리디렉션
     getRedirectStrategy().sendRedirect(request, response, redirectUrl);
   }
 }

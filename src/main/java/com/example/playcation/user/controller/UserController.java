@@ -1,9 +1,9 @@
 package com.example.playcation.user.controller;
 
+import com.example.playcation.common.PagingDto;
 import com.example.playcation.common.TokenSettings;
-import com.example.playcation.user.dto.LoginUserRequestDto;
-import com.example.playcation.user.dto.LoginUserResponseDto;
 import com.example.playcation.user.dto.DeletedUserRequestDto;
+import com.example.playcation.user.dto.RegistManagerRequestDto;
 import com.example.playcation.user.dto.RestoreUserRequestDto;
 import com.example.playcation.user.dto.UserResponseDto;
 import com.example.playcation.user.dto.SignInUserRequestDto;
@@ -11,19 +11,15 @@ import com.example.playcation.user.dto.UpdatedUserPasswordRequestDto;
 import com.example.playcation.user.dto.UpdatedUserRequestDto;
 import com.example.playcation.user.service.UserService;
 import com.example.playcation.util.JWTUtil;
-import io.jsonwebtoken.ExpiredJwtException;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -59,6 +55,15 @@ public class UserController {
     Long id = jwtUtil.findUserByToken(authorizationHeader);
 
     return ResponseEntity.ok().body(userService.findUser(id));
+  }
+
+  // 유저 프로필 조회
+  @GetMapping("/search")
+  public ResponseEntity<PagingDto<UserResponseDto>> searchUser(
+      @RequestParam String username,
+      @PageableDefault(size = 10, page = 0, sort = "username") Pageable pageable
+  ){
+    return ResponseEntity.ok().body(userService.searchUser(username, pageable));
   }
 
   // 유저 수정
@@ -103,6 +108,26 @@ public class UserController {
     return ResponseEntity.ok().body(userService.restoreUser(requestDto));
   }
 
+  // 출석 시
+  @PutMapping("/attendance")
+  public ResponseEntity<String> attendanceUser(
+      @RequestHeader(TokenSettings.ACCESS_TOKEN_CATEGORY) String authorizationHeader
+  ){
+    Long id = jwtUtil.findUserByToken(authorizationHeader);
+    return ResponseEntity.ok().body(userService.attendanceUser(id));
+  }
+
+  @PostMapping("/manager")
+  public ResponseEntity<String> registerManager(
+      @RequestHeader(TokenSettings.ACCESS_TOKEN_CATEGORY) String authorizationHeader,
+      @RequestPart RegistManagerRequestDto registManagerRequestDto,
+      @RequestPart MultipartFile gameImage
+  ){
+    Long id = jwtUtil.findUserByToken(authorizationHeader);
+    String str = userService.registerManager(id, registManagerRequestDto, gameImage);
+    return ResponseEntity.ok().body(str);
+  }
+
   @PostMapping("/upload/files")
   public ResponseEntity<UserResponseDto> uploadFiles(
       @RequestHeader(TokenSettings.ACCESS_TOKEN_CATEGORY) String authorizationHeader,
@@ -111,5 +136,4 @@ public class UserController {
     Long id = jwtUtil.findUserByToken(authorizationHeader);
     return ResponseEntity.ok().body(userService.uploadFiles(id, files));
   }
-
 }

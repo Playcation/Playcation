@@ -10,6 +10,7 @@ import com.example.playcation.exception.DuplicatedException;
 import com.example.playcation.exception.NoAuthorizedException;
 import com.example.playcation.game.entity.Game;
 import com.example.playcation.game.repository.GameRepository;
+import com.example.playcation.library.repository.LibraryRepository;
 import com.example.playcation.user.entity.User;
 import com.example.playcation.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -24,6 +25,7 @@ public class CartService {
   private final GameRepository gameRepository;
   private final CartRepository cartRepository;
   private final UserRepository userRepository;
+  private final LibraryRepository libraryRepository;
 
   /**
    * 장바구니 내 게임 리스트 조회 Service 메서드
@@ -65,6 +67,10 @@ public class CartService {
     if (cartRepository.findByUserIdAndGameId(userId, gameId).isPresent()) {
       throw new DuplicatedException(CartErrorCode.GAME_ALREADY_IN_CART);
     }
+    // 이미 가지고 있는 게임인지 확인
+    if(libraryRepository.existsByUserIdAndGameId(user.getId(), game.getId())){
+      throw new DuplicatedException(CartErrorCode.GAME_ALREADY_IN_LIBRARY);
+    }
 
     // 해당 회원의 장바구니에 게임 추가
     Cart newCart = Cart.builder()
@@ -98,5 +104,10 @@ public class CartService {
   public void removeCart(Long userId) {
     // 요청한 회원 id와 일치하는 장바구니 모두 삭제
     cartRepository.deleteAllByUserId(userId);
+  }
+
+  // 장바구니 개수 반환
+  public int getCartCount(Long userId) {
+    return cartRepository.countByUserId(userId);
   }
 }

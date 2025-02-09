@@ -25,15 +25,22 @@ public class CouponAdminController {
   private final CouponAdminService couponAdminService;
 
   @PostMapping("/users/{userAmount}")
-  public ResponseEntity<?> createTestUsers(@PathVariable Long userAmount) {
+  public ResponseEntity<String> createTestUsers(@PathVariable Long userAmount) {
     couponAdminService.createTestUsers(userAmount);
     return new ResponseEntity<>("유저 생성 완료", HttpStatus.CREATED);
   }
 
   @PostMapping
-  public ResponseEntity<CouponResponseDto> createCoupon(
+  public ResponseEntity<CouponResponseDto> createAtomicCoupon(
       @Valid @RequestBody CouponRequestDto requestDto) {
-    CouponResponseDto responseDto = couponAdminService.createCoupon(requestDto);
+    CouponResponseDto responseDto = couponAdminService.createAtomicCoupon(requestDto);
+    return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
+  }
+
+  @PostMapping("/lock")
+  public ResponseEntity<CouponResponseDto> createLockCoupon(
+      @Valid @RequestBody CouponRequestDto requestDto) {
+    CouponResponseDto responseDto = couponAdminService.createLockCoupon(requestDto);
     return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
   }
 
@@ -43,10 +50,12 @@ public class CouponAdminController {
     return new ResponseEntity<>(responseDto, HttpStatus.OK);
   }
 
-  @GetMapping
+  @GetMapping("/event/{eventId}")
   public ResponseEntity<PagingDto<CouponResponseDto>> findAllCouponsAndPaging(
-      @RequestParam(defaultValue = "0") int page) {
-    PagingDto<CouponResponseDto> coupons = couponAdminService.findAllCouponsAndPaging(page);
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "10") int size, @PathVariable Long eventId) {
+    PagingDto<CouponResponseDto> coupons = couponAdminService.findAllCouponsAndPaging(eventId, page,
+        size);
 
     return new ResponseEntity<>(coupons, HttpStatus.OK);
   }
@@ -57,4 +66,19 @@ public class CouponAdminController {
     CouponResponseDto responseDto = couponAdminService.updateCoupon(couponId, requestDto);
     return new ResponseEntity<>(responseDto, HttpStatus.OK);
   }
+
+  @PostMapping("/publish/{couponId}")
+  public ResponseEntity<String> publishAtomicCoupon(
+      @PathVariable Long couponId) {
+    couponAdminService.atomicPublish(couponId);
+    return new ResponseEntity<>("발급 완료", HttpStatus.OK);
+  }
+
+  @PostMapping("/lockpublish/{couponId}")
+  public ResponseEntity<String> publishLockCoupon(
+      @PathVariable Long couponId) {
+    couponAdminService.lockPublish(couponId);
+    return new ResponseEntity<>("발급 완료", HttpStatus.OK);
+  }
+
 }

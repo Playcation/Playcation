@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.example.playcation.config.RedisTestContainerConfig;
 import com.example.playcation.enums.Role;
 import com.example.playcation.enums.Social;
 import com.example.playcation.exception.DuplicatedException;
@@ -34,6 +35,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.annotation.Commit;
@@ -46,7 +48,9 @@ import org.springframework.test.context.transaction.TransactionalTestExecutionLi
 import org.springframework.web.multipart.MultipartFile;
 
 @Transactional
-@SpringBootTest
+@SpringBootTest(classes = {
+    RedisTestContainerConfig.class
+}, webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class UserServiceIntegrationTest {
@@ -98,22 +102,23 @@ class UserServiceIntegrationTest {
   @DisplayName("회원가입 성공")
   void signUp() {
     // Given
-    SignInUserRequestDto requestDto = new SignInUserRequestDto("test@example.com", "password", "Test User");
+    SignInUserRequestDto requestDto = new SignInUserRequestDto("test@example.com", "password", "Test User", "Test UserName");
     when(s3.putObject(any(PutObjectRequest.class))).thenReturn(null);
     // When
     UserResponseDto response = userService.signUp(requestDto, file);
 
     // Then
     assertThat(response.getEmail()).isEqualTo(user.getEmail());
+//    assertThat(response.getEmail()).isEqualTo(0);
   }
 
   @Test
   @DisplayName("회원가입 실패 : 중복 이메일")
   void signUp_Fail() {
     // Given
-    SignInUserRequestDto requestDto = new SignInUserRequestDto("test@example.com", "password", "Test User");
+    SignInUserRequestDto requestDto = new SignInUserRequestDto("test@example.com", "password", "Test User", "Test UserName");
     userService.signUp(requestDto, file);
-    SignInUserRequestDto requestDto2 = new SignInUserRequestDto("test@example.com", "password2!qfqef", "User2");
+    SignInUserRequestDto requestDto2 = new SignInUserRequestDto("test@example.com", "password2!qfqef", "User2", "Test UserName");
     // When
     // Then
     assertThrows(DuplicatedException.class, () -> userService.signUp(requestDto2, file));
@@ -123,7 +128,7 @@ class UserServiceIntegrationTest {
   @DisplayName("유저 비밀번호 수정 성공")
   void updateUserPassword() {
     // Given
-    SignInUserRequestDto signinDto = new SignInUserRequestDto("test@example.com", "encodedPassword", "Test User");
+    SignInUserRequestDto signinDto = new SignInUserRequestDto("test@example.com", "encodedPassword", "Test User", "Test UserName");
     when(s3.putObject(any(PutObjectRequest.class))).thenReturn(null);
     userService.signUp(signinDto, file);
     entityManager.clear();
@@ -153,13 +158,13 @@ class UserServiceIntegrationTest {
   @DisplayName("유저 정보 수정 성공")
   void updateUser(){
     // Given
-    SignInUserRequestDto signinDto = new SignInUserRequestDto("test@example.com", "encodedPassword", "Test User");
+    SignInUserRequestDto signinDto = new SignInUserRequestDto("test@example.com", "encodedPassword", "Test User", "Test UserName");
     when(s3.putObject(any(PutObjectRequest.class))).thenReturn(null);
     userService.signUp(signinDto, file);
-    UpdatedUserRequestDto requestDto = new UpdatedUserRequestDto("encodedPassword", "updateName", "update description");
+    UpdatedUserRequestDto requestDto = new UpdatedUserRequestDto("updateName", "encodedPassword", "update description");
     // When
     UserResponseDto responseDto = userService.updateUser(1L, requestDto, file);
     // Then
-    assertThat(responseDto.getName()).isEqualTo(responseDto.getName());
+    assertThat(responseDto.getUsername()).isEqualTo(responseDto.getUsername());
   }
 }
