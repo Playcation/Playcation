@@ -84,8 +84,14 @@ public class NotificationService {
     Long userId = game.getUser().getId();
     String message = userId + " : " + game.getTitle() + "에 새로운 리뷰가 작성되었습니다.";
 
-    System.out.println("리뷰 알림 전송, 메시지: " + message);
-    redisPublisher.publish(message);
+    // Redis 예외가 발생해도 리뷰 생성이 정상적으로 진행되도록 try-catch 추가
+    try {
+      redisPublisher.publish(message);
+      System.out.println("리뷰 알림 전송, 메시지: " + message);
+    } catch (Exception e) {
+      // 예외가 발생해도 트랜잭션에 영향을 주지 않도록 하고, 예외 메세지 출력
+      System.out.println("Redis 알림 전송 실패: " + e.getMessage());
+    }
 
   }
 }

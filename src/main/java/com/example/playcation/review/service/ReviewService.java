@@ -40,6 +40,7 @@ public class ReviewService {
 
     // 게임 조회 및 예외처리
     Game game = gameRepository.findByIdOrElseThrow(gameId);
+
     // 본인이 등록한 게임에, 리뷰 생성 예외처리
     if (game.getUser().getId().equals(userId)) {
       throw new NoAuthorizedException(ReviewErrorCode.REVIEW_ALREADY_EXISTS);
@@ -58,7 +59,12 @@ public class ReviewService {
         .build());
 
     // 게임 등록자에게 알림 전송(리뷰를 생성한, 게임을 찾아서 그 게임의 유저에게 알림가도록 설정)
-    notificationService.notifyReview(review.getId());
+    // 알림 전송 실패 시 예외처리해서, 리뷰 생성은 정상적으로 되도록 설정
+    try {
+      notificationService.notifyReview(review.getId());
+    } catch (Exception e) {
+      System.out.println("알림 전송 중 오류 발생 : " + e.getMessage());
+    }
 
     return CreatedReviewResponseDto.toDto(review);
   }
