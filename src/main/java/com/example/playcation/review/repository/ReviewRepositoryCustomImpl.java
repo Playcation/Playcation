@@ -45,7 +45,7 @@ public class ReviewRepositoryCustomImpl implements ReviewRepositoryCustom {
         )
         .offset(pageable.getOffset())
         .limit(pageable.getPageSize())
-        .orderBy(review.createdAt.desc())
+        .orderBy(review.createdAt.asc())
         .fetch();
 
 
