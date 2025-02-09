@@ -66,7 +66,7 @@ public class ReviewService {
       System.out.println("알림 전송 중 오류 발생 : " + e.getMessage());
     }
 
-    return CreatedReviewResponseDto.toDto(review);
+    return CreatedReviewResponseDto.toDto(review, "userName", "userImage");
   }
 
 
@@ -98,7 +98,7 @@ public class ReviewService {
 
     // 수정된 내용 반영
     review.updateContent(updateRequest.getContent(), updateRequest.getRating());
-    return CreatedReviewResponseDto.toDto(review);
+    return CreatedReviewResponseDto.toDto(review, "userName", "userImage");
   }
 
 
