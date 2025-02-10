@@ -62,7 +62,7 @@ public class OrderEmailService {
 
     // 주문 내역에 대해 순차적으로 처리
     for (OrderDetail detail : orderDetails) {
-      BigDecimal price = detail.getPrice();  // 주문 상세에서 할인된 가격을 가져옴
+      BigDecimal price = detail.getPrice().setScale(0,RoundingMode.FLOOR);  // 주문 상세에서 할인된 가격을 가져옴 + 소수점 아래로 버리고 정수만 가져오기
       details.append("<tr><td style='border: 1px solid #ddd; padding: 8px;'>")
           .append(detail.getGame().getTitle())
           .append("</td><td style='border: 1px solid #ddd; padding: 8px;'>")

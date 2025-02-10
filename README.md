@@ -3,8 +3,9 @@
 ![Image](https://github.com/user-attachments/assets/deee05b6-047a-4141-9b80-27fcb867bfa6)
 </div>
 
-<h1> 🎮 Playcation 게임 판매 플랫폼</h1>
-</br>
+# 🎮 Playcation: 게임 판매 플랫폼
+
+<br/>
 
 #### 🎮 주제 선정 배경 및 기획의도
 
@@ -39,6 +40,17 @@
 함께 떠나볼까요? 쉼과 게임, 그 경이로운 교차점으로.  
 ```
 </details>
+
+<br/>
+
+## 💡 화면 구성
+|                                                  메인 #1                                                   |                                                  로그인 #2                                                   |
+|:--------------------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------------------------------:|
+| <img src="https://github.com/user-attachments/assets/b2c0441c-ef3d-40ec-b41a-3ce16e92aa5e" width="400" > | <img src="https://github.com/user-attachments/assets/5bb2df5c-7604-44de-bb70-7730dfdd8a07" width="400" /> |
+
+|                                                장바구니 #3                                                 |                                                 쿠폰 #4                                                 |
+|:------------------------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------------:|
+| <img src="https://github.com/user-attachments/assets/eb823a25-d758-4b08-82db-3911db8fa204" width="400"> | <img src="https://github.com/user-attachments/assets/9bec9e2c-efad-4442-8bf7-6d35d772c6a9" width="400"> |
 
 
 <br/>
@@ -91,51 +103,78 @@
 
 <br/>
 
-## 📂 프로젝트 구조
+## 📁 프로젝트 구조
+
+<details>
+<summary><h3> 📂 백엔드 : 핵심 및 공통 기능 폴더 구조</h3></summary>
 
 ```
-📦 playcation-project
-├── 📂 src
-│   ├── 📂 main
-│   │   ├── 📂 java
-│   │   │   ├── 📂 playcation
-│   │   │   │   ├── 📂 
-│   │   │   │   ├── 📂 
-│   │   │   │   ├── 📂 
-│   │   │   │   ├── 📂 
-│   │   │   │   ├── 📂 
-│   │   │   │   ├── 📂 
-│   │   │   │   └── 📂 
-│   │   │   📂 resources
-│   └── 📂 test
-├── 📄 .gitignore
-├── 📄 Dockerfile
-└── 📄 README.md
+📦Playcation
+ ┣ 📂src
+ ┃ ┣ 📂main
+ ┃ ┃ ┣ 📂java
+ ┃ ┃ ┃ ┗ 📂playcation
+ ┃ ┃ ┃    ┣ 📂batch         // 배치
+ ┃ ┃ ┃    ┣ 📂common        // BaseEntity, 페이징Dto, 토큰 세팅
+ ┃ ┃ ┃    ┣ 📂config        // 애플리케이션 설정
+ ┃ ┃ ┃    ┣ 📂coupon        // 선착순 쿠폰 발급 관련 기능
+ ┃ ┃ ┃    ┣ 📂emailsender   // 결제 완료 이메일 및 이메일 인증 코드 전송
+ ┃ ┃ ┃    ┣ 📂exception     // 커스텀 예외 클래스 및 예외 처리 로직
+ ┃ ┃ ┃    ┣ 📂filter        // 로그인/로그아웃/JWT 필터
+ ┃ ┃ ┃    ┣ 📂gametag       // 게임 태그
+ ┃ ┃ ┃    ┣ 📂library       // 사용자의 게임 라이브러리
+ ┃ ┃ ┃    ┣ 📂notification  // 실시간 알림 (SSE, Redis Pub/Sub)
+ ┃ ┃ ┃    ┣ 📂oauth2        // 소셜 로그인 및 외부 인증 관련 기능
+ ┃ ┃ ┃    ┣ 📂order         // 결제
+ ┃ ┃ ┃    ┣ 📂review        // 게임 리뷰
+ ┃ ┃ ┃    ┣ 📂scheduler     // 스케줄러
+ ┃ ┃ ┃    ┣ 📂tag           // 콘텐츠 및 기타 태그 관리
+ ┃ ┃ ┃    ┣ 📂token         // JWT 등 토큰 생성 및 관리 기능
+ ┃ ┃ ┃    ┣ 📂toss          // Toss 결제
+ ┃ ┃ ┃    ┣ 📂user          // 사용자 프로필 및 관리
+ ┃ ┃ ┃    ┣ 📂util          // 기타 공통 유틸리티 클래스
+ ┃ ┃ ┃    ┗ 📂...           // 기타 등등 도메인
+ ┃ ┗ 📂resources             
+ ┣ 📜Dockerfile   
+ ┣ 📜build.gradle    
+ ┗ 📜README.md     
 ```
+
+</details>
+
+<details>
+<summary><h3> 📂 프론트엔드 : 핵심 및 공통 기능 폴더 구조</h3></summary>
+
+``` 
+추가예정입니다
+```
+
+</details>
 
 <br/>
 
 
 ## 🗂️ 프로젝트 아키텍처
 
-<details><summary> 와이어프레임
-</summary>
+<details>
+<summary><h3>✨ 와이어프레임 </h3></summary>
 
-*Write here!*
+#### [ **와이어프레임 바로보기** ](https://www.figma.com/board/pl0yhzHetLU7Q51OL2m0aO/%EC%A3%BC%EB%A7%90%EC%97%90%EB%8A%94-%EC%89%AC%EC%A1%B0?node-id=0-1&t=viyzAdVSiAy3Pl1B-1)
 </details>
 
 
-<details><summary>ERD
-</summary>
+<details>
+<summary><h3>✨ ERD </h3></summary>
 
-*Write here!*
+#### [  **ERD 바로보기** ](https://www.erdcloud.com/d/4uq8PnfaCAD9D3ggh)
+
 </details>
 
 
-<details><summary>API 명세서
-</summary>
+<details>
+<summary><h3> ✨ API 명세서 </h3></summary>
 
-*Write here!*
+#### [  **API명세서 바로보기**  ](https://file.notion.so/f/f/83c75a39-3aba-4ba4-a792-7aefe4b07895/7907c98f-bacb-4e6e-a86a-976fcdd2a454/Playcation_API_%EB%AA%85%EC%84%B8%EC%84%9C.pdf?table=block&id=93320060-8678-4cbf-9ce1-ea6c1d6e1c30&spaceId=83c75a39-3aba-4ba4-a792-7aefe4b07895&expirationTimestamp=1739066400000&signature=lycOJ5LlXcxegtOB0-Gjh7KMaaR2PSVKT-OfhigvD24&downloadName=Playcation_API+%EB%AA%85%EC%84%B8%EC%84%9C.pdf)
 </details>
 
 
@@ -168,10 +207,10 @@
 
 <br />
 
-## 🔑 Key Summary
+## 🔒 Key Summary
 
 <details>
-<summary>조회 인덱싱</summary>
+<summary><h3> 🔑 조회 인덱싱 </h3></summary>
 
 - 게임 검색을 할 때, 단순 조회 쿼리로 진행을 하면 **1.9s가 발생하는 문제**가 있었습니다.
 - title에 인덱싱을 통하여 문제를 해결하였습니다. **( 검색시간 835ms 약 56% 개선 )**
@@ -179,8 +218,8 @@
 </details>
 
 
-<details><summary>분산락과 Atomic 성능차이
-</summary>
+<details>
+<summary><h3> 🔑 분산락과 Atomic 성능차이 </h3></summary>
 
 - **데이터 정합성 측면**
     - Atomic으로 진행할 때 소규모의 동시성 제어 테스트 결과 97% 성공률을 보여 일부 요청이 제대로 처리되지 않음을 확인하였습니다.
@@ -198,7 +237,7 @@
 ## 📚 기술적 의사 결정
 
 <details>
-<summary>실시간 알림 Redis</summary>
+<summary><h3> 📕 실시간 알림 Redis </h3></summary>
 
 ### 도입 배경
 
@@ -224,7 +263,7 @@ Pub/Sub 모델을 기본적으로 지원하므로, 이를 통해 다수의 구�
 
 
 <details>
-<summary>실시간 알림 SSE</summary>
+<summary><h3> 📗 실시간 알림 SSE </h3></summary>
 
 ### 도입 배경
 
@@ -252,8 +291,8 @@ Pub/Sub 모델을 기본적으로 지원하므로, 이를 통해 다수의 구�
 
 
 
-<details><summary> VIP 혜택
-</summary>
+<details>
+<summary><h3> 📙 VIP 혜택 </h3></summary>
 
 ### 도입 배경
 
@@ -280,8 +319,8 @@ Pub/Sub 모델을 기본적으로 지원하므로, 이를 통해 다수의 구�
 </details>
 
 
-<details><summary> 토큰 로그인 방식
-</summary>
+<details>
+<summary><h3> 📓 토큰 로그인 방식 </h3></summary>
 
 ### 도입 배경
 
@@ -308,8 +347,8 @@ JWT 단일 토큰 방식의 보안 문제를 보완하기 위해 **이중 토큰
 </details>
 
 
-<details><summary> 토스 결제
-</summary>
+<details>
+<summary><h3> 📘 토스 결제 </h3></summary>
 
 ### 도입 배경
 
@@ -339,8 +378,8 @@ JWT 단일 토큰 방식의 보안 문제를 보완하기 위해 **이중 토큰
 </details>
 
 
-<details><summary> 선착순 쿠폰 발급
-</summary>
+<details>
+<summary><h3> 📒 선착순 쿠폰 발급 </h3></summary>
 
 ### 도입 배경
 
@@ -406,8 +445,8 @@ Lettuce의 spin lock은 루프를 통해 지속적인 리소스를 가지고 있
 ## 💣 트러블 슈팅
 
 
-<details><summary> SSE
-</summary>
+<details>
+<summary><h3> 🔎 SSE : 서버에 메세지 중복 처리로 인한 알림오류 </h3></summary>
 
 ## 문제 발생
 
@@ -466,8 +505,8 @@ Lettuce의 spin lock은 루프를 통해 지속적인 리소스를 가지고 있
 </details>
 
 
-<details><summary> Spring Batch
-</summary>
+<details>
+<summary><h3> 🔎 Batch : `deleteAllInBatch()`와`delete()` 두 가지 방법 비교 </h3></summary>
 
 ## 문제 발생
 
@@ -496,8 +535,8 @@ Reader가 반환하는 값을 id로 변경하고, delete 대신 deleteAllInBatch
 </details>
 
 
-<details><summary> Spring Security
-</summary>
+<details>
+<summary><h3> 🔎 Security : Access Token과 Refresh Token이 프론트에서 전달 되지 않는 문제 </h3></summary>
 
 ## 문제 발생
 
@@ -530,8 +569,8 @@ Resfresh Toekn을 Cookies에 포함하도록 설정하였습니다.
 </details>
 
 
-<details><summary> 게임
-</summary>
+<details>
+<summary><h3> 🔎 게임 : 게임 생성/수정: 파일 유효성, 리스트 이미지 처리 및 filePath 반환 문제 </h3></summary>
 
 ## 문제 발생
 
@@ -547,8 +586,8 @@ Resfresh Toekn을 Cookies에 포함하도록 설정하였습니다.
 </details>
 
 
-<details><summary> 동시성 처리
-</summary>
+<details>
+<summary><h3> 🔎 동시성 처리 : 동시성 제어 적용에도 Atomic, 분산 락 모두 재고량 음수값 발생 </h3></summary>
 
 ## 문제 발생
 
@@ -619,6 +658,46 @@ Resfresh Toekn을 Cookies에 포함하도록 설정하였습니다.
     stock.decrementAndGet();
 ```
 
+</details>
+
+<details>
+<summary><h3> 🔎 SSE : SSE 미연결로 인한 알림 전송 실패 및 리뷰 롤백 </h3></summary>
+
+## 문제 발생
+
+게임 등록자가 SSE 연결을 열어두지 않아서 알림 전송이 실패하고, 그 실패가 리뷰 생성 트랜잭션 전체를 롤백시키는 현상
+
+## 시행 착오
+
+1. SSE + Redis는 연결되어 있는 상황에만, 알림이 날라옴
+2. SSE를 알림페이지에 들어갔을 때만 연결되도록 설정
+3. 게임 등록자가 알림페이지를 켜놓지 않으면, SSE 연결이 되지 않기 때문에 **알림 전송 오류 발생**
+4. 리뷰 생성 로직은 **트랜잭션**으로 묶여, 중간에 **오류가뜨면 전체 트랜잭션이 롤백**되는 상황 발생
+5. 리뷰가 생성되고 알림이 가기때문에, 이미 리뷰 생성 성공하고 DB에 리뷰가 저장되었음에도, 알림에서 오류가 떴기때문에 클라이언트에서 오류 반환
+6. 즉, **알림 전송이 무조건 성공**해야함
+
+
+## 해결 방안
+
+알림 전송을 실패해도, 리뷰 생성은 정상적으로 되도록 예외처리
+
+- 문제가 되는 리뷰 생성 로직에 try-catch문을 사용
+- catch된 예외를 그냥 넘김 -> 나중에 문제 생기면 확인하기 위해, 예외 메세지 출력
+
+```java
+// 알림 전송 실패 시 예외처리해서, 리뷰 생성은 정상적으로 되도록 설정
+  try {
+      notificationService.notifyReview(review.getId());
+    } catch (Exception e) {
+    System.out.println("알림 전송 중 오류 발생 : " + e.getMessage());
+    }
+```
+간단하게는 try-catch문을 사용할 수 있음.  
+근본적인 원인은 알림 페이지에 들어갔을 때만 SSE 연결이 되는 것이기 때문에, 로그인하고 난 이후 모든 페이지를 SSE 연결해줌
+```javascript
+프론트 코드 추가 예정
+```
+
 
 </details>
 
@@ -627,25 +706,13 @@ Resfresh Toekn을 Cookies에 포함하도록 설정하였습니다.
 <br />
 
 ## ❤️‍🔥 소감
-|                                                                                                     |                                           소감                                           |
-|:---------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------:|
-| ![Image](https://github.com/user-attachments/assets/3450a7d4-42cc-4329-b5cf-c2ca8c82127f) <br> 이서준  |                팀원들과 일정 공유가 중요하다는 것을 알게되었고, <br> 원하는 기능이 모두 마무리되어 뿌듯합니다.                |
-|  ![Image](https://github.com/user-attachments/assets/eed84f54-5a47-47cf-a105-b8867e37c527) <br> 김민  |      관심있던 분야의 플랫폼을 만드는 게 즐거웠고, <br> 유지보수를 위한 설계의 어려움을 직접 겪은 경험이 앞으로 도움이 될 것 같습니다.      |
-| ![Image](https://github.com/user-attachments/assets/41d06a4e-10ce-474f-906e-1f64e3d252e7)  <br> 강준혁 |                  이번 프로젝트를 진행하면서 <br> 팀원과의 소통이 얼마나 중요한지 다시 한번 깨달았습니다.                   |
-| ![Image](https://github.com/user-attachments/assets/71dd3054-af8b-4451-8af2-67fa3d2d827c)  <br> 진하빈 | 평소 이용하기만 했던 플랫폼을 직접 제작해보며 로직을 확인할 수 있어 좋았고, <br> 팀원들과 함께 고민하고 해결하는 과정에서 많이 배울 수 있었습니다. |
-| ![Image](https://github.com/user-attachments/assets/d17b5f68-50b5-4464-a4c2-47c4f62de187)  <br> 하진이 |           평소 관심있던 분야의 플랫폼을 만들 수 있어서 좋았고, <br> 목표로하던 기능까지 마무리 할 수 있어서 좋았습니다.            |
+|                                                                                                     |                                               소감                                                |
+|:---------------------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------:|
+| ![Image](https://github.com/user-attachments/assets/3450a7d4-42cc-4329-b5cf-c2ca8c82127f) <br> 이서준  |                    팀원들과 일정 공유가 중요하다는 것을 알게되었고, <br> 원하는 기능이 모두 마무리되어 뿌듯합니다.                     |
+|  ![Image](https://github.com/user-attachments/assets/eed84f54-5a47-47cf-a105-b8867e37c527) <br> 김민  |          관심있던 분야의 플랫폼을 만드는 게 즐거웠고, <br> 유지보수를 위한 설계의 어려움을 직접 겪은 경험이 앞으로 도움이 될 것 같습니다.           |
+| ![Image](https://github.com/user-attachments/assets/41d06a4e-10ce-474f-906e-1f64e3d252e7)  <br> 강준혁 |                       이번 프로젝트를 진행하면서 <br> 팀원과의 소통이 얼마나 중요한지 다시 한번 깨달았습니다.                       |
+| ![Image](https://github.com/user-attachments/assets/71dd3054-af8b-4451-8af2-67fa3d2d827c)  <br> 진하빈 |     평소 이용하기만 했던 플랫폼을 직접 제작해보며 로직을 확인할 수 있어 좋았고, <br> 팀원들과 함께 고민하고 해결하는 과정에서 많이 배울 수 있었습니다.      |
+| ![Image](https://github.com/user-attachments/assets/d17b5f68-50b5-4464-a4c2-47c4f62de187)  <br> 하진이 | 평소 관심있던 분야의 플랫폼을 만들 수 있어서 좋았고, <br> 목표로하던 기능까지 마무리 할 수 있어서 좋았습니다.  <br> 좋은 팀원들을 만나서 즐겁게 공부했습니다! |
 
 
-
-
-<br/>
-
-## 💡 화면 구성
-|  메인 #1  | 프로필 #2 |
-|:-------:|:-----:|
-|    -    |   -   |
-
-|  장바구니 #3  |  리뷰 #4  |
-|:---------:|:-------:|
-|     -     |    -    |
 
