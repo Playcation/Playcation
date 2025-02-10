@@ -197,7 +197,7 @@
 <details>
 <summary><h3> ✨ API 명세서 </h3></summary>
 
-#### [  **API명세서 바로보기**  ](https://github.com/user-attachments/files/18726807/Playcation_API.pdf)
+#### [  **API명세서 바로보기**  ](https://ordinary-session-d5b.notion.site/API-196b983e917c80bfa2fbfd7df6fd9a40?pvs=4)
 </details>
 
 
