@@ -78,7 +78,6 @@ VALUES (1, 4, 0);
 INSERT INTO library (user_id, game_id, favourite)
 VALUES (1, 5, 0);
 
-USE playcation;
 INSERT INTO event (title, description)
 VALUES ('CHRISTMAS EVENT', '메리 크리스마스! 깜짝 이벤트를 진행합니다!');
 INSERT INTO event (title, description)
