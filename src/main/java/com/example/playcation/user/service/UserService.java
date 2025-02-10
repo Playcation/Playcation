@@ -121,7 +121,7 @@ public class UserService {
 
   // 사진 변경
   private FileDetail updateFileDetail(User user, MultipartFile file) {
-    if (!user.getImageUrl().isEmpty()) {
+    if (user.getImageUrl() != null && !user.getImageUrl().isEmpty()) {
       FileDetail fileDetail = fileDetailRepository.findByFilePathOrElseThrow(user.getImageUrl());
       userFileRepository.deleteByUserIdAndFileDetailId(user.getId(), fileDetail.getId());
       s3Service.deleteFile(user.getImageUrl());
