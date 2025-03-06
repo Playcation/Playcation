@@ -65,7 +65,7 @@ public class JWTFilter extends OncePerRequestFilter {
       filterChain.doFilter(request, response);
       return;
     }
-    accessToken = accessToken.replace("Bearer ", "");
+    accessToken = accessToken.replace(TokenSettings.TOKEN_TYPE, "");
 
     try {
       authenticateUser(accessToken);
