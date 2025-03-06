@@ -35,6 +35,7 @@ public class TokenService {
   // HTTP 요청에서 Refresh 토큰 추출
   private String extractRefreshToken(HttpServletRequest request) {
     for (Cookie cookie : request.getCookies()) {
+      // 쿠키 중에서 refresh 토큰이 있다면 값을 가져오기
       if (cookie.getName().equals(TokenSettings.REFRESH_TOKEN_CATEGORY)) {
         return cookie.getValue();
       }

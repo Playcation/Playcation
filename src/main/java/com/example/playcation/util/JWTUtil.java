@@ -6,7 +6,6 @@ import com.example.playcation.exception.TokenErrorCode;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Date;
@@ -21,7 +20,7 @@ import org.springframework.stereotype.Component;
 public class JWTUtil {
 
   private final RedisTemplate<String, String> redisTemplate;
-  private SecretKey secretKey;
+  private final SecretKey secretKey;
 
   public JWTUtil(RedisTemplate<String, String> redisTemplate, @Value("${spring.jwt.secret}") String secret) {
     this.redisTemplate = redisTemplate;
@@ -82,7 +81,9 @@ public class JWTUtil {
     String access = createJwt(TokenSettings.ACCESS_TOKEN_CATEGORY, userId, role, TokenSettings.ACCESS_TOKEN_EXPIRATION);
     String refresh = createJwt(TokenSettings.REFRESH_TOKEN_CATEGORY, TokenSettings.REFRESH_TOKEN_CATEGORY + userId, role, TokenSettings.REFRESH_TOKEN_EXPIRATION);
 
-    storeRefreshToken(TokenSettings.REFRESH_TOKEN_CATEGORY + userId, refresh);
+    // 레디스에 refresh 토큰 저장
+    String redisKey = getRedisKey(userId);
+    storeRefreshToken(redisKey, refresh);
 
     return new String[]{access, refresh};
   }
@@ -109,7 +110,8 @@ public class JWTUtil {
    */
   public void storeRefreshToken(String userId, String refreshToken) {
     ValueOperations<String, String> ops = redisTemplate.opsForValue();
-    ops.set(userId, refreshToken, Duration.ofMillis(TokenSettings.REFRESH_TOKEN_EXPIRATION));
+    String redisKey = getRedisKey(userId);
+    ops.set(redisKey, refreshToken, Duration.ofMillis(TokenSettings.REFRESH_TOKEN_EXPIRATION));
   }
 
   /**
@@ -119,14 +121,16 @@ public class JWTUtil {
    * @return 저장된 Refresh Token
    */
   public String fetchRefreshTokenFromRedis(String userId) {
-    return redisTemplate.opsForValue().get(userId);
+    String redisKey = getRedisKey(userId);
+    return redisTemplate.opsForValue().get(redisKey);
   }
 
   /**
    * Redis에서 Refresh Token 삭제 (로그아웃 시 사용)
    */
   public void deleteRefreshTokenFromRedis(String userId) {
-    redisTemplate.delete(userId);
+    String redisKey = getRedisKey(userId);
+    redisTemplate.delete(redisKey);
   }
 
   /**
@@ -154,7 +158,8 @@ public class JWTUtil {
    * @param refreshToken 요청된 Refresh Token
    */
   public boolean checkRefreshTokenMatch(String userId, String refreshToken) {
-    String storedToken = redisTemplate.opsForValue().get(userId);
+    String redisKey = getRedisKey(userId);
+    String storedToken = redisTemplate.opsForValue().get(redisKey);
     return storedToken != null && storedToken.equals(refreshToken);
   }
 
@@ -165,7 +170,13 @@ public class JWTUtil {
    * @return 저장된 Refresh Token
    */
   public String getStoredRefreshToken(String userId) {
-    return redisTemplate.opsForValue().get(userId);
+    String redisKey = getRedisKey(userId);
+    return redisTemplate.opsForValue().get(redisKey);
+  }
+
+  // 유저 아이디에서 레디스에 저장된 키 값으로 변환
+  private String getRedisKey(String userId){
+    return TokenSettings.REFRESH_TOKEN_CATEGORY + userId;
   }
 
   // 쿠키에 리플레시 토큰을 담기위해 쿠키를 생성하는 로직

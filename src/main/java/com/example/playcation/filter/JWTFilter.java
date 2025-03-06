@@ -54,23 +54,34 @@ public class JWTFilter extends OncePerRequestFilter {
       FilterChain filterChain)
       throws ServletException, IOException {
 
+    /**
+     * 이 밑에 부분에서 토큰이 없을때 화이트리스트인지 확인하는 부분이 있는데 꼭 필요할까?
+     */
+    // 요청 받은 uri 를 추출
     String requestUri = request.getRequestURI();
+    // 요청 받은 uri 가 로그인 혹은 회원가입일 경우 넘김
     if (isLoginRequest(requestUri) || isSinginRequest(requestUri)) {
       filterChain.doFilter(request, response);
       return;
     }
 
+    // 헤더에서 access 토큰을 추출
     String accessToken = request.getHeader(TokenSettings.ACCESS_TOKEN_CATEGORY);
+    // access 토큰이 없으면 넘김 ( 화이트리스트에 있으면 통과하지만 없으면 오류 반환 )
     if (accessToken == null) {
       filterChain.doFilter(request, response);
       return;
     }
+    // 토큰에서 'Bearer '제거
     accessToken = accessToken.replace(TokenSettings.TOKEN_TYPE, "");
 
     try {
-      authenticateUser(accessToken);
+      // 토큰 유효성 검사 ( 만료시간, 발급자 )
       validateToken(accessToken);
+      // 토큰 소유자의 역할( Role ) 확인
+      authenticateUser(accessToken);
     } catch (ExpiredJwtException e) {
+      // access 토큰이 유효하지 않을 때, refresh 토큰을 추출하여 재발급받기
       // 쿠키에서 리플레시 토큰 확인하기 -> 유효하면 트큰 재발급 / 아니면 이대로 진행
       String refreshToken = Arrays.stream(request.getCookies())
           .filter(cookie -> TokenSettings.REFRESH_TOKEN_CATEGORY.equals(
@@ -79,25 +90,31 @@ public class JWTFilter extends OncePerRequestFilter {
           .findFirst() // 첫 번째 값 가져오기
           .orElse(null); // 없으면 null 반환
       try {
-        authenticateUser(refreshToken);
+        // 토큰 유효성 검사 ( 만료시간, 발급자 )
         validateToken(refreshToken);
+        // 토큰 소유자의 역할( Role ) 확인
+        authenticateUser(refreshToken);
         String[] tokens = tokenService.createNewToken(request);
         String newAccessToken = tokens[0];
         String newRefreshToken = tokens[1];
+        // 응답 쿠키에 refresh 토큰을 포함
         response.addCookie(
-            jwtUtil.createCookie(TokenSettings.REFRESH_TOKEN_CATEGORY, newRefreshToken));
+            jwtUtil.createCookie(TokenSettings.REFRESH_TOKEN_CATEGORY, newRefreshToken
+            ));
 
         response.setStatus(HttpServletResponse.SC_OK); // 302 Found 설정
+        // 응답 바디에 access 토큰 포함
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.getWriter().write(
             "{\"token\" : \"" + newAccessToken + "\"}"
         );
-//      sendErrorResponse(response, "토큰이 만료되었습니다.");
       } catch (Exception exc) {
+        // refresh 토큰역시 만료 혹은 잘못되어있을 때
         sendErrorResponse(response, "잘못된 리플레시 토큰입니다.");
         return;
       }
     } catch (Exception e) {
+      // access 토큰이 만료 이외의 오류가 발생했을 때
       sendErrorResponse(response, "잘못된 토큰입니다.");
       return;
     }
