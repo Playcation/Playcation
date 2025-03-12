@@ -105,12 +105,11 @@ public class JWTUtil {
   /**
    * Redis에 Refresh Token을 저장
    *
-   * @param userId 사용자 ID
+   * @param redisKey refresh + 사용자 ID
    * @param refreshToken 저장할 리프레시 토큰
    */
-  public void storeRefreshToken(String userId, String refreshToken) {
+  public void storeRefreshToken(String redisKey, String refreshToken) {
     ValueOperations<String, String> ops = redisTemplate.opsForValue();
-    String redisKey = getRedisKey(userId);
     ops.set(redisKey, refreshToken, Duration.ofMillis(TokenSettings.REFRESH_TOKEN_EXPIRATION));
   }
 

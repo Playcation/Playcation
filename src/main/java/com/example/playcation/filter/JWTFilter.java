@@ -174,6 +174,8 @@ public class JWTFilter extends OncePerRequestFilter {
    */
   private void sendErrorResponse(HttpServletResponse response, String message) throws IOException {
     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+    response.setContentType("application/json; charset=UTF-8");
+    response.setCharacterEncoding("UTF-8");
     try (PrintWriter writer = response.getWriter()) {
       writer.print(message);
     }
