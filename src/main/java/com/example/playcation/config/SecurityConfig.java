@@ -118,7 +118,7 @@ public class SecurityConfig {
 
     http.headers(headers -> headers.frameOptions(FrameOptionsConfig::disable));
 
-    // oauth2
+    // oauth2 방식의 로그인 추가
     http.oauth2Login((oauth2) -> oauth2
         .userInfoEndpoint((userInfoEndpointConfig) ->
             userInfoEndpointConfig.userService(oAuth2Service))
@@ -142,13 +142,16 @@ public class SecurityConfig {
         .anyRequest().authenticated()
     );
 
+    // 토큰의 유효성 검사를 진행하는 필터
     http.addFilterBefore(new JWTFilter(userRepository, tokenService, jwtUtil), CustomLoginFilter.class);
+    // 로그아웃시 추가적인 동작을 위한 로그아웃 필터
     http.addFilterBefore(new CustomLogoutFilter(jwtUtil), LogoutFilter.class);
+    // 로그인 방식을 커스텀 하기위하여 기존 로그인 필터를 대체
     http.addFilterAt(
         new CustomLoginFilter(authenticationManager(authenticationConfiguration), jwtUtil),
         UsernamePasswordAuthenticationFilter.class);
 
-    // 세션 설정
+    // 세션 설정 disable
     http.sessionManagement((session) ->
         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
     );

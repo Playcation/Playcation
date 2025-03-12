@@ -53,7 +53,7 @@ CREATE PROCEDURE InsertGames()
 BEGIN
     DECLARE i INT DEFAULT 1;
 
-    WHILE i <= 10 DO
+    WHILE i <= 30 DO
             INSERT INTO game (title, description, category_id, user_id, price, filePath, imageUrl, status, deletedAt)
             VALUES (CONCAT('game', i), CONCAT('description', i), 1, 1, 10000 + (i * 1000), '', '', 'ON_SAL', null);
 
