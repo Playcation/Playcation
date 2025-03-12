@@ -146,7 +146,8 @@ public class JWTFilter extends OncePerRequestFilter {
     jwtUtil.isExpired(token);
     jwtUtil.isIssuer(token);
     String category = jwtUtil.getCategory(token);
-    if (!TokenSettings.ACCESS_TOKEN_CATEGORY.equals(category)) {
+    if (!TokenSettings.ACCESS_TOKEN_CATEGORY.equals(category) &&
+        !TokenSettings.REFRESH_TOKEN_CATEGORY.equals(category)) {
       throw new InvalidInputException(TokenErrorCode.TOKEN_CATEGORY_MISS_MATCH);
     }
   }
