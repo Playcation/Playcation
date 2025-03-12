@@ -22,8 +22,8 @@
 ```
 “최고의 게임들을 한 번의 클릭으로 – 당신의 새로운 게이밍 여정을 여는 플랫폼.”
 ```
-<details><summary> 더보기
-</summary>
+<details>
+<summary>더보기</summary>
 
 ```
 당신의 주말은 어떤 의미를 가지고 있나요?  
@@ -46,11 +46,15 @@
 ## 💡 화면 구성
 |                                                  메인 #1                                                   |                                                  로그인 #2                                                   |
 |:--------------------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------------------------------:|
-| <img src="https://github.com/user-attachments/assets/b2c0441c-ef3d-40ec-b41a-3ce16e92aa5e" width="400" > | <img src="https://github.com/user-attachments/assets/5bb2df5c-7604-44de-bb70-7730dfdd8a07" width="400" /> |
+| <img src="https://github.com/user-attachments/assets/b2c0441c-ef3d-40ec-b41a-3ce16e92aa5e" width="400" > | <img src="https://github.com/user-attachments/assets/7fc0d9dc-c9f0-4d1b-9d3f-09b44e209d0f" width="400" /> |
 
-|                                                장바구니 #3                                                 |                                                 쿠폰 #4                                                 |
-|:------------------------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------------:|
+|                                                  쿠폰 #3                                                  |                                                 장바구니 #4                                                 |
+|:-------------------------------------------------------------------------------------------------------:|:-------------------------------------------------------------------------------------------------------:|
 | <img src="https://github.com/user-attachments/assets/eb823a25-d758-4b08-82db-3911db8fa204" width="400"> | <img src="https://github.com/user-attachments/assets/9bec9e2c-efad-4442-8bf7-6d35d772c6a9" width="400"> |
+
+|                                                 프로필 #5                                                  |                                                  리뷰 #6                                                  |
+|:-------------------------------------------------------------------------------------------------------:|:-------------------------------------------------------------------------------------------------------:|
+| <img src="https://github.com/user-attachments/assets/884bf4ca-f020-466c-9444-c39d995d4a09" width="400"> | <img src="https://github.com/user-attachments/assets/3074bf89-b5f6-4ca7-8ebd-33989c120566" width="400"> |
 
 
 <br/>
@@ -146,7 +150,26 @@
 <summary><h3> 📂 프론트엔드 : 핵심 및 공통 기능 폴더 구조</h3></summary>
 
 ``` 
-추가예정입니다
+📦Playcation         
+ ┣ 📂src              
+ ┃ ┣ 📂assets        // 이미지·폰트 등
+ ┃ ┣ 📂components    // 컴포넌트 모음
+ ┃ ┃ ┣ 📂admin       // 관리자 기능
+ ┃ ┃ ┣ 📂api         // API, axios 설정
+ ┃ ┃ ┣ 📂cart        // 장바구니 기능
+ ┃ ┃ ┣ 📂common      // 공통 컴포넌트
+ ┃ ┃ ┣ 📂coupon      // 쿠폰 기능
+ ┃ ┃ ┣ 📂error       // 에러 처리·페이지
+ ┃ ┃ ┣ 📂game        // 게임 관련
+ ┃ ┃ ┣ 📂main        // 메인 화면
+ ┃ ┃ ┣ 📂notification// 알림 기능
+ ┃ ┃ ┣ 📂review      // 리뷰 기능
+ ┃ ┃ ┣ 📂toss        // 결제 등 외부 연동
+ ┃ ┃ ┣ 📂user        // 유저(로그인,회원가입 등)
+ ┃ ┃ ┗ 📜NavPage.jsx // 상단 내비게이션
+ ┃ ┣ 📂store         // 전역 상태 관리
+ ┣ 📜App.js          // 전체 앱 구조·라우팅
+ ┗ 📜index.js        
 ```
 
 </details>
@@ -174,7 +197,7 @@
 <details>
 <summary><h3> ✨ API 명세서 </h3></summary>
 
-#### [  **API명세서 바로보기**  ](https://file.notion.so/f/f/83c75a39-3aba-4ba4-a792-7aefe4b07895/7907c98f-bacb-4e6e-a86a-976fcdd2a454/Playcation_API_%EB%AA%85%EC%84%B8%EC%84%9C.pdf?table=block&id=93320060-8678-4cbf-9ce1-ea6c1d6e1c30&spaceId=83c75a39-3aba-4ba4-a792-7aefe4b07895&expirationTimestamp=1739066400000&signature=lycOJ5LlXcxegtOB0-Gjh7KMaaR2PSVKT-OfhigvD24&downloadName=Playcation_API+%EB%AA%85%EC%84%B8%EC%84%9C.pdf)
+#### [  **API명세서 바로보기**  ](https://ordinary-session-d5b.notion.site/API-196b983e917c80bfa2fbfd7df6fd9a40?pvs=4)
 </details>
 
 
@@ -694,9 +717,6 @@ Resfresh Toekn을 Cookies에 포함하도록 설정하였습니다.
 ```
 간단하게는 try-catch문을 사용할 수 있음.  
 근본적인 원인은 알림 페이지에 들어갔을 때만 SSE 연결이 되는 것이기 때문에, 로그인하고 난 이후 모든 페이지를 SSE 연결해줌
-```javascript
-프론트 코드 추가 예정
-```
 
 
 </details>
