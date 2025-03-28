@@ -4,12 +4,14 @@ import com.example.playcation.batch.UserPaidPointDto;
 import com.example.playcation.exception.NotFoundException;
 import com.example.playcation.exception.OrderErrorCode;
 import com.example.playcation.order.entity.Order;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface OrderRepository extends JpaRepository<Order, UUID> {
 
@@ -32,6 +34,9 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
   /**
    * 유저 VIP 등급 책정 배치용 메서드
    */
-  @Query("SELECT new com.example.playcation.batch.UserPaidPointDto(o.user, SUM(o.totalPrice), SUM(o.freePoint)) FROM  Order o GROUP BY o.user")
-  Page<UserPaidPointDto> findAllPaidPointGroupByUser(Pageable pageable);
+  @Query("SELECT new com.example.playcation.batch.UserPaidPointDto(o.user, SUM(o.totalPrice), SUM(o.freePoint)) "
+      + "FROM  Order o "
+      + "WHERE o.createdAt > :startDate "
+      + "GROUP BY o.user")
+  Page<UserPaidPointDto> findAllPaidPointGroupByUser(Pageable pageable, @Param("startDate") LocalDateTime startDate);
 }

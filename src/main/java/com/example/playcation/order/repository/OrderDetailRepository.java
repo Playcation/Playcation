@@ -35,5 +35,12 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Long> 
         new NotFoundException(OrderErrorCode.NOT_FOUND_ORDER_DETAIL));
   }
 
+  /**
+   * id에 해당하는 주문 상세가 orderId의 주문 내에 존재하는지 확인
+   *
+   * @param id 주문 상세 식별자
+   * @param orderId 주문 식별자
+   * @return 주문 상세가 주문 내에 포함되어 있을 경우 true
+   */
   boolean existsByIdAndOrderId(Long id, UUID orderId);
 }

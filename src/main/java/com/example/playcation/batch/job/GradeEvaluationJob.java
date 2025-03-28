@@ -9,6 +9,7 @@ import com.example.playcation.user.entity.User;
 import com.example.playcation.user.repository.PointRepository;
 import com.example.playcation.user.repository.UserRepository;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
@@ -37,6 +38,7 @@ public class GradeEvaluationJob {
   private final PointRepository pointRepository;
   private final OrderRepository orderRepository;
 
+
   @Bean
   public Job GradeEvaluate() {
 
@@ -64,6 +66,7 @@ public class GradeEvaluationJob {
         .name("calculateGrade")
         .pageSize(100)
         .methodName("findAllPaidPointGroupByUser")
+        .arguments(LocalDate.now().withDayOfMonth(1).atStartOfDay())
         .sorts(Map.of("user", Direction.ASC))
         .repository(orderRepository)
         .build();
