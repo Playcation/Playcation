@@ -1,7 +1,9 @@
 package com.example.playcation.notification.entity;
 
 import com.example.playcation.common.BaseEntity;
+import com.example.playcation.notification.dto.NotificationResponseDto;
 import com.example.playcation.review.entity.Review;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -23,11 +25,25 @@ public class Notification extends BaseEntity {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  private String sender;
+  private Long sender;
 
   private String contents;        // 채팅 메시지 내용 또는 댓글 내용
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "review_id")
+  @JsonIgnore
   private Review review;
+
+  public Notification(Long sender, String contents, Review review) {
+    this.sender = sender;
+    this.contents = contents;
+    this.review = review;
+  }
+
+  public NotificationResponseDto toDto(){
+    return NotificationResponseDto.builder()
+        .sender(this.sender)
+        .contents(this.contents)
+        .build();
+  }
 }
