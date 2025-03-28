@@ -1,16 +1,20 @@
 package com.example.playcation.notification.service;
 
 import com.example.playcation.game.entity.Game;
+import com.example.playcation.game.repository.GameRepository;
+import com.example.playcation.notification.dto.NotificationResponseDto;
+import com.example.playcation.notification.entity.Notification;
+import com.example.playcation.notification.repository.NotificationRepository;
 import com.example.playcation.redis.RedisPublisher;
 import com.example.playcation.review.entity.Review;
 import com.example.playcation.review.repository.ReviewRepository;
 import jakarta.transaction.Transactional;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @Service
@@ -20,7 +24,8 @@ public class NotificationService {
   private final ReviewRepository reviewRepository;
   private final RedisPublisher redisPublisher;
   private final SseEmitterRegistry sseEmitterRegistry;
-
+  private final NotificationRepository notificationRepository;
+  private final GameRepository gameRepository;
 
   /**
    * SSE(Server-Sent Events) 구독 메서드
@@ -84,6 +89,8 @@ public class NotificationService {
     Long userId = game.getUser().getId();
     String message = userId + " : " + game.getTitle() + "에 새로운 리뷰가 작성되었습니다.";
 
+    notificationRepository.save(new Notification(userId, message, review));
+
     // Redis 예외가 발생해도 리뷰 생성이 정상적으로 진행되도록 try-catch 추가
     try {
       redisPublisher.publish(message);
@@ -93,5 +100,14 @@ public class NotificationService {
       System.out.println("Redis 알림 전송 실패: " + e.getMessage());
     }
 
+  }
+
+  public List<NotificationResponseDto> findNotification(Long userId) {
+    List<Game> gameList = gameRepository.findAllByUserId(userId);
+    List<Long> gameIdList = gameList.stream().map(Game::getId).collect(Collectors.toList());
+    List<Review> reviewlist = reviewRepository.findAllByGameIdIn(gameIdList);
+    List<Long> reviewIdList = reviewlist.stream().map(Review::getId).collect(Collectors.toList());
+    List<Notification> list = notificationRepository.findAllByReviewIdIn(reviewIdList);
+    return list.stream().map(Notification::toDto).toList();
   }
 }

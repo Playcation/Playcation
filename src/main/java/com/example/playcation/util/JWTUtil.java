@@ -120,16 +120,14 @@ public class JWTUtil {
    * @return 저장된 Refresh Token
    */
   public String fetchRefreshTokenFromRedis(String userId) {
-    String redisKey = getRedisKey(userId);
-    return redisTemplate.opsForValue().get(redisKey);
+    return redisTemplate.opsForValue().get(userId);
   }
 
   /**
    * Redis에서 Refresh Token 삭제 (로그아웃 시 사용)
    */
   public void deleteRefreshTokenFromRedis(String userId) {
-    String redisKey = getRedisKey(userId);
-    redisTemplate.delete(redisKey);
+    redisTemplate.delete(userId);
   }
 
   /**
@@ -157,8 +155,7 @@ public class JWTUtil {
    * @param refreshToken 요청된 Refresh Token
    */
   public boolean checkRefreshTokenMatch(String userId, String refreshToken) {
-    String redisKey = getRedisKey(userId);
-    String storedToken = redisTemplate.opsForValue().get(redisKey);
+    String storedToken = redisTemplate.opsForValue().get(userId);
     return storedToken != null && storedToken.equals(refreshToken);
   }
 
@@ -169,8 +166,7 @@ public class JWTUtil {
    * @return 저장된 Refresh Token
    */
   public String getStoredRefreshToken(String userId) {
-    String redisKey = getRedisKey(userId);
-    return redisTemplate.opsForValue().get(redisKey);
+    return redisTemplate.opsForValue().get(userId);
   }
 
   // 유저 아이디에서 레디스에 저장된 키 값으로 변환

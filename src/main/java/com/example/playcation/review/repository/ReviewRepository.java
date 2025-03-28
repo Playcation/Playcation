@@ -2,6 +2,7 @@ package com.example.playcation.review.repository;
 
 import com.example.playcation.exception.NotFoundException;
 import com.example.playcation.exception.ReviewErrorCode;
+import com.example.playcation.game.entity.Game;
 import com.example.playcation.review.entity.Review;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -18,4 +19,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewRep
 
   List<Review> findReviewByGameId(Long id);
 
+  List<Review> game(Game game);
+
+  List<Review> findAllByGameIdIn(List<Long> gameIdList);
 }

@@ -1,13 +1,18 @@
 package com.example.playcation.notification.controller;
 
+import com.example.playcation.common.TokenSettings;
+import com.example.playcation.notification.dto.NotificationResponseDto;
+import com.example.playcation.notification.entity.Notification;
 import com.example.playcation.notification.service.NotificationService;
 import com.example.playcation.util.JWTUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import java.util.List;
 
 /**
  * "/games/{gameId}/reviews"
@@ -34,5 +39,12 @@ public class NotificationController {
 
     // NotificationService의 subscribe 메서드를 호출하여 해당 사용자에 대한 SSE 연결을 생성 및 반환합니다.
     return notificationService.subscribe(userId);
+  }
+
+  @GetMapping("/notification")
+  public List<NotificationResponseDto> getNotifications(
+      @RequestHeader(TokenSettings.ACCESS_TOKEN_CATEGORY) String authorizationHeader) {
+    Long userId = jwtUtil.findUserByToken(authorizationHeader);
+    return notificationService.findNotification(userId);
   }
 }

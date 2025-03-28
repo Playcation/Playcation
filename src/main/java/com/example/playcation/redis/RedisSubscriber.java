@@ -25,7 +25,6 @@ public class RedisSubscriber implements MessageListener {
    * @param message Redis로부터 수신한 메시지 객체 (메시지 본문은 byte[] 형태로 제공됨)
    * @param pattern Redis 패턴 (사용하지 않을 경우 null일 수 있음)
    */
-
   @Override
   public void onMessage(Message message, byte[] pattern) {
     String payload = new String(message.getBody());

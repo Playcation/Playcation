@@ -13,7 +13,7 @@ public class RedisInitializer implements CommandLineRunner {
 
   @Override
   public void run(String... args){
-    redisTemplate.getConnectionFactory().getConnection().flushDb(); // 모든 데이터 삭제
-    System.out.println("Redis 초기화 완료");
+//    redisTemplate.getConnectionFactory().getConnection().flushDb(); // 모든 데이터 삭제
+//    System.out.println("Redis 초기화 완료");
   }
 }
