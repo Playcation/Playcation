@@ -5,6 +5,8 @@ import com.example.playcation.exception.NotFoundException;
 import com.example.playcation.exception.OrderErrorCode;
 import com.example.playcation.order.entity.Order;
 import com.example.playcation.order.entity.OrderDetail;
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
@@ -43,4 +45,6 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Long> 
    * @return 주문 상세가 주문 내에 포함되어 있을 경우 true
    */
   boolean existsByIdAndOrderId(Long id, UUID orderId);
+
+  Page<OrderDetail> findAllByOrderCreatedAtIsBeforeAndIsSettledIsFalse(Pageable pageable, LocalDateTime currDate);
 }

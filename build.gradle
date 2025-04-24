@@ -40,6 +40,7 @@ dependencies {
     testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     implementation 'at.favre.lib:bcrypt:0.10.2'
+    implementation 'mysql:mysql-connector-java:8.0.33'
 
     // mail
     implementation 'org.springframework.boot:spring-boot-starter-mail'

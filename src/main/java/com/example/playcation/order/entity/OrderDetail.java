@@ -48,6 +48,9 @@ public class OrderDetail {
   @Enumerated(value = EnumType.STRING)
   private OrderStatus status;
 
+  @Column(name = "`is_settled`")
+  private Boolean isSettled;
+
   @OneToOne
   @JoinColumn(name = "`refund_id`")
   private Refund refund;
